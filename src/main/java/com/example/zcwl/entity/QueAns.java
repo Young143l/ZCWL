@@ -1,0 +1,248 @@
+package com.example.zcwl.entity;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+/**
+ * 问答实体类
+ * 映射到数据库的que_ans表，存储问答记录
+ */
+@Entity  // 声明这是一个JPA实体类，用于映射数据库表
+@Table(name = "que_ans")  // 指定映射的数据库表名
+public class QueAns implements Serializable {  // 实现Serializable接口，支持序列化
+
+    @Serial
+    private static final long serialVersionUID = 1L;  // 序列化版本号，用于版本控制
+
+    /**
+     * 复合主键
+     * 使用嵌入式主键类QueAnsId，包含对话ID和问答次数
+     */
+    @EmbeddedId  // 声明使用嵌入式主键
+    private QueAnsId id;
+
+    /**
+     * 问答时间
+     * 数据库默认值为当前时间
+     */
+    @Column(name = "date", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    // @Column：指定数据库列名、非空约束和列定义
+    private LocalDateTime date;
+
+    /**
+     * 问题内容
+     * 不能为空，使用@NotBlank进行数据校验
+     */
+    @NotBlank(message = "问题不能为空")  // 数据校验，确保问题内容不为空
+    @Column(name = "que", nullable = false)  // 映射到数据库的que列，非空约束
+    private String que;
+
+    /**
+     * 回答内容
+     * 不能为空，使用@NotBlank进行数据校验
+     */
+    @NotBlank(message = "回答不能为空")  // 数据校验，确保回答内容不为空
+    @Column(name = "ans", nullable = false)  // 映射到数据库的ans列，非空约束
+    private String ans;
+
+    /**
+     * 关联的对话
+     * 多对一关系，多个问答属于一个对话
+     */
+    @ManyToOne(fetch = FetchType.LAZY)  // 多对一关联，使用懒加载（LAZY）提高性能
+    @MapsId("dId")  // 映射主键中的dId字段到Dialog实体
+    @JoinColumn(name = "d_id", referencedColumnName = "d_id", nullable = false)
+    // @JoinColumn：指定外键列名和参照的主键列名
+    private Dialog dialog;
+
+    // getter和setter方法
+    /**
+     * 获取复合主键
+     * @return 复合主键对象
+     */
+    public QueAnsId getId() {
+        return id;
+    }
+
+    /**
+     * 设置复合主键
+     * @param id 复合主键对象
+     */
+    public void setId(QueAnsId id) {
+        this.id = id;
+    }
+
+    /**
+     * 获取问答时间
+     * @return 问答时间
+     */
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    /**
+     * 设置问答时间
+     * @param date 问答时间
+     */
+    public void setDate(LocalDateTime date) {
+        this.date = date;
+    }
+
+    /**
+     * 获取问题内容
+     * @return 问题内容
+     */
+    public String getQue() {
+        return que;
+    }
+
+    /**
+     * 设置问题内容
+     * @param que 问题内容
+     */
+    public void setQue(String que) {
+        this.que = que;
+    }
+
+    /**
+     * 获取回答内容
+     * @return 回答内容
+     */
+    public String getAns() {
+        return ans;
+    }
+
+    /**
+     * 设置回答内容
+     * @param ans 回答内容
+     */
+    public void setAns(String ans) {
+        this.ans = ans;
+    }
+
+    /**
+     * 获取关联的对话
+     * @return 对话实体
+     */
+    public Dialog getDialog() {
+        return dialog;
+    }
+
+    /**
+     * 设置关联的对话
+     * @param dialog 对话实体
+     */
+    public void setDialog(Dialog dialog) {
+        this.dialog = dialog;
+    }
+
+    /**
+     * 嵌入式主键类
+     * 用于表示que_ans表的复合主键（d_id, times）
+     */
+    @Embeddable  // 声明这是一个嵌入式主键类
+    public static class QueAnsId implements Serializable {
+
+        @Serial
+        private static final long serialVersionUID = 1L;  // 序列化版本号
+
+        /**
+         * 对话ID
+         * 对应que_ans表的d_id列
+         */
+        @Column(name = "d_id", nullable = false)  // 映射到数据库的d_id列，非空约束
+        private Integer dId;
+
+        /**
+         * 问答次数
+         * 对应que_ans表的times列
+         */
+        @Column(name = "times", nullable = false)  // 映射到数据库的times列，非空约束
+        private Integer times;
+
+        /**
+         * 默认构造器
+         * 必须提供，用于JPA实例化对象
+         */
+        public QueAnsId() {
+        }
+
+        /**
+         * 带参数的构造器
+         * 用于创建主键对象
+         * @param dId 对话ID
+         * @param times 问答次数
+         */
+        public QueAnsId(Integer dId, Integer times) {
+            this.dId = dId;
+            this.times = times;
+        }
+
+        // getter和setter方法
+        /**
+         * 获取对话ID
+         * @return 对话ID
+         */
+        public Integer getdId() {
+            return dId;
+        }
+
+        /**
+         * 设置对话ID
+         * @param dId 对话ID
+         */
+        public void setdId(Integer dId) {
+            this.dId = dId;
+        }
+
+        /**
+         * 获取问答次数
+         * @return 问答次数
+         */
+        public Integer getTimes() {
+            return times;
+        }
+
+        /**
+         * 设置问答次数
+         * @param times 问答次数
+         */
+        public void setTimes(Integer times) {
+            this.times = times;
+        }
+
+        /**
+         * 重写equals方法
+         * 用于比较两个主键对象是否相等
+         * @param o 比较对象
+         * @return 是否相等
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            QueAnsId queAnsId = (QueAnsId) o;
+
+            if (!Objects.equals(dId, queAnsId.dId)) return false;
+            return Objects.equals(times, queAnsId.times);
+        }
+
+        /**
+         * 重写hashCode方法
+         * 用于生成主键对象的哈希值
+         * @return 哈希值
+         */
+        @Override
+        public int hashCode() {
+            int result = dId != null ? dId.hashCode() : 0;
+            result = 31 * result + (times != null ? times.hashCode() : 0);
+            return result;
+        }
+    }
+
+}
