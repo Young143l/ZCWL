@@ -88,8 +88,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // 允许所有来源
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+        // 允许所有来源模式（使用allowedOriginPatterns替代allowedOrigins，避免与allowCredentials冲突）
+        configuration.addAllowedOriginPattern("*");
         // 允许的HTTP方法
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // 允许的HTTP头

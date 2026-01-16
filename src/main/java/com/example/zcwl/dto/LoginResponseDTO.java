@@ -1,5 +1,6 @@
 package com.example.zcwl.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -20,7 +21,7 @@ public class LoginResponseDTO implements Serializable {
     /**
      * 用户名
      */
-    private String username;
+    private String userName;
 
     /**
      * 用户ID
@@ -30,12 +31,12 @@ public class LoginResponseDTO implements Serializable {
     /**
      * 构造函数
      * @param token JWT token
-     * @param username 用户名
+     * @param userName 用户名
      * @param userId 用户ID
      */
-    public LoginResponseDTO(String token, String username, String userId) {
+    public LoginResponseDTO(String token, String userName, String userId) {
         this.token = token;
-        this.username = username;
+        this.userName = userName;
         this.userId = userId;
     }
 
@@ -59,16 +60,16 @@ public class LoginResponseDTO implements Serializable {
      * 获取用户名
      * @return 用户名
      */
-    public String getUsername() {
-        return username;
+    public String getUserName() {
+        return userName;
     }
 
     /**
      * 设置用户名
-     * @param username 用户名
+     * @param userName 用户名
      */
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     /**
