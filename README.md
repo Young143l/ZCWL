@@ -40,7 +40,6 @@ ZCWL_front_end/
 │   ├── index.css               # 全局样式
 │   └── main.tsx                # 应用入口文件
 ├── public/                     # 静态资源
-├── .env                        # 环境变量文件
 ├── .env.template               # 环境变量模板
 ├── .gitignore                  # Git 忽略配置
 ├── eslint.config.js            # ESLint 配置
