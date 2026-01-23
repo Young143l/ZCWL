@@ -50,7 +50,7 @@ public class SecurityConfig {
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
+        authProvider.setPasswordEncoder(plainTextPasswordEncoder());
         return authProvider;
     }
 
@@ -122,14 +122,14 @@ public class SecurityConfig {
     }
 
     /**
-     * 密码编码器
-     * 使用BCryptPasswordEncoder，安全存储密码
+     * 明文密码编码器
+     * 使用NoOpPasswordEncoder，直接比较明文密码，便于前期维护
      * @return 密码编码器
      */
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        // 重新启用BCryptPasswordEncoder，使用默认强度
-        return new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+    public PasswordEncoder plainTextPasswordEncoder() {
+        // 使用NoOpPasswordEncoder，直接比较明文密码
+        return org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
     }
 
     /**

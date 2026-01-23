@@ -55,8 +55,8 @@ public class QueAns implements Serializable {  // 实现Serializable接口，支
      */
     @ManyToOne(fetch = FetchType.LAZY)  // 多对一关联，使用懒加载（LAZY）提高性能
     @MapsId("dId")  // 映射主键中的dId字段到Dialog实体
-    @JoinColumn(name = "d_id", referencedColumnName = "d_id", nullable = false)
-    // @JoinColumn：指定外键列名和参照的主键列名
+    @JoinColumn(name = "d_id", referencedColumnName = "d_id", nullable = false, foreignKey = @ForeignKey(name = "que_ans_d_id_fkey", foreignKeyDefinition = "FOREIGN KEY (d_id) REFERENCES dialog(d_id) ON DELETE CASCADE"))
+    // @JoinColumn：指定外键列名和参照的主键列名，添加ON DELETE CASCADE
     private Dialog dialog;
 
     // getter和setter方法

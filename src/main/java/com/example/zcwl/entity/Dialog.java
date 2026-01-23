@@ -29,7 +29,7 @@ public class Dialog implements Serializable {  // 实现Serializable接口，支
      * 多对一关系，使用懒加载，关联到User实体
      */
     @ManyToOne(fetch = FetchType.LAZY)  // 声明多对一关系，使用懒加载
-    @JoinColumn(name = "u_id", referencedColumnName = "u_id", nullable = false)  // 指定外键关联
+    @JoinColumn(name = "u_id", referencedColumnName = "u_id", nullable = false, foreignKey = @ForeignKey(name = "dialog_u_id_fkey", foreignKeyDefinition = "FOREIGN KEY (u_id) REFERENCES users(u_id) ON DELETE CASCADE"))  // 指定外键关联，添加ON DELETE CASCADE
     private User user;
 
     /**

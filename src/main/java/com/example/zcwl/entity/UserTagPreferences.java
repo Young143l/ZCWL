@@ -33,7 +33,7 @@ public class UserTagPreferences implements Serializable {  // 实现Serializable
     @NotNull(message = "偏好分不能为空")  // 数据校验，确保偏好分不为空
     @Min(value = -100, message = "偏好分不能小于-100")  // 数据校验，确保偏好分最小值为-100
     @Max(value = 100, message = "偏好分不能大于100")  // 数据校验，确保偏好分最大值为100
-    @Column(name = "pre", nullable = false)  // 映射到数据库的pre列，非空约束
+    @Column(name = "pre", nullable = false, columnDefinition = "INTEGER NOT NULL CHECK (pre BETWEEN -100 AND 100)")  // 映射到数据库的pre列，非空约束和CHECK约束
     private Integer pre;
 
     /**
@@ -42,7 +42,7 @@ public class UserTagPreferences implements Serializable {  // 实现Serializable
      */
     @ManyToOne(fetch = FetchType.LAZY)  // 声明多对一关系，使用懒加载
     @MapsId("uId")  // 映射嵌入式主键中的uId字段
-    @JoinColumn(name = "u_id", referencedColumnName = "u_id", nullable = false)  // 指定外键关联
+    @JoinColumn(name = "u_id", referencedColumnName = "u_id", nullable = false, foreignKey = @ForeignKey(name = "user_tag_preferences_u_id_fkey", foreignKeyDefinition = "FOREIGN KEY (u_id) REFERENCES users(u_id) ON DELETE CASCADE"))  // 指定外键关联，添加ON DELETE CASCADE
     private User user;
 
     /**
@@ -51,7 +51,7 @@ public class UserTagPreferences implements Serializable {  // 实现Serializable
      */
     @ManyToOne(fetch = FetchType.LAZY)  // 声明多对一关系，使用懒加载
     @MapsId("tId")  // 映射嵌入式主键中的tId字段
-    @JoinColumn(name = "t_id", referencedColumnName = "t_id", nullable = false)  // 指定外键关联
+    @JoinColumn(name = "t_id", referencedColumnName = "t_id", nullable = false, foreignKey = @ForeignKey(name = "user_tag_preferences_t_id_fkey", foreignKeyDefinition = "FOREIGN KEY (t_id) REFERENCES tags(t_id) ON DELETE CASCADE"))  // 指定外键关联，添加ON DELETE CASCADE
     private Tags tags;
 
     /**

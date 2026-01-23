@@ -29,7 +29,7 @@ public class DocTags implements Serializable {  // 实现Serializable接口，�
      */
     @ManyToOne(fetch = FetchType.LAZY)  // 声明多对一关系，使用懒加载
     @MapsId("docId")  // 映射嵌入式主键中的docId字段
-    @JoinColumn(name = "doc_id", referencedColumnName = "doc_id", nullable = false)  // 指定外键关联
+    @JoinColumn(name = "doc_id", referencedColumnName = "doc_id", nullable = false, foreignKey = @ForeignKey(name = "doc_tags_doc_id_fkey", foreignKeyDefinition = "FOREIGN KEY (doc_id) REFERENCES doc(doc_id) ON DELETE CASCADE"))  // 指定外键关联，添加ON DELETE CASCADE
     private Doc doc;
 
     /**
@@ -38,7 +38,7 @@ public class DocTags implements Serializable {  // 实现Serializable接口，�
      */
     @ManyToOne(fetch = FetchType.LAZY)  // 声明多对一关系，使用懒加载
     @MapsId("tId")  // 映射嵌入式主键中的tId字段
-    @JoinColumn(name = "t_id", referencedColumnName = "t_id", nullable = false)  // 指定外键关联
+    @JoinColumn(name = "t_id", referencedColumnName = "t_id", nullable = false, foreignKey = @ForeignKey(name = "doc_tags_t_id_fkey", foreignKeyDefinition = "FOREIGN KEY (t_id) REFERENCES tags(t_id) ON DELETE CASCADE"))  // 指定外键关联，添加ON DELETE CASCADE
     private Tags tags;
 
     /**

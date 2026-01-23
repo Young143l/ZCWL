@@ -124,42 +124,43 @@ public class DocController {
             // @PathVariable：Spring注解，用于从URL路径中获取参数
             // 作用：将URL中的{d_id}值绑定到方法的d_id参数上
             @PathVariable Integer d_id) {
-        try {
-            // 调用服务层方法，根据文档ID查询文档记录
-            // Optional是Java 8引入的类，用于处理可能为空的数据
-            Optional<Doc> optionalDoc = docService.getDocById(d_id);
+        // 调用服务层方法，根据文档ID查询文档记录
+        // Optional是Java 8引入的类，用于处理可能为空的数据
+        Optional<Doc> optionalDoc = docService.getDocById(d_id);
+        
+        // 使用Optional的map方法处理查询结果
+        // 如果找到数据，返回200状态码和数据；否则返回404状态码
+        return optionalDoc.map(doc -> {
+            // 构建响应对象
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
             
-            // 使用Optional的map方法处理查询结果
-            // 如果找到数据，返回200状态码和数据；否则返回404状态码
-            return optionalDoc.map(doc -> {
-                // 构建响应对象
-                java.util.Map<String, Object> response = new java.util.HashMap<>();
-                
-                // 构建docInfo对象
-                java.util.Map<String, Object> docInfo = new java.util.HashMap<>();
-                docInfo.put("id", doc.getDocId());
-                docInfo.put("name", doc.getDocName());
-                docInfo.put("summary", doc.getSummary());
-                docInfo.put("img", doc.getIcon());
-                
-                // 构建docDir对象（文档目录）
-                java.util.List<java.util.Map<String, Object>> docDir = new java.util.ArrayList<>();
-                // 这里简化处理，实际应该从数据库查询文档目录
-                // 暂时返回空列表
-                
-                response.put("docInfo", docInfo);
-                response.put("docDir", docDir);
-                
-                return ResponseEntity.ok(response);
-            })
-            .orElseGet(
-                // 如果optionalDoc为空，调用ResponseEntity.notFound().build()
-                // 作用：创建一个包含404状态码的ResponseEntity对象
-                () -> ResponseEntity.notFound().build());
-        } catch (Exception e) {
-            // 失败时返回404状态码
-            return ResponseEntity.notFound().build();
-        }
+            // 构建docInfo对象
+            java.util.Map<String, Object> docInfo = new java.util.HashMap<>();
+            docInfo.put("id", doc.getDocId());
+            docInfo.put("name", doc.getDocName());
+            docInfo.put("summary", doc.getSummary());
+            docInfo.put("img", doc.getIcon());
+            
+            // 构建docDir对象（文档目录）
+            java.util.List<java.util.Map<String, Object>> docDir = new java.util.ArrayList<>();
+            // 查询该文档的所有目录
+            java.util.List<DocContents> contents = docContentsService.getDocContentsByDocId(doc.getDocId());
+            for (DocContents content : contents) {
+                java.util.Map<String, Object> dirItem = new java.util.HashMap<>();
+                dirItem.put("id", content.getId().getChapterId());
+                dirItem.put("name", content.getName());
+                docDir.add(dirItem);
+            }
+            
+            response.put("docInfo", docInfo);
+            response.put("docDir", docDir);
+            
+            return ResponseEntity.ok(response);
+        })
+        .orElseGet(
+            // 如果optionalDoc为空，调用ResponseEntity.notFound().build()
+            // 作用：创建一个包含404状态码的ResponseEntity对象
+            () -> ResponseEntity.notFound().build());
     }
 
     /**

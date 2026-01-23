@@ -128,8 +128,22 @@ public class LoginControllerTest {
     @Test
     public void testValidateTokenMissing() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/validate-token"))
-                // 预期状态码：400 参数错误
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                // 预期状态码：401 未授权
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    /**
+     * 测试：验证token接口（使用有效token）
+     */
+    @Test
+    public void testValidateTokenValid() throws Exception {
+        // 设置模拟行为，使validateToken返回true
+        Mockito.when(authService.validateToken("valid-token")).thenReturn(true);
+        
+        mockMvc.perform(MockMvcRequestBuilders.get("/validate-token")
+                        .param("token", "valid-token"))
+                // 预期状态码：200 成功
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     /**

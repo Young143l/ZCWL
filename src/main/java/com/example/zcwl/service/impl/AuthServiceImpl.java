@@ -66,8 +66,8 @@ public class AuthServiceImpl implements AuthService {
                 throw new RuntimeException("Invalid userId or password");
             }
             
-            // 验证密码（使用BCrypt加密）
-            if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())) {
+            // 直接比较明文密码
+            if (!loginRequestDTO.getPassword().equals(user.getPassword())) {
                 System.out.println("Password mismatch for userId: " + loginRequestDTO.getUserId());
                 throw new RuntimeException("Invalid userId or password");
             }
@@ -132,8 +132,8 @@ public class AuthServiceImpl implements AuthService {
         user.setName(userDTO.getUsername());
         // 设置邮箱
         user.setEmail(userDTO.getEmail());
-        // 使用BCrypt加密存储密码
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        // 直接存储明文密码，便于前期维护
+        user.setPassword(userDTO.getPassword());
 
         // 保存用户
         return userRepository.save(user);

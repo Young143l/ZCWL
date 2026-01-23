@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 认证控制器类
@@ -63,8 +65,7 @@ public class AuthController {
      *   {
      *     "username": "张三",
      *     "password": "123456",
-     *     "email": "zhangsan@example.com",
-     *     "phone": "13800138000"
+     *     "email": "zhangsan@example.com"
      *   }
      * - 响应：注册成功返回用户信息，状态码201；注册失败返回错误信息，状态码400
      *
@@ -72,10 +73,8 @@ public class AuthController {
      * @return 包含注册结果的ResponseEntity对象
      */
     // @PostMapping：Spring注解，处理POST请求
-    // 作用：当前端发送POST请求到/api/auth/register时，会调用这个方法
+    // 作用：当前端发送POST请求到/register时，会调用这个方法
     @PostMapping("/register")
-    
-
     
     // ResponseEntity：Spring用于封装HTTP响应的对象
     // 可以包含响应体、HTTP状态码、响应头等信息
@@ -94,9 +93,16 @@ public class AuthController {
             // 返回注册成功的用户数据和201状态码
             // HttpStatus.CREATED表示资源创建成功
             return new ResponseEntity<>(user, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            // 注册失败，返回400状态码和标准化的错误响应
+            java.util.Map<String, Object> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            // 注册失败，返回400状态码和错误信息
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            // 其他异常，返回500状态码和标准化的错误响应
+            java.util.Map<String, Object> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("message", "服务器内部错误，请稍后重试");
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -105,34 +111,60 @@ public class AuthController {
      * <p>
      * 前端调用方式：
      * - 请求类型：GET
-     * - 请求URL：http://localhost:8080/validate-token?token={token}
-     *   例如：http://localhost:8080/validate-token?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-     * - 响应：token有效返回true，状态码200；token无效返回false，状态码401
+     * - 请求URL：http://localhost:8080/validate-token
+     * - 请求头：Authorization: Bearer token
+     *   或者：URL查询参数?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+     * - 响应：token有效返回状态码200和token信息；token无效返回状态码401和错误信息
      *
      * @param token JWT token，从URL查询参数中获取
+     * @param authorization Authorization头，格式为Bearer token
      * @return 包含验证结果的ResponseEntity对象
      */
     // @GetMapping：Spring注解，处理GET请求
-    // 作用：当前端发送GET请求到/api/auth/validate-token时，会调用这个方法
+    // 作用：当前端发送GET请求到/validate-token时，会调用这个方法
     @GetMapping("/validate-token")
-    
-
     
     // ResponseEntity：Spring用于封装HTTP响应的对象
     // 可以包含响应体、HTTP状态码、响应头等信息
-    public ResponseEntity<Boolean> validateToken(
+    public ResponseEntity<?> validateToken(
             // @RequestParam：Spring注解，用于从URL查询参数中获取参数
-            // 作用：将URL中的token参数值绑定到方法的token参数上
-            @RequestParam String token) {
+            // 作用：将URL中的token参数值绑定到方法的token参数上，required = false表示可选
+            @RequestParam(required = false) String token,
+            // @RequestHeader：Spring注解，用于从请求头中获取参数
+            // 作用：将Authorization头的值绑定到方法的authorization参数上，required = false表示可选
+            @RequestHeader(name = "Authorization", required = false) String authorization) {
+        Map<String, Object> response = new HashMap<>();
         
-        // 调用服务层的方法验证token
-        boolean isValid = authService.validateToken(token);
-        
-        // 返回验证结果和对应的状态码
-        if (isValid) {
-            return new ResponseEntity<>(true, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
+        try {
+            // 从Authorization头中提取token，如果没有则使用URL查询参数中的token
+            if (authorization != null && authorization.startsWith("Bearer ")) {
+                token = authorization.substring(7);
+            }
+            
+            // 如果没有提供token，返回401状态码和错误信息
+            if (token == null || token.isEmpty()) {
+                response.put("message", "未提供token");
+                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+            }
+            
+            // 调用服务层的方法验证token
+            boolean isValid = authService.validateToken(token);
+            
+            // 返回验证结果和对应的状态码
+            if (isValid) {
+                response.put("message", "token有效");
+                response.put("valid", true);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                response.put("message", "token无效");
+                response.put("valid", false);
+                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            // 统一处理异常，返回错误信息和401状态码
+            response.put("message", "token验证失败");
+            response.put("valid", false);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
     }
 }
