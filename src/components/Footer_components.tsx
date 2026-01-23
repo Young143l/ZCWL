@@ -1,10 +1,15 @@
 import type { FC } from "react";
 import { Link } from "react-router-dom";
-const Footer_components:FC = () => {
+const Footer_components: FC = () => {
     return (
-        <div className="text-center">
+        <div className="flex justify-center">
+            <img
+                    src="/public/logo.svg"
+                    alt="Logo"
+                    className="h-4 w-12 object-contain"
+                />
             <Link to={"/"}>
-                <span className="text-black">智创未来</span>
+                <span className="text-black"> 智创未来</span>
             </Link>
             ©{new Date().getFullYear()}
         </div>

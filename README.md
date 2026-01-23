@@ -11,6 +11,7 @@
 - **Tailwind CSS**: ^4.1.18 - 实用优先的 CSS 框架
 - **React Router DOM**: ^7.12.0 - React 应用的声明式路由
 - **Zustand**: ^5.0.10 - 轻量级状态管理解决方案
+- **React Markdown**: ^10.1.0 - 支持 Markdown 渲染的 React 组件
 
 ## 项目结构
 
@@ -21,9 +22,11 @@ ZCWL_front_end/
 │   │   ├── Doc_api.ts          # 文档相关API
 │   │   └── Login_api.ts        # 登录相关API
 │   ├── components/             # 可复用的UI组件
-│   │   ├── DocCard_components.tsx # 文档卡片组件
-│   │   ├── Footer_components.tsx  # 页脚组件
-│   │   ├── Header_components.tsx  # 页眉组件
+│   │   ├── Chapter_components.tsx  # 章节组件
+│   │   ├── DocCard_components.tsx  # 文档卡片组件
+│   │   ├── DocInfo_components.tsx  # 文档信息组件
+│   │   ├── Footer_components.tsx   # 页脚组件
+│   │   ├── Header_components.tsx   # 页眉组件
 │   │   ├── Hello_Sum_components.tsx # 汇总组件
 │   │   └── ToTop_components.tsx     # 返回顶部组件
 │   ├── layout/                 # 页面布局组件
@@ -40,15 +43,28 @@ ZCWL_front_end/
 │   ├── index.css               # 全局样式
 │   └── main.tsx                # 应用入口文件
 ├── public/                     # 静态资源
+├── test/                       # 测试文件
+├── .env                        # 环境变量配置
 ├── .env.template               # 环境变量模板
 ├── .gitignore                  # Git 忽略配置
 ├── eslint.config.js            # ESLint 配置
 ├── index.html                  # HTML 模板
 ├── package.json                # 项目依赖和脚本
-├── tsconfig.json               # TypeScript 配置
+├── tsconfig.app.json           # TypeScript 应用配置
+├── tsconfig.json               # TypeScript 总配置
+├── tsconfig.node.json          # TypeScript Node配置
 ├── vite.config.ts              # Vite 配置
 └── README.md                   # 项目说明文档
 ```
+
+## 功能特性
+
+- 用户登录认证
+- 文档列表展示
+- 文档内容浏览
+- 响应式布局适配移动端
+- 状态管理（使用Zustand）
+- Markdown文档渲染
 
 ## 安装与运行
 
@@ -89,6 +105,24 @@ ZCWL_front_end/
 - `npm run preview` - 预览生产构建
 - `npm run lint` - 运行 ESLint 进行代码检查
 
+## 开发指南
+
+### 组件开发
+
+- 所有可复用的UI组件放置在 [src/components](./src/components) 目录下
+- 页面级别的组件放置在 [src/pages](./src/pages) 目录下
+- 使用 TypeScript 编写组件，确保类型安全
+
+### API 调用
+
+- API 调用封装在 [src/api](./src/api) 目录下
+- 使用 fetch API 进行网络请求
+- 统一处理错误和加载状态
+
+### 状态管理
+
+- 使用 Zustand 进行全局状态管理
+- 登录状态管理位于 [src/status/Login_status.tsx](./src/status/Login_status.tsx)
 
 ## 部署
 

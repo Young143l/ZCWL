@@ -17,7 +17,7 @@ type MenuItem = Required<MenuProps>["items"][number];
 const items: MenuItem[] = [
     {
         label: (
-            <Link to={"/"} className=" text-[18px]">
+            <Link to={"/"} className=" text-[16px]">
                 Home
             </Link>
         ),
@@ -26,7 +26,7 @@ const items: MenuItem[] = [
     },
     {
         label: (
-            <Link to={"/document"} className=" text-[18px]">
+            <Link to={"/document"} className=" text-[16px]">
                 Document
             </Link>
         ),
@@ -35,7 +35,7 @@ const items: MenuItem[] = [
     },
     {
         label: (
-            <Link to={"/project"} className=" text-[18px]">
+            <Link to={"/project"} className=" text-[16px]">
                 Project
             </Link>
         ),
@@ -44,7 +44,7 @@ const items: MenuItem[] = [
     },
     {
         label: (
-            <Link to={"/code"} className=" text-[18px]">
+            <Link to={"/code"} className=" text-[16px]">
                 Code
             </Link>
         ),
@@ -80,7 +80,7 @@ const Header_components: FC = () => {
             </Link>
         </div>
     );
-    
+
     const LoginContent = (
         <div className="flex justify-center items-center">
             <Button
@@ -107,12 +107,13 @@ const Header_components: FC = () => {
             theme={{
                 components: {
                     Menu: {
-                        iconSize: 18,
+                        iconSize: 16,
+                        itemBg: "#FFFFFF00",
                     },
                 },
             }}
         >
-            <div className="flex justify-between items-center h-full md:w-4/5 w-full pl-5 pr-5 md:pl-0 md:pr-0">
+            <div className="flex justify-between items-center h-full md:w-5/6 w-full pl-5 pr-5 md:pl-0 md:pr-0">
                 {/* Logo */}
                 <Link to={"/"}>
                     <img
@@ -122,7 +123,7 @@ const Header_components: FC = () => {
                     />
                 </Link>
                 {/* 导航栏 */}
-                <div className="hidden md:block flex-1">
+                <div className="hidden md:block flex-1 ">
                     <Menu
                         onClick={(e) => {
                             setCurrent(e.key);
