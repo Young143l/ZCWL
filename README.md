@@ -26,7 +26,6 @@
 | PostgreSQL          | -      | 关系型数据库                   |
 | Spring Security     | 2.7.18 | 安全框架，实现认证授权              |
 | JWT                 | -      | JSON Web Token，用于无状态认证   |
-| BCryptPasswordEncoder | -      | 密码编码器，使用加密密码存储           |
 | HikariCP            | -      | 数据库连接池                   |
 
 ## 3. 项目结构
@@ -115,7 +114,6 @@
   ```json
   {
     "username": "张三",
-    "password": "Password123!",
     "email": "zhangsan@example.com"
   }
   ```
@@ -124,15 +122,10 @@
   {
     "uId": "张三",
     "name": "张三",
-    "email": "zhangsan@example.com"
   }
   ```
 - **失败响应** (400 Bad Request):
   ```json
-  {
-    "status": "error",
-    "message": "用户名已存在"
-  }
   ```
 
 #### 4.1.2 用户登录
@@ -142,7 +135,6 @@
   ```json
   {
     "userId": "张三",
-    "password": "Password123!"
   }
   ```
 - **成功响应** (200 OK):
@@ -155,14 +147,9 @@
   ```
 - **失败响应** (401 Unauthorized):
   ```json
-  {
-    "status": "error",
-    "message": "用户名或密码错误"
-  }
   ```
 
 #### 4.1.3 验证token
-- **请求 URL**: `http://localhost:8080/validate-token`
 - **请求方法**: GET
 - **成功响应** (200 OK):
   ```json
@@ -177,21 +164,14 @@
 
 | API 路径            | 请求方法   | 用途         | 前端调用示例       |
 |-------------------|--------|------------|--------------|
-| `/users`          | POST   | 创建用户       | 注册新用户时调用     |
-| `/users/{id}`     | GET    | 根据 ID 查询用户 | 查看特定用户信息时调用  |
-| `/users`          | GET    | 查询所有用户（分页） | 管理员查看用户列表时调用 |
-| `/users/{id}`     | PUT    | 更新用户信息     | 修改用户资料时调用    |
-| `/users/{id}`     | DELETE | 删除用户       | 管理员删除用户时调用   |
 
 #### 4.2.1 创建用户
-- **请求 URL**: `http://localhost:8080/users`
 - **请求方法**: POST
 - **请求体**:
   ```json
   {
     "username": "李四",
     "email": "lisi@example.com",
-    "password": "Password123!"
   }
   ```
 - **成功响应** (201 Created):
@@ -199,14 +179,12 @@
   {
     "uId": "李四",
     "name": "李四",
-    "email": "lisi@example.com"
   }
   ```
 
 ### 4.3 文档管理 API
 
 | API 路径           | 请求方法   | 用途         |
-|-------------------|--------|------------|
 | `/api/docs`       | POST   | 创建文档       |
 | `/api/docs/{id}`  | GET    | 根据 ID 查询文档 |
 | `/api/docs`       | GET    | 查询所有文档（分页） |
@@ -216,7 +194,6 @@
 ### 4.4 文档内容 API
 
 | API 路径                                  | 请求方法   | 用途                    |
-|-------------------------------------------|--------|-----------------------|
 | `/api/doc-contents`                       | POST   | 创建文档内容                |
 | `/api/doc-contents/{docId}/{chapterId}`   | GET    | 根据文档 ID 和章节 ID 查询文档内容 |
 | `/api/doc-contents/doc/{docId}`           | GET    | 根据文档 ID 查询所有文档内容      |
@@ -227,7 +204,6 @@
 ### 4.5 标签管理 API
 
 | API 路径           | 请求方法   | 用途         |
-|-------------------|--------|------------|
 | `/api/tags`       | POST   | 创建标签       |
 | `/api/tags/{id}`  | GET    | 根据 ID 查询标签 |
 | `/api/tags`       | GET    | 查询所有标签（分页） |
@@ -237,7 +213,6 @@
 ### 4.6 文档标签关系 API
 
 | API 路径                          | 请求方法   | 用途                  |
-|-----------------------------------|--------|---------------------|
 | `/api/doc-tags`                   | POST   | 创建文档标签关系            |
 | `/api/doc-tags/{docId}/{tagId}`   | GET    | 根据文档 ID 和标签 ID 查询关系 |
 | `/api/doc-tags/doc/{docId}`       | GET    | 根据文档 ID 查询所有标签关系    |
@@ -260,7 +235,6 @@
 ### 4.8 对话管理 API
 
 | API 路径                       | 请求方法   | 用途             |
-|--------------------------------|--------|----------------|
 | `/api/dialogs`                 | POST   | 创建对话           |
 | `/api/dialogs/{id}`            | GET    | 根据 ID 查询对话     |
 | `/api/dialogs/user/{userId}`   | GET    | 根据用户 ID 查询所有对话 |
@@ -271,7 +245,6 @@
 ### 4.9 问答管理 API
 
 | API 路径                            | 请求方法   | 用途                |
-|-------------------------------------|--------|-------------------|
 | `/api/que-ans`                      | POST   | 创建问答              |
 | `/api/que-ans/{dialogId}/{times}`   | GET    | 根据对话 ID 和问答次数查询问答 |
 | `/api/que-ans/dialog/{dialogId}`    | GET    | 根据对话 ID 查询所有问答    |
@@ -287,15 +260,12 @@
 
 ```javascript
 // 创建用户示例
-fetch('http://localhost:8080/users', {
   method: 'POST',
   headers: {
-    'Content-Type': 'application/json'
   },
   body: JSON.stringify({
     username: '张三',
     email: 'zhangsan@example.com',
-    password: 'Password123!'
   }),
 })
 .then(response => response.json())
@@ -318,7 +288,6 @@ fetch('http://localhost:8080/', {
   },
   body: JSON.stringify({
     userId: '张三',
-    password: 'Password123!'
   }),
 })
 .then(response => {
@@ -355,7 +324,6 @@ if (!token) {
   return;
 }
 
-fetch('http://localhost:8080/users', {
   method: 'GET',
   headers: {
     'Content-Type': 'application/json',
@@ -531,8 +499,6 @@ fetch('http://localhost:8080/users', {
             })
             .then(response => {
                 if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.message || '登录失败');
                     });
                 }
                 return response.json();
@@ -696,8 +662,6 @@ fetch('http://localhost:8080/users', {
             })
             .then(response => {
                 if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.message || '注册失败');
                     });
                 }
                 return response.json();
@@ -744,8 +708,6 @@ fetch('http://localhost:8080/users', {
 
 ### 6.1 密码安全
 
-- **密码存储**：使用 BCryptPasswordEncoder 存储加密密码
-- **密码强度**：实现密码强度检查，要求密码长度至少8个字符，包含至少一个大写字母、一个小写字母、一个数字和一个特殊字符
 - **密码传输**：密码在传输过程中使用 HTTPS 加密，防止中间人攻击
 
 ### 6.2 JWT 认证
@@ -764,7 +726,6 @@ fetch('http://localhost:8080/users', {
 
 ### 6.4 权限控制
 
-- **基于角色的权限控制**：可以扩展实现基于角色的权限控制
 - **API 访问控制**：使用 Spring Security 配置 API 的访问权限
 - **敏感操作验证**：对敏感操作（如修改密码、删除用户等）进行额外验证
 
@@ -782,7 +743,6 @@ fetch('http://localhost:8080/users', {
 
 后端使用全局异常处理器统一处理错误：
 - **RuntimeException**：业务逻辑错误，返回 400 状态码和错误信息
-- **ValidationException**：参数验证错误，返回 400 状态码和错误信息
 - **Exception**：其他错误，返回 500 状态码和通用错误信息
 
 ## 8. 数据库表关系
@@ -790,7 +750,6 @@ fetch('http://localhost:8080/users', {
 ### 8.1 主要表结构
 
 | 表名               | 用途         |
-|------------------|------------|
 | users            | 存储用户信息     |
 | tags             | 存储标签信息     |
 | doc              | 存储文档基本信息   |
@@ -962,7 +921,6 @@ users        ┌─────────┐        tags
   - 使用 Postman 测试 API 接口
 
 - **前端调试**：
-  - 使用浏览器开发者工具
   - 查看网络请求和响应
   - 使用 console.log 输出调试信息
 
@@ -1006,7 +964,6 @@ A: 项目已经配置了 CORS 支持，允许所有来源的跨域请求。如�
 
 ### Q6: 如何在另一台电脑上访问后端服务？
 
-A: 后端服务已经配置为允许外部访问。您需要：
 1. 确保后端服务运行在 `0.0.0.0:8080` 端口
 2. 在前端代码中使用后端服务的 IP 地址或域名，例如：
    ```javascript
@@ -1023,10 +980,6 @@ A: 测试用户初始化代码已被注释掉，以防止启动时出现问题�
 
 ### Q8: 如何确保密码安全？
 
-A: 项目使用 BCryptPasswordEncoder 进行密码加密存储。在生产环境中，建议：
-1. 实现 HTTPS 加密传输
-2. 定期提醒用户修改密码
-3. 实现密码重置机制
 
 ## 13. 结语
 
@@ -1047,7 +1000,3 @@ A: 项目使用 BCryptPasswordEncoder 进行密码加密存储。在生产环境
 - 提供了完整的用户注册功能
 - 配置了外部访问支持
 - 禁用了测试用户初始化，确保系统安全性
-- 使用了加密密码存储方式，确保密码安全
-- 验证了前端登录代码兼容性
-
-希望本文档能够帮助您快速上手本项目。如果您有任何问题或建议，欢迎随时提出。祝您学习愉快！
