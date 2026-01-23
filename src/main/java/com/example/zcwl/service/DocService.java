@@ -54,4 +54,10 @@ public interface DocService {
      */
     Doc getDocByDocName(String docName);
 
+    /**
+     * 查询所有文档
+     * @return 文档实体列表
+     */
+    java.util.List<Doc> getAllDocs();
+
 }

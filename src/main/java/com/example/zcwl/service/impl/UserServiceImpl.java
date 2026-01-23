@@ -4,10 +4,12 @@ import com.example.zcwl.entity.User;
 import com.example.zcwl.dto.UserDTO;
 import com.example.zcwl.repository.UserRepository;
 import com.example.zcwl.service.UserService;
-import org.springframework.beans.BeanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -19,15 +21,19 @@ import java.util.Optional;
 @Service  // 声明这是一个服务类，用于业务逻辑实现
 public class UserServiceImpl implements UserService {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 构造函数注入
      * @param userRepository 用户数据访问接口实例
+     * @param passwordEncoder 密码编码器实例
      */
-    @Autowired  // 自动注入UserRepository依赖，用于数据库操作
-    public UserServiceImpl(UserRepository userRepository) {
+    @Autowired  // 自动注入依赖
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -37,12 +43,49 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User createUser(UserDTO userDTO) {
+        logger.info("Creating user: {}", userDTO.getUsername());
+
+        // 检查密码是否与用户名相同
+        if (userDTO.getPassword().equals(userDTO.getUsername())) {
+            logger.warn("Password cannot be the same as username for user: {}", userDTO.getUsername());
+            throw new RuntimeException("密码不能与用户名相同");
+        }
+
+        // 验证密码强度
+        validatePasswordStrength(userDTO.getPassword());
+
+        // 检查用户名是否已存在
+        if (userRepository.findByName(userDTO.getUsername()) != null) {
+            logger.warn("Username already exists: {}", userDTO.getUsername());
+            throw new RuntimeException("Username already exists");
+        }
+
+        // 检查邮箱是否已存在
+        if (userRepository.findByEmail(userDTO.getEmail()) != null) {
+            logger.warn("Email already exists: {}", userDTO.getEmail());
+            throw new RuntimeException("Email already exists");
+        }
+
+        // 检查用户ID是否已存在
+        if (userRepository.findByuId(userDTO.getUsername()) != null) {
+            logger.warn("User ID already exists: {}", userDTO.getUsername());
+            throw new RuntimeException("用户ID已存在");
+        }
+
         // 创建User实体对象
         User user = new User();
-        // 使用BeanUtils复制属性，将userDTO的属性值复制到user对象
-        BeanUtils.copyProperties(userDTO, user);
+        // 设置用户ID
+        user.setUId(userDTO.getUsername());
+        // 设置用户名
+        user.setName(userDTO.getUsername());
+        // 设置邮箱
+        user.setEmail(userDTO.getEmail());
+        // 使用BCrypt加密存储密码
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         // 调用Repository的save方法保存用户实体
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        logger.info("User created successfully: {}", savedUser.getUId());
+        return savedUser;
     }
 
     /**
@@ -52,8 +95,14 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Optional<User> getUserById(String id) {
-        // 调用Repository的findById方法根据ID查询
-        return userRepository.findById(id);
+        logger.debug("Getting user by id: {}", id);
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            logger.debug("Found user: {}", user.get().getUId());
+        } else {
+            logger.debug("User not found: {}", id);
+        }
+        return user;
     }
 
     /**
@@ -63,8 +112,10 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Page<User> getAllUsers(Pageable pageable) {
-        // 调用Repository的findAll方法，带分页参数
-        return userRepository.findAll(pageable);
+        logger.debug("Getting all users with pageable: {}", pageable);
+        Page<User> users = userRepository.findAll(pageable);
+        logger.debug("Found {} users", users.getTotalElements());
+        return users;
     }
 
     /**
@@ -76,17 +127,32 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User updateUser(String id, UserDTO userDTO) {
+        logger.info("Updating user: {}", id);
         // 先根据ID查询现有用户
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
             // 如果存在，更新字段值
             User user = optionalUser.get();
-            // 使用BeanUtils复制属性，将userDTO的属性值复制到user对象
-            BeanUtils.copyProperties(userDTO, user);
+            
+            // 手动设置各个字段，确保密码被正确加密
+            user.setName(userDTO.getUsername());
+            user.setEmail(userDTO.getEmail());
+            
+            // 如果提供了密码，则使用BCrypt加密后更新
+            if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
+                // 验证密码强度
+                validatePasswordStrength(userDTO.getPassword());
+                user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+                logger.debug("Updated password for user: {}", id);
+            }
+            
             // 保存更新后的实体
-            return userRepository.save(user);
+            User updatedUser = userRepository.save(user);
+            logger.info("User updated successfully: {}", updatedUser.getUId());
+            return updatedUser;
         }
         // 如果不存在，抛出运行时异常
+        logger.warn("User not found for update: {}", id);
         throw new RuntimeException("User not found with id: " + id);
     }
 
@@ -96,8 +162,32 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void deleteUser(String id) {
+        logger.info("Deleting user: {}", id);
         // 调用Repository的deleteById方法根据ID删除
         userRepository.deleteById(id);
+        logger.info("User deleted successfully: {}", id);
     }
 
+    /**
+     * 验证密码强度
+     * @param password 密码
+     * @throws RuntimeException 如果密码强度不足
+     */
+    private void validatePasswordStrength(String password) {
+        if (password.length() < 8) {
+            throw new RuntimeException("密码长度不能少于8个字符");
+        }
+        if (!password.matches(".*[A-Z].*")) {
+            throw new RuntimeException("密码必须包含至少一个大写字母");
+        }
+        if (!password.matches(".*[a-z].*")) {
+            throw new RuntimeException("密码必须包含至少一个小写字母");
+        }
+        if (!password.matches(".*\\d.*")) {
+            throw new RuntimeException("密码必须包含至少一个数字");
+        }
+        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*")) {
+            throw new RuntimeException("密码必须包含至少一个特殊字符");
+        }
+    }
 }

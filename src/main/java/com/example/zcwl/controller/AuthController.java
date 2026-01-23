@@ -1,7 +1,5 @@
 package com.example.zcwl.controller;
 
-import com.example.zcwl.dto.LoginRequestDTO;
-import com.example.zcwl.dto.LoginResponseDTO;
 import com.example.zcwl.dto.UserDTO;
 import com.example.zcwl.entity.User;
 import com.example.zcwl.service.AuthService;
@@ -53,56 +51,14 @@ public class AuthController {
         this.authService = authService;
     }
 
-    /**
-     * 用户登录
-     * <p>
-     * 前端调用方式：
-     * - 请求类型：POST
-     * - 请求URL：http://localhost:8080/
-     * - 请求体：JSON格式的登录数据，例如：
-     *   {
-     *     "userId": "1",
-     *     "password": "123456"
-     *   }
-     * - 响应：登录成功返回username、userId和token，状态码200；登录失败返回错误信息，状态码401
-     *
-     * @param loginRequestDTO 登录请求数据，由@RequestBody注解自动转换
-     * @return 包含登录结果的ResponseEntity对象
-     */
-    // @PostMapping：Spring注解，处理POST请求
-    // 作用：当前端发送POST请求到/时，会调用这个方法
-    @PostMapping("")
-    
-
-    
-    // ResponseEntity：Spring用于封装HTTP响应的对象
-    // 可以包含响应体、HTTP状态码、响应头等信息
-    public ResponseEntity<?> login(
-            // @Valid：JSR-303校验注解，用于验证请求体数据的合法性
-            // 作用：如果loginRequestDTO对象不符合验证规则（例如必填字段为空），会自动返回400错误
-            @Valid 
-            
-            // @RequestBody：Spring注解，用于将HTTP请求体转换为Java对象
-            // 作用：自动将前端发送的JSON数据转换为LoginRequestDTO对象
-            @RequestBody LoginRequestDTO loginRequestDTO) {
-        try {
-            // 调用服务层的方法进行登录
-            LoginResponseDTO loginResponseDTO = authService.login(loginRequestDTO);
-            
-            // 返回登录成功的响应数据和200状态码
-            return new ResponseEntity<>(loginResponseDTO, HttpStatus.OK);
-        } catch (Exception e) {
-            // 登录失败，返回401状态码和错误信息
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
-        }
-    }
+    // 登录接口已移至UserController，路径为/users/login
 
     /**
      * 用户注册
      * <p>
      * 前端调用方式：
      * - 请求类型：POST
-     * - 请求URL：http://localhost:8080/api/auth/register
+     * - 请求URL：http://localhost:8080/register
      * - 请求体：JSON格式的注册数据，例如：
      *   {
      *     "username": "张三",
@@ -149,8 +105,8 @@ public class AuthController {
      * <p>
      * 前端调用方式：
      * - 请求类型：GET
-     * - 请求URL：http://localhost:8080/api/auth/validate-token?token={token}
-     *   例如：http://localhost:8080/api/auth/validate-token?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+     * - 请求URL：http://localhost:8080/validate-token?token={token}
+     *   例如：http://localhost:8080/validate-token?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
      * - 响应：token有效返回true，状态码200；token无效返回false，状态码401
      *
      * @param token JWT token，从URL查询参数中获取

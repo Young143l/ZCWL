@@ -1,6 +1,5 @@
 package com.example.zcwl.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serial;
 import java.io.Serializable;
 

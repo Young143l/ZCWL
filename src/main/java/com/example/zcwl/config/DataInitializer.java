@@ -1,6 +1,5 @@
 package com.example.zcwl.config;
 
-import com.example.zcwl.entity.User;
 import com.example.zcwl.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;

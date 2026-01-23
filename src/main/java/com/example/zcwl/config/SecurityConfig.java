@@ -1,6 +1,6 @@
 package com.example.zcwl.config;
 
-import com.example.zcwl.service.UserDetailsServiceImpl;
+import com.example.zcwl.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.http.HttpMethod;
 import java.util.Arrays;
 
 /**
@@ -69,6 +69,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/validate-token").permitAll()
                 .antMatchers("/register").permitAll()
                 .antMatchers("/api/auth/**").permitAll()
+                .antMatchers("/users/login").permitAll()
+                .antMatchers(HttpMethod.POST, "/users").permitAll()
+                // GET /users/:id 需要认证
+                // DELETE /users/** 需要认证
+                .antMatchers("/doc/**").permitAll()
+                .antMatchers("/api/doc-contents/**").permitAll()
                 // 允许Swagger相关路径
                 .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
                 // 其他路径需要认证
@@ -107,12 +113,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     /**
      * 密码编码器
-     * 使用NoOpPasswordEncoder，存储明文密码（由于数据库表结构限制）
+     * 使用BCryptPasswordEncoder，安全存储密码
      * @return 密码编码器
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+        // 重新启用BCryptPasswordEncoder，使用默认强度
+        return new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
     }
 
     /**

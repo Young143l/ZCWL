@@ -106,4 +106,14 @@ public class DocServiceImpl implements DocService {
         return docRepository.findByDocName(docName);
     }
 
+    /**
+     * 查询所有文档
+     * @return 文档实体列表
+     */
+    @Override
+    public java.util.List<Doc> getAllDocs() {
+        // 调用Repository的findAll方法获取所有文档
+        return docRepository.findAll();
+    }
+
 }

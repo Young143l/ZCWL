@@ -1,4 +1,4 @@
-package com.example.zcwl.service;
+package com.example.zcwl.service.impl;
 
 import com.example.zcwl.entity.User;
 import com.example.zcwl.repository.UserRepository;

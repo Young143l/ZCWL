@@ -18,18 +18,18 @@ public class User implements Serializable {  // 实现Serializable接口，支�
 
     /**
      * 用户ID
-     * 主键，长度20个字符，非空
+     * 主键，长度50个字符，非空
      */
     @Id  // 声明这是主键
-    @Column(name = "u_id", length = 20, nullable = false)  // 映射到数据库的u_id列，指定长度和非空约束
+    @Column(name = "u_id", length = 50, nullable = false)  // 映射到数据库的u_id列，指定长度和非空约束
     private String uId;
 
     /**
      * 用户名
-     * 长度20个字符，非空，使用@NotBlank进行数据校验
+     * 长度50个字符，非空，使用@NotBlank进行数据校验
      */
     @NotBlank(message = "用户名不能为空")  // 数据校验，确保用户名不为空
-    @Column(name = "name", length = 20, nullable = false)  // 映射到数据库的name列，指定长度和非空约束
+    @Column(name = "name", length = 50, nullable = false)  // 映射到数据库的name列，指定长度和非空约束
     private String name;
 
     /**
@@ -46,7 +46,7 @@ public class User implements Serializable {  // 实现Serializable接口，支�
      * 注意：使用BCryptPasswordEncoder加密后的密码长度会超过20个字符
      */
     @NotBlank(message = "密码不能为空")  // 数据校验，确保密码不为空
-    @Column(name = "password", length = 100, nullable = false)  // 映射到数据库的password列，指定长度和非空约束
+    @Column(name = "password", length = 255, nullable = false)  // 映射到数据库的password列，指定长度和非空约束
     private String password;
 
     // getter和setter方法

@@ -26,7 +26,7 @@ import java.util.Optional;
  */
 
 @RestController
-@RequestMapping("/api/doc-contents")
+@RequestMapping({"/api/doc-contents"})
 
 
 public class DocContentsController {
@@ -108,6 +108,7 @@ public class DocContentsController {
     @GetMapping("/{docId}/{chapterId}")
 
     
+    
     // ResponseEntity：Spring用于封装HTTP响应的对象
     // 可以包含响应体、HTTP状态码、响应头等信息
     public ResponseEntity<DocContents> getDocContentById(
@@ -186,7 +187,7 @@ public class DocContentsController {
      */
     // @GetMapping：Spring注解，处理GET请求
     // 作用：当前端发送GET请求到/api/doc-contents时，会调用这个方法
-    @GetMapping
+    @GetMapping("/contents")
     
     
     
@@ -226,7 +227,7 @@ public class DocContentsController {
     // @PutMapping：Spring注解，处理PUT请求
     // 作用：当前端发送PUT请求到/api/doc-contents/{docId}/{chapterId}时，会调用这个方法
     @PutMapping("/{docId}/{chapterId}")
-    
+
     
     
     // ResponseEntity：Spring用于封装HTTP响应的对象
@@ -239,7 +240,6 @@ public class DocContentsController {
             // @PathVariable：Spring注解，用于从URL路径中获取参数
             // 作用：将URL中的{chapterId}值绑定到方法的chapterId参数上
             @PathVariable Integer chapterId, 
-            
             // @Valid：JSR-303校验注解，用于验证请求体数据的合法性
             // 作用：如果docContent对象不符合验证规则，会自动返回400错误
             @Valid 
@@ -274,7 +274,7 @@ public class DocContentsController {
     // @DeleteMapping：Spring注解，处理DELETE请求
     // 作用：当前端发送DELETE请求到/api/doc-contents/{docId}/{chapterId}时，会调用这个方法
     @DeleteMapping("/{docId}/{chapterId}")
-    
+
     
     
     // ResponseEntity：Spring用于封装HTTP响应的对象
