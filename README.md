@@ -104,7 +104,7 @@
 | API 路径                     | 请求方法 | 用途      | 前端调用示例         |
 |----------------------------|------|---------|----------------|
 | `/register`                | POST | 用户注册    | 新用户注册时调用       |
-| `/`                        | POST | 用户登录    | 用户登录时调用        |
+| `/users/login`             | POST | 用户登录    | 用户登录时调用        |
 | `/validate-token`          | GET  | 验证token | 验证token是否有效时调用 |
 
 #### 4.1.1 用户注册
@@ -129,12 +129,13 @@
   ```
 
 #### 4.1.2 用户登录
-- **请求 URL**: `http://localhost:8080/`
+- **请求 URL**: `http://localhost:8080/users/login`
 - **请求方法**: POST
 - **请求体**:
   ```json
   {
     "userId": "张三",
+    "password": "123456"
   }
   ```
 - **成功响应** (200 OK):
@@ -281,13 +282,14 @@
 
 ```javascript
 // 登录示例
-fetch('http://localhost:8080/', {
+fetch('http://localhost:8080/users/login', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
     userId: '张三',
+    password: '123456'
   }),
 })
 .then(response => {
@@ -487,7 +489,7 @@ if (!token) {
             errorMessage.style.display = 'none';
             
             // 发送登录请求
-            fetch('http://localhost:8080/', {
+            fetch('http://localhost:8080/users/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -499,7 +501,7 @@ if (!token) {
             })
             .then(response => {
                 if (!response.ok) {
-                    });
+                    throw new Error('登录失败');
                 }
                 return response.json();
             })
