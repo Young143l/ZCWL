@@ -123,13 +123,25 @@ public class SecurityConfig {
 
     /**
      * 明文密码编码器
-     * 使用NoOpPasswordEncoder，直接比较明文密码，便于前期维护
+     * 自定义实现，直接比较明文密码，便于前期维护
      * @return 密码编码器
      */
     @Bean
     public PasswordEncoder plainTextPasswordEncoder() {
-        // 使用NoOpPasswordEncoder，直接比较明文密码
-        return org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
+        // 自定义PasswordEncoder实现，直接比较明文密码
+        return new PasswordEncoder() {
+            @Override
+            public String encode(CharSequence rawPassword) {
+                // 直接返回明文密码
+                return rawPassword.toString();
+            }
+
+            @Override
+            public boolean matches(CharSequence rawPassword, String encodedPassword) {
+                // 直接比较明文密码
+                return rawPassword.toString().equals(encodedPassword);
+            }
+        };
     }
 
     /**

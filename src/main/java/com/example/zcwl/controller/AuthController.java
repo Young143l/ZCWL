@@ -33,6 +33,9 @@ import java.util.Map;
 // 例如：http://localhost:8080/login
 @RequestMapping("/")
 
+// @Validated：Spring注解，用于启用方法参数验证
+// 作用：配合@Valid注解使用，触发方法参数的验证逻辑
+@org.springframework.validation.annotation.Validated
 
 public class AuthController {
 
@@ -86,24 +89,35 @@ public class AuthController {
             // @RequestBody：Spring注解，用于将HTTP请求体转换为Java对象
             // 作用：自动将前端发送的JSON数据转换为UserDTO对象
             @RequestBody UserDTO userDTO) {
-        try {
-            // 调用服务层的方法进行注册
-            User user = authService.register(userDTO);
-            
-            // 返回注册成功的用户数据和201状态码
-            // HttpStatus.CREATED表示资源创建成功
-            return new ResponseEntity<>(user, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            // 注册失败，返回400状态码和标准化的错误响应
-            java.util.Map<String, Object> errorResponse = new java.util.HashMap<>();
-            errorResponse.put("message", e.getMessage());
+        
+        // 显式验证用户名长度，确保不超过数据库字段限制
+        if (userDTO.getUsername().length() > 20) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            Map<String, String> errors = new HashMap<>();
+            errors.put("username", "用户名长度必须在6-20个字符之间");
+            errorResponse.put("message", "请求参数验证失败");
+            errorResponse.put("errors", errors);
+            errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            // 其他异常，返回500状态码和标准化的错误响应
-            java.util.Map<String, Object> errorResponse = new java.util.HashMap<>();
-            errorResponse.put("message", "服务器内部错误，请稍后重试");
-            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        
+        // 显式验证邮箱长度，确保不超过数据库字段限制
+        if (userDTO.getEmail().length() > 20) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            Map<String, String> errors = new HashMap<>();
+            errors.put("email", "邮箱长度不能超过20个字符");
+            errorResponse.put("message", "请求参数验证失败");
+            errorResponse.put("errors", errors);
+            errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+        
+        // 调用服务层的方法进行注册
+        User user = authService.register(userDTO);
+        
+        // 返回注册成功的用户数据和201状态码
+        // HttpStatus.CREATED表示资源创建成功
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     /**

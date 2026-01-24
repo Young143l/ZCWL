@@ -45,6 +45,18 @@ public class UserServiceImpl implements UserService {
     public User createUser(UserDTO userDTO) {
         logger.info("Creating user: {}", userDTO.getUsername());
 
+        // 显式验证用户名长度，确保不超过数据库字段限制
+        if (userDTO.getUsername() == null || userDTO.getUsername().length() < 6 || userDTO.getUsername().length() > 20) {
+            logger.warn("Username length invalid: {}", userDTO.getUsername());
+            throw new RuntimeException("用户名长度必须在6-20个字符之间");
+        }
+        
+        // 显式验证邮箱长度，确保不超过数据库字段限制
+        if (userDTO.getEmail() == null || userDTO.getEmail().length() > 20) {
+            logger.warn("Email length invalid: {}", userDTO.getEmail());
+            throw new RuntimeException("邮箱长度不能超过20个字符");
+        }
+
         // 检查密码是否与用户名相同
         if (userDTO.getPassword().equals(userDTO.getUsername())) {
             logger.warn("Password cannot be the same as username for user: {}", userDTO.getUsername());
@@ -80,7 +92,7 @@ public class UserServiceImpl implements UserService {
         user.setName(userDTO.getUsername());
         // 设置邮箱
         user.setEmail(userDTO.getEmail());
-        // 使用BCrypt加密存储密码
+        // 使用明文存储密码，便于前期维护
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         // 调用Repository的save方法保存用户实体
         User savedUser = userRepository.save(user);
@@ -138,7 +150,7 @@ public class UserServiceImpl implements UserService {
             user.setName(userDTO.getUsername());
             user.setEmail(userDTO.getEmail());
             
-            // 如果提供了密码，则使用BCrypt加密后更新
+            // 如果提供了密码，则使用明文存储
             if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
                 // 验证密码强度
                 validatePasswordStrength(userDTO.getPassword());
@@ -177,6 +189,9 @@ public class UserServiceImpl implements UserService {
         if (password.length() < 8) {
             throw new RuntimeException("密码长度不能少于8个字符");
         }
+        if (password.length() > 20) {
+            throw new RuntimeException("密码长度不能超过20个字符");
+        }
         if (!password.matches(".*[A-Z].*")) {
             throw new RuntimeException("密码必须包含至少一个大写字母");
         }
@@ -186,7 +201,7 @@ public class UserServiceImpl implements UserService {
         if (!password.matches(".*\\d.*")) {
             throw new RuntimeException("密码必须包含至少一个数字");
         }
-        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*")) {
+        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\|,.<>/?].*")) {
             throw new RuntimeException("密码必须包含至少一个特殊字符");
         }
     }

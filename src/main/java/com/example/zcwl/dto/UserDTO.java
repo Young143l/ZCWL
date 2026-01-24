@@ -26,7 +26,7 @@ public class UserDTO implements Serializable {  // 实现Serializable接口，�
      * 不能为空
      */
     @NotBlank(message = "用户名不能为空")  // 数据校验，确保用户名不为空
-    @Size(min = 6, max = 50, message = "用户名长度必须在6-50个字符之间")
+    @Size(min = 6, max = 20, message = "用户名长度必须在6-20个字符之间")
     @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "用户名只能包含字母、数字和下划线")
     private String username;
 
@@ -35,7 +35,7 @@ public class UserDTO implements Serializable {  // 实现Serializable接口，�
      * 不能为空
      */
     @NotBlank(message = "密码不能为空")  // 数据校验，确保密码不为空
-    @Size(min = 8, max = 100, message = "密码长度必须在8-100个字符之间")
+    @Size(min = 8, max = 20, message = "密码长度必须在8-20个字符之间")
     private String password;
 
     /**
@@ -44,6 +44,7 @@ public class UserDTO implements Serializable {  // 实现Serializable接口，�
      */
     @Email(message = "邮箱格式不正确")  // 数据校验，确保邮箱格式正确
     @NotBlank(message = "邮箱不能为空")
+    @Size(max = 20, message = "邮箱长度不能超过20个字符")
     private String email;
 
     /**

@@ -37,6 +37,9 @@ import java.util.Optional;
 // 例如：http://localhost:8080/users
 @RequestMapping("/users")
 
+// @Validated：Spring注解，用于启用方法参数验证
+// 作用：配合@Valid注解使用，触发方法参数的验证逻辑
+@org.springframework.validation.annotation.Validated
 
 public class UserController {
 

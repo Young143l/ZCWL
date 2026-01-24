@@ -102,6 +102,21 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public User register(UserDTO userDTO) {
+        // 验证用户名长度
+        if (userDTO.getUsername() == null || userDTO.getUsername().length() < 6 || userDTO.getUsername().length() > 20) {
+            throw new RuntimeException("用户名长度必须在6-20个字符之间");
+        }
+        
+        // 验证邮箱长度
+        if (userDTO.getEmail() == null || userDTO.getEmail().length() > 20) {
+            throw new RuntimeException("邮箱长度不能超过20个字符");
+        }
+        
+        // 验证密码长度
+        if (userDTO.getPassword() == null || userDTO.getPassword().length() < 8 || userDTO.getPassword().length() > 20) {
+            throw new RuntimeException("密码长度必须在8-20个字符之间");
+        }
+
         // 检查密码是否与用户名相同
         if (userDTO.getPassword().equals(userDTO.getUsername())) {
             throw new RuntimeException("密码不能与用户名相同");
