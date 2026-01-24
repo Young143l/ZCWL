@@ -16,9 +16,10 @@ export interface DocContent {
     content: string;
 }
 
-export const getDocInfo: (d_id: string) => Promise<{
+export const getDoc: (d_id: string) => Promise<{
     ok: boolean;
     docInfo: DocInfo | undefined;
+    docDir: DocDir[];
 }> = async (d_id: string) => {
     try {
         const res: Response = await fetch(
@@ -35,11 +36,11 @@ export const getDocInfo: (d_id: string) => Promise<{
         }
         const json: { docInfo: DocInfo; docDir: DocDir[] } = await res.json();
         if (json) {
-            return { ok: true, docInfo: json.docInfo };
+            return { ok: true, docInfo: json.docInfo,docDir: json.docDir};
         }
         throw Error("Response Error!");
     } catch (e) {
-        return { ok: false, docInfo: undefined };
+        return { ok: false, docInfo: undefined,docDir:[] };
     }
 };
 
@@ -68,31 +69,31 @@ export const getDocList: () => Promise<{
     }
 };
 
-export const getDocDirectory: (
-    d_id: string,
-) => Promise<{ ok: boolean; docDire: DocDir[] }> = async (d_id: string) => {
-    try {
-        const res: Response = await fetch(
-            import.meta.env.VITE_BACK_END + `/doc/${d_id}`,
-            {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            },
-        );
-        if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        const json: { docInfo: DocInfo; docDir: DocDir[] } = await res.json();
-        if (json) {
-            return { ok: true, docDire: json.docDir };
-        }
-        throw Error("Response Error!");
-    } catch (e) {
-        return { ok: false, docDire: [] };
-    }
-};
+// export const getDocDirectory: (
+//     d_id: string,
+// ) => Promise<{ ok: boolean; docDire: DocDir[] }> = async (d_id: string) => {
+//     try {
+//         const res: Response = await fetch(
+//             import.meta.env.VITE_BACK_END + `/doc/${d_id}`,
+//             {
+//                 method: "GET",
+//                 headers: {
+//                     "Content-Type": "application/json",
+//                 },
+//             },
+//         );
+//         if (!res.ok) {
+//             throw new Error(`HTTP error! status: ${res.status}`);
+//         }
+//         const json: { docInfo: DocInfo; docDir: DocDir[] } = await res.json();
+//         if (json) {
+//             return { ok: true, docDire: json.docDir };
+//         }
+//         throw Error("Response Error!");
+//     } catch (e) {
+//         return { ok: false, docDire: [] };
+//     }
+// };
 
 export const getDocContent: (
     d_id: string,

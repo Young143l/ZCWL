@@ -24,10 +24,10 @@ const Hello_Sum_components: FC<HS> = ({ AllCmd }) => {
         return () => {
             timers.forEach((timer) => clearTimeout(timer));
         };
-    }, [isLogin]);
+    }, [isLogin,AllCmd]);
 
     return (
-        <div className="md:w-full w-[calc(100%-40px)] h-[calc(100vh-64px-42px)] mb-10  rounded-xl">
+        <div className="w-full  h-[calc(100vh-64px-40px)] mb-8 rounded-xl">
             <div className="bg-[#F8F8F875] rounded-xl border-2 border-white overflow-hidden h-full backdrop-blur-sm">
                 <div className="bg-white px-4 py-3 flex items-center">
                     <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>

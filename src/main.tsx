@@ -1,6 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+    createBrowserRouter,
+    RouterProvider,
+    ScrollRestoration,
+} from "react-router-dom";
 import Main_layout from "./layout/Main_layout.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Home from "./pages/Home.tsx";
@@ -11,7 +15,12 @@ import "./index.css";
 import DocumentDirectory from "./pages/DocumentDirectory.tsx";
 const router = createBrowserRouter([
     {
-        element: <Main_layout />,
+        element: (
+            <>
+                <Main_layout />
+                <ScrollRestoration />
+            </>
+        ),
         children: [
             {
                 path: "/",

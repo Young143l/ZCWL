@@ -1,30 +1,26 @@
-import { Layout, Divider, Skeleton, Empty } from "antd";
+import { Divider, Skeleton, Empty } from "antd";
 import DocCard_component from "../components/DocCard_components";
 import Hello_Sum_component from "../components/Hello_Sum_components";
 import { useEffect, useState } from "react";
-const { Content } = Layout;
 import { type DocInfo, getDocList } from "../api/Doc_api";
-
+import Template_Page from "./Template_Page";
 const DocumentList = () => {
     const [docList, setDocList] = useState<DocInfo[]>([]);
     const [load, setLoad] = useState<boolean>(true);
 
     useEffect(() => {
-        getDocList().then((res) => {
+        getDocList().then((res: { ok: boolean; docList: DocInfo[] }) => {
             if (res.ok) {
                 setDocList(res.docList);
-            }
-            setTimeout(() => {
                 setLoad(false);
-            }, 500);
+            }
         });
     }, []);
 
     return (
-        <Content className="flex flex-col justify-center items-center w-full">
+        <>
             <Hello_Sum_component AllCmd="Cfww --document" />
-                <div className="w-full bg-white p-2 rounded-xl">
-                
+            <Template_Page>
                 <Divider titlePlacement="start">学习文档</Divider>
                 {load ? (
                     <Skeleton active />
@@ -45,8 +41,8 @@ const DocumentList = () => {
                 ) : (
                     <Empty />
                 )}
-                </div>
-        </Content>
+            </Template_Page>
+        </>
     );
 };
 

@@ -70,8 +70,12 @@ const Header_components: FC = () => {
         } else if (location.pathname.startsWith("/code")) {
             newPath = "code";
         }
-        setCurrent(newPath);
-    }, [location.pathname]);
+        
+        // 只有当 newPath 与 current 不同时才更新状态
+        if (current !== newPath) {
+            setCurrent(newPath);
+        }
+    }, [location.pathname, current]);
 
     const unLoginContent = (
         <div className="flex justify-center items-center">
@@ -147,7 +151,7 @@ const Header_components: FC = () => {
                         }
                         content={isLogin ? LoginContent : unLoginContent}
                     >
-                        <Avatar size="large" icon={<UserOutlined />} />
+                        <Avatar size="large" icon={<UserOutlined />} src={isLogin?"https://img.young143.top/young143/a.jpg":undefined} />
                     </Popover>
                 </div>
                 {/* 手机端开抽屉关 */}
