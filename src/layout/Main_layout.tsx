@@ -4,7 +4,7 @@ import { Layout, ConfigProvider } from "antd";
 const { Header, Footer } = Layout;
 import Header_components from "../components/Header_components";
 import Footer_components from "../components/Footer_components";
-import ToTop_components from "../components/ToTop_components";
+import FloatTools_components from "../components/FloatTools_components";
 
 const Main_layout: FC = () => {
     return (
@@ -38,8 +38,9 @@ const Main_layout: FC = () => {
                 <Footer className="z-1">
                     <Footer_components />
                 </Footer>
-                <ToTop_components />
+                
             </Layout>
+            <FloatTools_components/>
         </ConfigProvider>
     );
 };

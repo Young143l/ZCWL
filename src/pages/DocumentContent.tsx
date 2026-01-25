@@ -54,11 +54,11 @@ const DocumentContent: FC = () => {
             />
             <Template_Page
                 children={
-                    <div
-                        className="h-[calc(100vh-95px)] overflow-y-auto p-5 border border-gray-200 rounded-md bg-gray-50"
-                    >
+                    // <div
+                    //     className="h-[calc(100vh-95px)] overflow-y-auto p-5 border border-gray-200 rounded-md bg-gray-50"
+                    // >
                         <ReactMarkdown>{docContent?.content}</ReactMarkdown>
-                    </div>
+                    // </div>
                 }
                 sider={
                     <Menu

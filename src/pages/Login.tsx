@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button, Form, Input, App } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import login from "../api/Login_api.ts";
-import useLoginState from "../status/Login_status.tsx";
+import useLoginState from "../status/Login_status.ts";
 
 const LoginPage = () => {
     const [userId, setUserId] = useState("");
