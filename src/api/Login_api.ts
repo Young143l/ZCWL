@@ -35,7 +35,7 @@ const login: (
         } else {
             throw new Error("Login failed: invalid response data");
         }
-    } catch (error: string | any) {
+    } catch (error: unknown) {
         console.error("Login error:", error);
         return { success: false, userName: "" };
     }

@@ -13,6 +13,7 @@ import DocumentList from "./pages/DocumentList.tsx";
 import DocumentContent from "./pages/DocumentContent.tsx";
 import "./index.css";
 import DocumentDirectory from "./pages/DocumentDirectory.tsx";
+import {ConfigProvider} from "antd"
 const router = createBrowserRouter([
     {
         element: (
@@ -52,6 +53,15 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
-        <RouterProvider router={router} />
+        <ConfigProvider
+            theme={{
+                token: {
+                    colorPrimary:"#13c2c2",
+                    colorPrimaryBorder:"#87e8de"
+                },
+            }}
+        >
+            <RouterProvider router={router} />
+        </ConfigProvider>
     </StrictMode>,
 );

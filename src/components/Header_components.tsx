@@ -1,4 +1,4 @@
-import { useState, useEffect, type FC } from "react";
+import { useState, type FC } from "react";
 import { Menu, Avatar, Drawer, Popover, Button, ConfigProvider } from "antd";
 import type { MenuProps } from "antd";
 import { Link, useLocation } from "react-router-dom";
@@ -54,29 +54,26 @@ const items: MenuItem[] = [
 ];
 
 const Header_components: FC = () => {
-    const [current, setCurrent] = useState("home");
     const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
     const location = useLocation();
     const { isLogin, userName, clearLoginStatus } = useLogin();
 
-    useEffect(() => {
-        let newPath: string = "home";
-        if (location.pathname === "/") {
-            newPath = "home";
-        } else if (location.pathname.startsWith("/document")) {
-            newPath = "document";
-        } else if (location.pathname.startsWith("/project")) {
-            newPath = "project";
-        } else if (location.pathname.startsWith("/code")) {
-            newPath = "code";
+    // 计算当前激活的菜单项，而不是使用状态
+    const getCurrentKey = (pathname: string): string => {
+        if (pathname === "/") {
+            return "home";
+        } else if (pathname.startsWith("/document")) {
+            return "document";
+        } else if (pathname.startsWith("/project")) {
+            return "project";
+        } else if (pathname.startsWith("/code")) {
+            return "code";
         }
-        
-        // 只有当 newPath 与 current 不同时才更新状态
-        if (current !== newPath) {
-            setCurrent(newPath);
-        }
-    }, [location.pathname, current]);
+        return "home";
+    };
 
+    // 直接从当前路径计算当前选中的key
+    const current = getCurrentKey(location.pathname);
     const unLoginContent = (
         <div className="flex justify-center items-center">
             <Link to={"/login"}>
@@ -129,8 +126,7 @@ const Header_components: FC = () => {
                 {/* 导航栏 */}
                 <div className="hidden md:block flex-1 ">
                     <Menu
-                        onClick={(e) => {
-                            setCurrent(e.key);
+                        onClick={() => {
                             closeMobileMenu();
                         }}
                         selectedKeys={[current]}
@@ -198,8 +194,7 @@ const Header_components: FC = () => {
                         )}
                     </div>
                     <Menu
-                        onClick={(e) => {
-                            setCurrent(e.key);
+                        onClick={() => {
                             closeMobileMenu();
                         }}
                         selectedKeys={[current]}
@@ -214,3 +209,5 @@ const Header_components: FC = () => {
 };
 
 export default Header_components;
+
+

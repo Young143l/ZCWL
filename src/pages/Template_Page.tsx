@@ -1,4 +1,4 @@
-import { Layout, Divider } from "antd";
+import { Layout } from "antd";
 import type { FC, ReactNode } from "react";
 
 const { Content, Sider } = Layout;
@@ -12,7 +12,7 @@ const Template_Page: FC<TemplateNoSiderProps> = ({ children, sider }) => {
         <div className="w-full bg-white rounded-xl overflow-hidden p-2">
             <Layout>
                 {sider ? (
-                    <Sider className="hidden md:block">{sider}</Sider>
+                    <Sider className="hidden md:block" >{sider}</Sider>
                 ) : (
                     <></>
                 )}

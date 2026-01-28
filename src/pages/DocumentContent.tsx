@@ -11,6 +11,8 @@ import {
 } from "../api/Doc_api";
 import DocBreadcrumb_components from "../components/DocBreadcrumb_components";
 type MenuItem = Required<MenuProps>["items"][number];
+import "github-markdown-css/github-markdown.css";
+import remarkGfm from "remark-gfm";
 
 const DocumentContent: FC = () => {
     const { d_id, c_id } = useParams();
@@ -57,7 +59,11 @@ const DocumentContent: FC = () => {
                     // <div
                     //     className="h-[calc(100vh-95px)] overflow-y-auto p-5 border border-gray-200 rounded-md bg-gray-50"
                     // >
-                        <ReactMarkdown>{docContent?.content}</ReactMarkdown>
+                    <div className="markdown-body p-3">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {docContent?.content}
+                        </ReactMarkdown>
+                    </div>
                     // </div>
                 }
                 sider={
