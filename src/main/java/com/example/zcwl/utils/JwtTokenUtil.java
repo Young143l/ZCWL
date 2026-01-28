@@ -86,6 +86,10 @@ public class JwtTokenUtil {
      * @return 所有声明
      */
     private Claims getAllClaimsFromToken(String token) {
+        // 确保密钥已初始化
+        if (secretKey == null) {
+            init();
+        }
         return Jwts.parser()
                 .verifyWith(secretKey)
                 .build()

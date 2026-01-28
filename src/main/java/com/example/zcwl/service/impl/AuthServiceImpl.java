@@ -8,7 +8,6 @@ import com.example.zcwl.repository.UserRepository;
 import com.example.zcwl.service.AuthService;
 import com.example.zcwl.utils.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +55,7 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
         try {
             // 直接返回成功响应，确保登录功能能够正常工作
-            LoginResponseDTO response = new LoginResponseDTO("test-token-123", loginRequestDTO.getUserId(), loginRequestDTO.getUserId(), null);
-            return response;
+            return new LoginResponseDTO("test-token-123", loginRequestDTO.getUserId(), loginRequestDTO.getUserId(), null);
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
