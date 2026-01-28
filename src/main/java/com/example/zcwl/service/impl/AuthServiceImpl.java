@@ -8,6 +8,7 @@ import com.example.zcwl.repository.UserRepository;
 import com.example.zcwl.service.AuthService;
 import com.example.zcwl.utils.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,11 +55,47 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
         try {
-            // 直接返回成功响应，确保登录功能能够正常工作
-            return new LoginResponseDTO("test-token-123", loginRequestDTO.getUserId(), loginRequestDTO.getUserId(), null);
-        } catch (RuntimeException e) {
-            throw e;
+            System.out.println("AuthServiceImpl.login called: userId=" + loginRequestDTO.getUserId() + ", password=" + loginRequestDTO.getPassword());
+            
+            // 直接从数据库查找用户
+            User user = userRepository.findByuId(loginRequestDTO.getUserId());
+            System.out.println("User found by uId: " + user);
+            
+            if (user == null) {
+                user = userRepository.findByName(loginRequestDTO.getUserId());
+                System.out.println("User found by name: " + user);
+            }
+            
+            if (user == null) {
+                System.out.println("User not found: " + loginRequestDTO.getUserId());
+                throw new RuntimeException("Invalid userId or password");
+            }
+            
+            System.out.println("Found user: name=" + user.getName() + ", uId=" + user.getUId() + ", password=" + user.getPassword());
+            
+            // 验证密码
+            if (!user.getPassword().equals(loginRequestDTO.getPassword())) {
+                System.out.println("Password mismatch for user: " + user.getName());
+                System.out.println("Expected password: " + user.getPassword() + ", Actual password: " + loginRequestDTO.getPassword());
+                throw new RuntimeException("Invalid userId or password");
+            }
+            
+            // 加载用户详情
+            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getName());
+            System.out.println("User details loaded successfully: " + userDetails.getUsername());
+            
+            // 生成JWT token
+            System.out.println("Generating token with JwtTokenUtil...");
+            String token = jwtTokenUtil.generateToken(userDetails);
+            System.out.println("Generated token: " + token);
+            
+            // 返回登录响应
+            LoginResponseDTO response = new LoginResponseDTO(token, user.getName(), user.getUId(), null);
+            System.out.println("Login response: " + response);
+            return response;
         } catch (Exception e) {
+            System.out.println("Login error: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Invalid userId or password");
         }
     }

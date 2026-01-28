@@ -96,13 +96,17 @@ public class UserController {
             // @RequestBody：Spring注解，用于将HTTP请求体转换为Java对象
             // 作用：自动将前端发送的JSON数据转换为LoginRequestDTO对象
             @RequestBody LoginRequestDTO loginRequestDTO) {
+        System.out.println("Login request received: userId=" + loginRequestDTO.getUserId() + ", password=" + loginRequestDTO.getPassword());
         try {
+            System.out.println("Calling authService.login()");
             // 调用服务层的方法进行登录
             LoginResponseDTO loginResponseDTO = authService.login(loginRequestDTO);
-            
+            System.out.println("Login successful, returning response");
             // 登录成功，返回用户信息和token
             return ResponseEntity.ok(loginResponseDTO);
         } catch (Exception e) {
+            System.out.println("Login failed: " + e.getMessage());
+            e.printStackTrace();
             // 登录失败，返回401状态码和空对象
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new java.util.HashMap<>());
         }

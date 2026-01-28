@@ -127,6 +127,11 @@ public class JwtTokenUtil {
         final Date createdDate = new Date();
         final Date expirationDate = new Date(createdDate.getTime() + expireTime);
 
+        // 确保密钥已初始化
+        if (secretKey == null) {
+            init();
+        }
+
         return Jwts.builder()
                 .claims(claims)
                 .subject(subject)
