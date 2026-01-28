@@ -1,6 +1,9 @@
 package com.example.zcwl.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
@@ -9,6 +12,8 @@ import java.util.Objects;
  * 文档标签关联实体类
  * 映射到数据库的doc_tags表，存储文档与标签的多对多关联关系
  */
+@Setter
+@Getter
 @Entity  // 声明这是一个JPA实体类，用于映射数据库表
 @Table(name = "doc_tags")  // 指定映射的数据库表名
 public class DocTags implements Serializable {  // 实现Serializable接口，支持序列化
@@ -19,6 +24,11 @@ public class DocTags implements Serializable {  // 实现Serializable接口，�
     /**
      * 复合主键
      * 使用嵌入式主键类DocTagsId
+     * -- GETTER --
+     *  获取复合主键
+     * -- SETTER --
+     *  设置复合主键
+     *
      */
     @EmbeddedId  // 声明使用嵌入式主键
     private DocTagsId id;
@@ -26,6 +36,11 @@ public class DocTags implements Serializable {  // 实现Serializable接口，�
     /**
      * 关联的文档
      * 多对一关系，使用懒加载，关联到Doc实体
+     * -- GETTER --
+     *  获取关联的文档
+     * -- SETTER --
+     *  设置关联的文档
+     *
      */
     @ManyToOne(fetch = FetchType.LAZY)  // 声明多对一关系，使用懒加载
     @MapsId("docId")  // 映射嵌入式主键中的docId字段
@@ -35,59 +50,16 @@ public class DocTags implements Serializable {  // 实现Serializable接口，�
     /**
      * 关联的标签
      * 多对一关系，使用懒加载，关联到Tags实体
+     * -- GETTER --
+     *  获取关联的标签
+     * -- SETTER --
+     *  设置关联的标签
+     *
      */
     @ManyToOne(fetch = FetchType.LAZY)  // 声明多对一关系，使用懒加载
     @MapsId("tId")  // 映射嵌入式主键中的tId字段
     @JoinColumn(name = "t_id", referencedColumnName = "t_id", nullable = false, foreignKey = @ForeignKey(name = "doc_tags_t_id_fkey", foreignKeyDefinition = "FOREIGN KEY (t_id) REFERENCES tags(t_id) ON DELETE CASCADE"))  // 指定外键关联，添加ON DELETE CASCADE
     private Tags tags;
-
-    /**
-     * 获取复合主键
-     * @return 复合主键对象
-     */
-    public DocTagsId getId() {
-        return id;
-    }
-
-    /**
-     * 设置复合主键
-     * @param id 复合主键对象
-     */
-    public void setId(DocTagsId id) {
-        this.id = id;
-    }
-
-    /**
-     * 获取关联的文档
-     * @return 文档对象
-     */
-    public Doc getDoc() {
-        return doc;
-    }
-
-    /**
-     * 设置关联的文档
-     * @param doc 文档对象
-     */
-    public void setDoc(Doc doc) {
-        this.doc = doc;
-    }
-
-    /**
-     * 获取关联的标签
-     * @return 标签对象
-     */
-    public Tags getTags() {
-        return tags;
-    }
-
-    /**
-     * 设置关联的标签
-     * @param tags 标签对象
-     */
-    public void setTags(Tags tags) {
-        this.tags = tags;
-    }
 
     /**
      * 嵌入式主键类
@@ -102,7 +74,14 @@ public class DocTags implements Serializable {  // 实现Serializable接口，�
         /**
          * 文档ID
          * 作为复合主键的一部分，关联到doc表的doc_id字段
+         * -- GETTER --
+         *  获取文档ID
+         * -- SETTER --
+         *  设置文档ID
+         *
          */
+        @Setter
+        @Getter
         @Column(name = "doc_id", nullable = false)  // 映射到数据库的doc_id列，非空约束
         private Integer docId;
 
@@ -129,22 +108,6 @@ public class DocTags implements Serializable {  // 实现Serializable接口，�
         public DocTagsId(Integer docId, Integer tId) {
             this.docId = docId;
             this.tId = tId;
-        }
-
-        /**
-         * 获取文档ID
-         * @return 文档ID
-         */
-        public Integer getDocId() {
-            return docId;
-        }
-
-        /**
-         * 设置文档ID
-         * @param docId 文档ID
-         */
-        public void setDocId(Integer docId) {
-            this.docId = docId;
         }
 
         /**

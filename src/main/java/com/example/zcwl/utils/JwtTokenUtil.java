@@ -2,13 +2,12 @@ package com.example.zcwl.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,19 +21,33 @@ import java.util.function.Function;
 public class JwtTokenUtil {
 
     // 密钥，用于签名和验证token
-    // 使用Keys.secretKeyFor()生成安全的密钥，避免硬编码
-    private final Key secretKey;
+    private SecretKey secretKey;
 
     // token过期时间（毫秒）
     @Value("${jwt.expire-time:86400000}")
     private long expireTime;
 
+    // 从配置文件读取密钥
+    @Value("${jwt.secret-key:your-secret-key-for-jwt-token-generation-and-validation}")
+    private String jwtSecretKey;
+
     /**
      * 构造函数
      */
     public JwtTokenUtil() {
-        // 生成安全的密钥
-        this.secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        // 构造函数为空，密钥初始化在@PostConstruct中执行
+    }
+
+    /**
+     * 在依赖注入完成后初始化密钥
+     * 使用@PostConstruct确保@Value注解的值已经注入
+     */
+    @javax.annotation.PostConstruct
+    public void init() {
+        // 从配置文件读取密钥，配置文件中已使用环境变量占位符
+        // 这样Spring Boot会自动从环境变量中读取值，环境变量不存在时使用默认值
+        byte[] keyBytes = this.jwtSecretKey.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
     /**
@@ -73,7 +86,11 @@ public class JwtTokenUtil {
      * @return 所有声明
      */
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     /**
@@ -81,7 +98,7 @@ public class JwtTokenUtil {
      * @param token JWT token
      * @return 是否过期
      */
-    private Boolean isTokenExpired(String token) {
+    private boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
     }
@@ -107,10 +124,10 @@ public class JwtTokenUtil {
         final Date expirationDate = new Date(createdDate.getTime() + expireTime);
 
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(createdDate)
-                .setExpiration(expirationDate)
+                .claims(claims)
+                .subject(subject)
+                .issuedAt(createdDate)
+                .expiration(expirationDate)
                 .signWith(secretKey)
                 .compact();
     }
@@ -121,7 +138,7 @@ public class JwtTokenUtil {
      * @param userDetails 用户详情
      * @return 是否有效
      */
-    public Boolean validateToken(String token, UserDetails userDetails) {
+    public boolean validateToken(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
@@ -131,10 +148,10 @@ public class JwtTokenUtil {
      * @param token JWT token
      * @return 是否有效
      */
-    public Boolean validateToken(String token) {
+    public boolean validateToken(String token) {
         try {
             // 解析token并获取声明
-            Claims claims = getAllClaimsFromToken(token);
+            getAllClaimsFromToken(token);
             // 检查token是否过期
             return !isTokenExpired(token);
         } catch (Exception e) {

@@ -10,7 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,6 +35,7 @@ import java.util.Optional;
 // 例如：http://localhost:8080/api/dialogs
 @RequestMapping("/api/dialogs")
 
+@org.springframework.validation.annotation.Validated
 
 public class DialogController {
 
@@ -76,18 +78,17 @@ public class DialogController {
     // @PostMapping：Spring注解，处理POST请求
     // 作用：当前端发送POST请求到/api/dialogs时，会调用这个方法
     @PostMapping
-    
-    
-    
+
     // ResponseEntity：Spring用于封装HTTP响应的对象
     // 可以包含响应体、HTTP状态码、响应头等信息
     public ResponseEntity<Dialog> createDialog(
             // @Valid：JSR-303校验注解，用于验证请求体数据的合法性
             // 作用：如果dialog对象不符合验证规则（例如必填字段为空），会自动返回400错误
-            @Valid 
+            @Valid
             
             // @RequestBody：Spring注解，用于将HTTP请求体转换为Java对象
             // 作用：自动将前端发送的JSON数据转换为Dialog对象
+            @NotNull(message = "对话数据不能为空")
             @RequestBody Dialog dialog) {
         
         // 调用服务层的方法创建对话记录
@@ -118,6 +119,7 @@ public class DialogController {
     public ResponseEntity<Dialog> getDialogById(
             // @PathVariable：Spring注解，用于从URL路径中获取参数
             // 作用：将URL中的{id}值绑定到方法的id参数上
+            @NotNull(message = "对话ID不能为空")
             @PathVariable Integer id) {
         
         // 调用服务层方法，根据对话ID查询对话记录
@@ -156,6 +158,7 @@ public class DialogController {
 
     public ResponseEntity<List<Dialog>> getDialogsByUserId(
             // @PathVariable：从URL路径中获取用户ID
+            @NotNull(message = "用户ID不能为空")
             @PathVariable String userId) {
         
         // 调用服务层方法，根据用户ID查询所有对话记录
@@ -187,6 +190,7 @@ public class DialogController {
     public ResponseEntity<Page<Dialog>> getAllDialogs(
             // Pageable：Spring Data JPA提供的分页参数类
             // 作用：自动从请求参数中解析出分页信息（page, size, sort）
+            @NotNull(message = "分页参数不能为空")
             Pageable pageable) {
         
         // 调用服务层方法，获取所有对话记录（分页）
@@ -220,9 +224,11 @@ public class DialogController {
 
     public ResponseEntity<Dialog> updateDialog(
             // @PathVariable：从URL路径中获取对话ID
+            @NotNull(message = "对话ID不能为空")
             @PathVariable Integer id, 
             // @Valid：验证请求体数据的合法性
             // @RequestBody：将请求体JSON转换为Dialog对象
+            @NotNull(message = "更新数据不能为空")
             @Valid @RequestBody Dialog dialog) {
         
         // 调用服务层方法，更新对话记录
@@ -250,6 +256,7 @@ public class DialogController {
 
     public ResponseEntity<Void> deleteDialog(
             // @PathVariable：从URL路径中获取对话ID
+            @NotNull(message = "对话ID不能为空")
             @PathVariable Integer id) {
         
         // 调用服务层方法，删除对话记录

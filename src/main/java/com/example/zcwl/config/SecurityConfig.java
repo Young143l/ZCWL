@@ -10,6 +10,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -19,6 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.http.HttpMethod;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Spring Security配置类
@@ -48,8 +50,7 @@ public class SecurityConfig {
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
         authProvider.setPasswordEncoder(plainTextPasswordEncoder());
         return authProvider;
     }
@@ -58,41 +59,55 @@ public class SecurityConfig {
      * 配置HTTP安全规则
      * @param http HTTP安全
      * @return 安全过滤器链
-     * @throws Exception 异常
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 // 禁用CSRF保护
-                .csrf().disable()
+                .csrf(AbstractHttpConfigurer::disable)
                 // 启用CORS
-                .cors().and()
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 // 配置授权规则
-                .authorizeHttpRequests()
-                // 允许所有用户访问的路径
-                .antMatchers("/").permitAll()
-                .antMatchers("/validate-token").permitAll()
-                .antMatchers("/register").permitAll()
-                .antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/users/login").permitAll()
-                .antMatchers(HttpMethod.POST, "/users").permitAll()
-                // GET /users/:id 需要认证
-                // DELETE /users/** 需要认证
-                .antMatchers("/doc/**").permitAll()
-                .antMatchers("/api/doc-contents/**").permitAll()
-                // 允许Swagger相关路径
-                .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
-                // 其他路径需要认证
-                .anyRequest().authenticated()
-                .and()
+                .authorizeHttpRequests(auth -> auth
+                        // 允许所有用户访问的路径
+                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/validate-token").permitAll()
+                        .requestMatchers("/register").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/users/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        // GET /users/:id 需要认证
+                        // DELETE /users/** 需要认证
+                        .requestMatchers("/doc/**").permitAll()
+                        .requestMatchers("/api/doc-contents/**").permitAll()
+                        // 允许测试路径
+                        .requestMatchers("/test").permitAll()
+                        // 允许简单测试路径
+                        .requestMatchers("/simple-test/**").permitAll()
+                        // 允许无依赖测试路径
+                        .requestMatchers("/test-no-dep/**").permitAll()
+                        // 允许AI聊天路径
+                        .requestMatchers("/ai/**").permitAll()
+                        // 允许AI聊天文档路径
+                        .requestMatchers("/aichatdoc/**").permitAll()
+                        // 允许API AI聊天文档路径
+                        .requestMatchers("/api/aichatdoc/**").permitAll()
+                        // 允许新AI测试路径
+                        .requestMatchers("/new-ai/**").permitAll()
+                        // 允许测试AI聊天文档路径
+                        .requestMatchers("/test-aichatdoc/**").permitAll()
+                        // 允许新AI聊天文档路径
+                        .requestMatchers("/new-aichatdoc/**").permitAll()
+                        // 允许Swagger相关路径
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
+                        // 其他路径需要认证
+                        .anyRequest().authenticated())
                 // 配置会话管理策略为无状态
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 配置认证提供者
-                .and()
-                .authenticationProvider(authenticationProvider());
-
-        // 添加JWT认证过滤器
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .authenticationProvider(authenticationProvider())
+                // 添加JWT认证过滤器
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -111,7 +126,7 @@ public class SecurityConfig {
         // 允许的HTTP头
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
         // 允许暴露的HTTP头
-        configuration.setExposedHeaders(Arrays.asList("Content-Length"));
+        configuration.setExposedHeaders(List.of("Content-Length"));
         // 允许携带凭证
         configuration.setAllowCredentials(true);
         
@@ -148,10 +163,9 @@ public class SecurityConfig {
      * 认证管理器
      * @param config 认证配置
      * @return 认证管理器
-     * @throws Exception 异常
      */
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
         return config.getAuthenticationManager();
     }
 }

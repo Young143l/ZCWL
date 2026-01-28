@@ -201,7 +201,7 @@ public class UserServiceImpl implements UserService {
         if (!password.matches(".*\\d.*")) {
             throw new RuntimeException("密码必须包含至少一个数字");
         }
-        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\|,.<>/?].*")) {
+        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"|,.<>/?].*")) {
             throw new RuntimeException("密码必须包含至少一个特殊字符");
         }
     }

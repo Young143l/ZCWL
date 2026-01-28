@@ -1,7 +1,10 @@
 package com.example.zcwl.entity;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
@@ -10,6 +13,8 @@ import java.util.Objects;
  * 文档内容实体类
  * 映射到数据库的doc_contents表，存储文档的章节内容
  */
+@Setter
+@Getter
 @Entity  // 声明这是一个JPA实体类，用于映射数据库表
 @Table(name = "doc_contents")  // 指定映射的数据库表名
 public class DocContents implements Serializable {  // 实现Serializable接口，支持序列化
@@ -20,6 +25,11 @@ public class DocContents implements Serializable {  // 实现Serializable接口�
     /**
      * 复合主键
      * 使用嵌入式主键类DocContentsId
+     * -- GETTER --
+     *  获取复合主键
+     * -- SETTER --
+     *  设置复合主键
+     *
      */
     @EmbeddedId  // 声明使用嵌入式主键
     private DocContentsId id;
@@ -27,6 +37,11 @@ public class DocContents implements Serializable {  // 实现Serializable接口�
     /**
      * 章节名称
      * 长度20个字符，非空，使用@NotBlank进行数据校验
+     * -- GETTER --
+     *  获取章节名称
+     * -- SETTER --
+     *  设置章节名称
+     *
      */
     @NotBlank(message = "章节名称不能为空")  // 数据校验，确保章节名称不为空
     @Column(name = "name", length = 20, nullable = false)  // 映射到数据库的name列，指定长度和非空约束
@@ -35,14 +50,24 @@ public class DocContents implements Serializable {  // 实现Serializable接口�
     /**
      * 章节内容
      * 非空，使用@NotBlank进行数据校验
+     * -- GETTER --
+     *  获取章节内容
+     * -- SETTER --
+     *  设置章节内容
+     *
      */
     @NotBlank(message = "章节内容不能为空")  // 数据校验，确保章节内容不为空
-    @Column(name = "content", nullable = false)  // 映射到数据库的content列，非空约束
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")  // 映射到数据库的content列，使用TEXT类型支持长文本，非空约束
     private String content;
 
     /**
      * 关联的文档
      * 多对一关系，使用懒加载，关联到Doc实体
+     * -- GETTER --
+     *  获取关联的文档
+     * -- SETTER --
+     *  设置关联的文档
+     *
      */
     @ManyToOne(fetch = FetchType.LAZY)  // 声明多对一关系，使用懒加载
     @MapsId("docId")  // 映射嵌入式主键中的docId字段
@@ -50,73 +75,11 @@ public class DocContents implements Serializable {  // 实现Serializable接口�
     private Doc doc;
 
     /**
-     * 获取复合主键
-     * @return 复合主键对象
-     */
-    public DocContentsId getId() {
-        return id;
-    }
-
-    /**
-     * 设置复合主键
-     * @param id 复合主键对象
-     */
-    public void setId(DocContentsId id) {
-        this.id = id;
-    }
-
-    /**
-     * 获取章节名称
-     * @return 章节名称
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * 设置章节名称
-     * @param name 章节名称
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * 获取章节内容
-     * @return 章节内容
-     */
-    public String getContent() {
-        return content;
-    }
-
-    /**
-     * 设置章节内容
-     * @param content 章节内容
-     */
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    /**
-     * 获取关联的文档
-     * @return 文档对象
-     */
-    public Doc getDoc() {
-        return doc;
-    }
-
-    /**
-     * 设置关联的文档
-     * @param doc 文档对象
-     */
-    public void setDoc(Doc doc) {
-        this.doc = doc;
-    }
-
-    /**
      * 嵌入式主键类
      * 用于DocContents实体的复合主键
      */
+    @Setter
+    @Getter
     @Embeddable  // 声明这是一个嵌入式主键类
     public static class DocContentsId implements Serializable {
 
@@ -126,6 +89,11 @@ public class DocContents implements Serializable {  // 实现Serializable接口�
         /**
          * 文档ID
          * 作为复合主键的一部分，关联到doc表的doc_id字段
+         * -- GETTER --
+         *  获取文档ID
+         * -- SETTER --
+         *  设置文档ID
+         *
          */
         @Column(name = "doc_id", nullable = false)  // 映射到数据库的doc_id列，非空约束
         private Integer docId;
@@ -133,6 +101,11 @@ public class DocContents implements Serializable {  // 实现Serializable接口�
         /**
          * 章节ID
          * 作为复合主键的一部分，存储章节编号
+         * -- GETTER --
+         *  获取章节ID
+         * -- SETTER --
+         *  设置章节ID
+         *
          */
         @Column(name = "chapter_id", nullable = false)  // 映射到数据库的chapter_id列，非空约束
         private Integer chapterId;
@@ -152,38 +125,6 @@ public class DocContents implements Serializable {  // 实现Serializable接口�
          */
         public DocContentsId(Integer docId, Integer chapterId) {
             this.docId = docId;
-            this.chapterId = chapterId;
-        }
-
-        /**
-         * 获取文档ID
-         * @return 文档ID
-         */
-        public Integer getDocId() {
-            return docId;
-        }
-
-        /**
-         * 设置文档ID
-         * @param docId 文档ID
-         */
-        public void setDocId(Integer docId) {
-            this.docId = docId;
-        }
-
-        /**
-         * 获取章节ID
-         * @return 章节ID
-         */
-        public Integer getChapterId() {
-            return chapterId;
-        }
-
-        /**
-         * 设置章节ID
-         * @param chapterId 章节ID
-         */
-        public void setChapterId(Integer chapterId) {
             this.chapterId = chapterId;
         }
 

@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,11 +30,11 @@ import java.util.Optional;
 @RestController
 
 // @RequestMapping：设置这个控制器处理的基础URL路径
-// 作用：所有该控制器下的API接口都会以/api/que-ans开头
-// 例如：http://localhost:8080/api/que-ans
-@RequestMapping("/api/que-ans")
+// 作用：所有该控制器下的API接口都会以/que-ans开头
+// 例如：http://localhost:8080/que-ans
+@RequestMapping("/que-ans")
 
-
+@org.springframework.validation.annotation.Validated
 public class QueAnsController {
 
     // 注入问答服务对象，用于调用业务逻辑
@@ -59,7 +59,7 @@ public class QueAnsController {
      * <p>
      * 前端调用方式：
      * - 请求类型：POST
-     * - 请求URL：http://localhost:8080/api/que-ans
+     * - 请求URL：http://localhost:8080/que-ans
      * - 请求体：JSON格式的问答数据，例如：
      *   {
      *     "id": {
@@ -105,8 +105,8 @@ public class QueAnsController {
      * <p>
      * 前端调用方式：
      * - 请求类型：GET
-     * - 请求URL：http://localhost:8080/api/que-ans/{dialogId}/{times}
-     *   例如：http://localhost:8080/api/que-ans/1/2
+     * - 请求URL：http://localhost:8080/que-ans/{dialogId}/{times}
+     *   例如：http://localhost:8080/que-ans/1/2
      * - 响应：找到数据返回问答数据和200状态码；找不到返回404状态码
      *
      * @param dialogId 对话ID，从URL路径中获取
@@ -149,8 +149,8 @@ public class QueAnsController {
      * <p>
      * 前端调用方式：
      * - 请求类型：GET
-     * - 请求URL：http://localhost:8080/api/que-ans/dialog/{dialogId}
-     *   例如：http://localhost:8080/api/que-ans/dialog/1
+     * - 请求URL：http://localhost:8080/que-ans/dialog/{dialogId}
+     *   例如：http://localhost:8080/que-ans/dialog/1
      * - 响应：返回该对话下的所有问答数据列表和200状态码
      *
      * @param dialogId 对话ID，从URL路径中获取
@@ -173,7 +173,7 @@ public class QueAnsController {
      * <p>
      * 前端调用方式：
      * - 请求类型：GET
-     * - 请求URL：http://localhost:8080/api/que-ans?page=0&size=10&sort=id.dId,asc
+     * - 请求URL：http://localhost:8080/que-ans?page=0&size=10&sort=id.dId,asc
      *   参数说明：
      *   - page：页码，从0开始
      *   - size：每页显示的记录数
@@ -202,8 +202,8 @@ public class QueAnsController {
      * <p>
      * 前端调用方式：
      * - 请求类型：PUT
-     * - 请求URL：http://localhost:8080/api/que-ans/{dialogId}/{times}
-     *   例如：http://localhost:8080/api/que-ans/1/2
+     * - 请求URL：http://localhost:8080/que-ans/{dialogId}/{times}
+     *   例如：http://localhost:8080/que-ans/1/2
      * - 请求体：JSON格式的更新数据，例如：
      *   {
      *     "que": "更新后的问题？",
@@ -240,8 +240,8 @@ public class QueAnsController {
      * <p>
      * 前端调用方式：
      * - 请求类型：DELETE
-     * - 请求URL：http://localhost:8080/api/que-ans/{dialogId}/{times}
-     *   例如：http://localhost:8080/api/que-ans/1/2
+     * - 请求URL：http://localhost:8080/que-ans/{dialogId}/{times}
+     *   例如：http://localhost:8080/que-ans/1/2
      * - 响应：删除成功返回204状态码（表示无内容）；找不到数据返回404状态码
      *
      * @param dialogId 对话ID，从URL路径中获取

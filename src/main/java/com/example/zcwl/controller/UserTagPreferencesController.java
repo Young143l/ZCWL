@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +34,7 @@ import java.util.Optional;
 // 例如：http://localhost:8080/api/user-tag-preferences
 @RequestMapping("/api/user-tag-preferences")
 
-
+@org.springframework.validation.annotation.Validated
 public class UserTagPreferencesController {
 
     // 注入用户标签偏好服务对象，用于调用业务逻辑

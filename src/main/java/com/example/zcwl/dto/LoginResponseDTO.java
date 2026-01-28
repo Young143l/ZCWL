@@ -1,5 +1,8 @@
 package com.example.zcwl.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -7,6 +10,8 @@ import java.io.Serializable;
  * 登录响应数据传输对象
  * 用于返回登录成功后的信息，包括username、userId和token
  */
+@Setter
+@Getter
 public class LoginResponseDTO implements Serializable {
 
     @Serial
@@ -14,18 +19,43 @@ public class LoginResponseDTO implements Serializable {
 
     /**
      * JWT token
+     * -- GETTER --
+     *  获取token
+     * -- SETTER --
+     *  设置token
+     *
      */
     private String token;
 
     /**
      * 用户名
+     * -- GETTER --
+     *  获取用户名
+     * -- SETTER --
+     *  设置用户名
+     *
      */
     private String userName;
 
     /**
      * 用户ID
+     * -- GETTER --
+     *  获取用户ID
+     * -- SETTER --
+     *  设置用户ID
+     *
      */
     private String userId;
+
+    /**
+     * 头像
+     * -- GETTER --
+     *  获取头像
+     * -- SETTER --
+     *  设置头像
+     *
+     */
+    private String avatar;
 
     /**
      * 构造函数
@@ -40,50 +70,17 @@ public class LoginResponseDTO implements Serializable {
     }
 
     /**
-     * 获取token
-     * @return JWT token
-     */
-    public String getToken() {
-        return token;
-    }
-
-    /**
-     * 设置token
+     * 构造函数
      * @param token JWT token
-     */
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    /**
-     * 获取用户名
-     * @return 用户名
-     */
-    public String getUserName() {
-        return userName;
-    }
-
-    /**
-     * 设置用户名
      * @param userName 用户名
-     */
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    /**
-     * 获取用户ID
-     * @return 用户ID
-     */
-    public String getUserId() {
-        return userId;
-    }
-
-    /**
-     * 设置用户ID
      * @param userId 用户ID
+     * @param avatar 头像
      */
-    public void setUserId(String userId) {
+    public LoginResponseDTO(String token, String userName, String userId, String avatar) {
+        this.token = token;
+        this.userName = userName;
         this.userId = userId;
+        this.avatar = avatar;
     }
+
 }

@@ -1,7 +1,10 @@
 package com.example.zcwl.entity;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -28,7 +31,14 @@ public class Tags implements Serializable {  // 实现Serializable接口，支�
     /**
      * 标签名称
      * 长度20个字符，非空，唯一，使用@NotBlank进行数据校验
+     * -- GETTER --
+     *  获取标签名称
+     * -- SETTER --
+     *  设置标签名称
+     *
      */
+    @Setter
+    @Getter
     @NotBlank(message = "标签名称不能为空")  // 数据校验，确保标签名称不为空
     @Column(name = "name", length = 20, nullable = false, unique = true)  // 映射到数据库的name列，指定长度、非空约束和唯一约束
     private String name;
@@ -48,22 +58,6 @@ public class Tags implements Serializable {  // 实现Serializable接口，支�
      */
     public void settId(Integer tId) {
         this.tId = tId;
-    }
-
-    /**
-     * 获取标签名称
-     * @return 标签名称
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * 设置标签名称
-     * @param name 标签名称
-     */
-    public void setName(String name) {
-        this.name = name;
     }
 
 }

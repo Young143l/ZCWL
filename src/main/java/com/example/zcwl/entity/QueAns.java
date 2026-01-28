@@ -1,7 +1,10 @@
 package com.example.zcwl.entity;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -11,6 +14,8 @@ import java.util.Objects;
  * 问答实体类
  * 映射到数据库的que_ans表，存储问答记录
  */
+@Setter
+@Getter
 @Entity  // 声明这是一个JPA实体类，用于映射数据库表
 @Table(name = "que_ans")  // 指定映射的数据库表名
 public class QueAns implements Serializable {  // 实现Serializable接口，支持序列化
@@ -21,6 +26,11 @@ public class QueAns implements Serializable {  // 实现Serializable接口，支
     /**
      * 复合主键
      * 使用嵌入式主键类QueAnsId，包含对话ID和问答次数
+     * -- GETTER --
+     *  获取复合主键
+     * -- SETTER --
+     *  设置复合主键
+     *
      */
     @EmbeddedId  // 声明使用嵌入式主键
     private QueAnsId id;
@@ -28,6 +38,11 @@ public class QueAns implements Serializable {  // 实现Serializable接口，支
     /**
      * 问答时间
      * 数据库默认值为当前时间
+     * -- GETTER --
+     *  获取问答时间
+     * -- SETTER --
+     *  设置问答时间
+     *
      */
     @Column(name = "date", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     // @Column：指定数据库列名、非空约束和列定义
@@ -36,22 +51,37 @@ public class QueAns implements Serializable {  // 实现Serializable接口，支
     /**
      * 问题内容
      * 不能为空，使用@NotBlank进行数据校验
+     * -- GETTER --
+     *  获取问题内容
+     * -- SETTER --
+     *  设置问题内容
+     *
      */
     @NotBlank(message = "问题不能为空")  // 数据校验，确保问题内容不为空
-    @Column(name = "que", nullable = false)  // 映射到数据库的que列，非空约束
+    @Column(name = "que", nullable = false, columnDefinition = "TEXT")  // 映射到数据库的que列，使用TEXT类型支持长文本，非空约束
     private String que;
 
     /**
      * 回答内容
      * 不能为空，使用@NotBlank进行数据校验
+     * -- GETTER --
+     *  获取回答内容
+     * -- SETTER --
+     *  设置回答内容
+     *
      */
     @NotBlank(message = "回答不能为空")  // 数据校验，确保回答内容不为空
-    @Column(name = "ans", nullable = false)  // 映射到数据库的ans列，非空约束
+    @Column(name = "ans", nullable = false, columnDefinition = "TEXT")  // 映射到数据库的ans列，使用TEXT类型支持长文本，非空约束
     private String ans;
 
     /**
      * 关联的对话
      * 多对一关系，多个问答属于一个对话
+     * -- GETTER --
+     *  获取关联的对话
+     * -- SETTER --
+     *  设置关联的对话
+     *
      */
     @ManyToOne(fetch = FetchType.LAZY)  // 多对一关联，使用懒加载（LAZY）提高性能
     @MapsId("dId")  // 映射主键中的dId字段到Dialog实体
@@ -60,85 +90,6 @@ public class QueAns implements Serializable {  // 实现Serializable接口，支
     private Dialog dialog;
 
     // getter和setter方法
-    /**
-     * 获取复合主键
-     * @return 复合主键对象
-     */
-    public QueAnsId getId() {
-        return id;
-    }
-
-    /**
-     * 设置复合主键
-     * @param id 复合主键对象
-     */
-    public void setId(QueAnsId id) {
-        this.id = id;
-    }
-
-    /**
-     * 获取问答时间
-     * @return 问答时间
-     */
-    public LocalDateTime getDate() {
-        return date;
-    }
-
-    /**
-     * 设置问答时间
-     * @param date 问答时间
-     */
-    public void setDate(LocalDateTime date) {
-        this.date = date;
-    }
-
-    /**
-     * 获取问题内容
-     * @return 问题内容
-     */
-    public String getQue() {
-        return que;
-    }
-
-    /**
-     * 设置问题内容
-     * @param que 问题内容
-     */
-    public void setQue(String que) {
-        this.que = que;
-    }
-
-    /**
-     * 获取回答内容
-     * @return 回答内容
-     */
-    public String getAns() {
-        return ans;
-    }
-
-    /**
-     * 设置回答内容
-     * @param ans 回答内容
-     */
-    public void setAns(String ans) {
-        this.ans = ans;
-    }
-
-    /**
-     * 获取关联的对话
-     * @return 对话实体
-     */
-    public Dialog getDialog() {
-        return dialog;
-    }
-
-    /**
-     * 设置关联的对话
-     * @param dialog 对话实体
-     */
-    public void setDialog(Dialog dialog) {
-        this.dialog = dialog;
-    }
 
     /**
      * 嵌入式主键类
@@ -160,7 +111,14 @@ public class QueAns implements Serializable {  // 实现Serializable接口，支
         /**
          * 问答次数
          * 对应que_ans表的times列
+         * -- GETTER --
+         *  获取问答次数
+         * -- SETTER --
+         *  设置问答次数
+         *
          */
+        @Setter
+        @Getter
         @Column(name = "times", nullable = false)  // 映射到数据库的times列，非空约束
         private Integer times;
 
@@ -197,22 +155,6 @@ public class QueAns implements Serializable {  // 实现Serializable接口，支
          */
         public void setdId(Integer dId) {
             this.dId = dId;
-        }
-
-        /**
-         * 获取问答次数
-         * @return 问答次数
-         */
-        public Integer getTimes() {
-            return times;
-        }
-
-        /**
-         * 设置问答次数
-         * @param times 问答次数
-         */
-        public void setTimes(Integer times) {
-            this.times = times;
         }
 
         /**

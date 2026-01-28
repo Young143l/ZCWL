@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.Optional;
 
 /**
@@ -33,7 +33,7 @@ import java.util.Optional;
 // 例如：http://localhost:8080/api/tags
 @RequestMapping("/api/tags")
 
-
+@org.springframework.validation.annotation.Validated
 public class TagsController {
 
     // 注入标签服务对象，用于调用业务逻辑

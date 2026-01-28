@@ -12,9 +12,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.Optional;
 
 /**
@@ -168,6 +169,7 @@ public class UserController {
     // @GetMapping：Spring注解，处理GET请求
     // 作用：当前端发送GET请求到/users/{id}时，会调用这个方法
     // {id}是路径参数，用于传递用户ID
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
 
     public ResponseEntity<?> getUserById(
@@ -184,7 +186,7 @@ public class UserController {
             // 构建响应对象，包含name、avatar和email
             java.util.Map<String, Object> response = new java.util.HashMap<>();
             response.put("name", user.getName());
-            response.put("avatar", null); // User实体没有avatar字段
+            response.put("avatar", user.getAvatar());
             response.put("email", user.getEmail());
             return ResponseEntity.ok(response);
         })

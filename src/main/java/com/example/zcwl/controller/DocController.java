@@ -10,7 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -189,18 +192,8 @@ public class DocController {
             
             // 构建响应对象
             java.util.Map<String, Object> response = new java.util.HashMap<>();
-            java.util.List<java.util.Map<String, Object>> docList = new java.util.ArrayList<>();
-            
-            // 转换文档数据格式
-            for (Doc doc : docs) {
-                java.util.Map<String, Object> docItem = new java.util.HashMap<>();
-                docItem.put("id", doc.getDocId());
-                docItem.put("name", doc.getDocName());
-                docItem.put("summary", doc.getSummary());
-                docItem.put("img", doc.getIcon());
-                docList.add(docItem);
-            }
-            
+            List<Map<String, Object>> docList = getMaps(docs);
+
             response.put("docList", docList);
             
             // 返回文档列表和200状态码
@@ -209,6 +202,21 @@ public class DocController {
             // 失败时返回404状态码
             return ResponseEntity.notFound().build();
         }
+    }
+
+    private static List<Map<String, Object>> getMaps(List<Doc> docs) {
+        List<Map<String, Object>> docList = new java.util.ArrayList<>();
+
+        // 转换文档数据格式
+        for (Doc doc : docs) {
+            Map<String, Object> docItem = new java.util.HashMap<>();
+            docItem.put("id", doc.getDocId());
+            docItem.put("name", doc.getDocName());
+            docItem.put("summary", doc.getSummary());
+            docItem.put("img", doc.getIcon());
+            docList.add(docItem);
+        }
+        return docList;
     }
 
     /**

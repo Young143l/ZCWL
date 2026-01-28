@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +33,7 @@ import java.util.Optional;
 // 作用：所有该控制器下的API接口都会以/api/doc-tags开头
 // 例如：http://localhost:8080/api/doc-tags
 @RequestMapping("/api/doc-tags")
-
+@org.springframework.validation.annotation.Validated
 
 public class DocTagsController {
 

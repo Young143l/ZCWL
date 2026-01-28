@@ -1,6 +1,9 @@
 package com.example.zcwl.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -27,7 +30,14 @@ public class Dialog implements Serializable {  // 实现Serializable接口，支
     /**
      * 关联的用户
      * 多对一关系，使用懒加载，关联到User实体
+     * -- GETTER --
+     *  获取关联的用户
+     * -- SETTER --
+     *  设置关联的用户
+     *
      */
+    @Setter
+    @Getter
     @ManyToOne(fetch = FetchType.LAZY)  // 声明多对一关系，使用懒加载
     @JoinColumn(name = "u_id", referencedColumnName = "u_id", nullable = false, foreignKey = @ForeignKey(name = "dialog_u_id_fkey", foreignKeyDefinition = "FOREIGN KEY (u_id) REFERENCES users(u_id) ON DELETE CASCADE"))  // 指定外键关联，添加ON DELETE CASCADE
     private User user;
@@ -35,7 +45,14 @@ public class Dialog implements Serializable {  // 实现Serializable接口，支
     /**
      * 问答次数
      * 记录对话中的问答次数
+     * -- GETTER --
+     *  获取问答次数
+     * -- SETTER --
+     *  设置问答次数
+     *
      */
+    @Setter
+    @Getter
     @Column(name = "qa_times")  // 映射到数据库的qa_times列
     private Integer qaTimes;
 
@@ -43,7 +60,7 @@ public class Dialog implements Serializable {  // 实现Serializable接口，支
      * 对话摘要
      * 存储对话的简要描述
      */
-    @Column(name = "d_abstract")  // 映射到数据库的d_abstract列
+    @Column(name = "d_abstract", columnDefinition = "TEXT")  // 映射到数据库的d_abstract列，使用TEXT类型支持长文本
     private String dAbstract;
 
     /**
@@ -60,38 +77,6 @@ public class Dialog implements Serializable {  // 实现Serializable接口，支
      */
     public void setdId(Integer dId) {
         this.dId = dId;
-    }
-
-    /**
-     * 获取关联的用户
-     * @return 用户对象
-     */
-    public User getUser() {
-        return user;
-    }
-
-    /**
-     * 设置关联的用户
-     * @param user 用户对象
-     */
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    /**
-     * 获取问答次数
-     * @return 问答次数
-     */
-    public Integer getQaTimes() {
-        return qaTimes;
-    }
-
-    /**
-     * 设置问答次数
-     * @param qaTimes 问答次数
-     */
-    public void setQaTimes(Integer qaTimes) {
-        this.qaTimes = qaTimes;
     }
 
     /**
