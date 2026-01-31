@@ -16,7 +16,7 @@ const Template_Page: FC<TemplateNoSiderProps> = ({ children, sider }) => {
                 ) : (
                     <></>
                 )}
-                <Content className="bg-white">
+                <Content className=" bg-white">
                     <div className="min-h-[calc(100vh-95px)]">{children}</div>
                 </Content>
             </Layout>

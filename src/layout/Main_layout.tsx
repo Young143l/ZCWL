@@ -27,7 +27,14 @@ const Main_layout: FC = () => {
                     alt="Background"
                     className="fixed inset-0 w-full h-full object-fill z-0"
                 /> */}
-                <Header className="shadow-sm sticky top-0 z-2 flex justify-center backdrop-blur-sm">
+                <div
+                    className="fixed  inset-0 pointer-events-none"
+                    style={{
+                        backgroundImage: "linear-gradient(#e5e7eb 1px, transparent 1px),linear-gradient(90deg, #e5e7eb 1px, transparent 1px)",
+                        backgroundSize: "20px 20px",
+                    }}
+                ></div>
+                <Header className="border-b-2 border-gray-300 sticky top-0 z-2 flex justify-center backdrop-blur-sm">
                     <Header_components />
                 </Header>
                 <div className="w-full z-1">
@@ -38,9 +45,8 @@ const Main_layout: FC = () => {
                 <Footer className="z-1">
                     <Footer_components />
                 </Footer>
-                
             </Layout>
-            <FloatTools_components/>
+            <FloatTools_components />
         </ConfigProvider>
     );
 };

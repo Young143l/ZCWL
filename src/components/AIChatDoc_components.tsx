@@ -1,27 +1,32 @@
-import { Input, Button, Switch, ConfigProvider } from "antd";
+import { Input, Button, ConfigProvider } from "antd";
 import { useState, type FC, useEffect, useRef } from "react";
-import { SendOutlined, ClearOutlined,PlusCircleOutlined } from "@ant-design/icons";
+import {
+    SendOutlined,
+    ClearOutlined,
+    PlusCircleOutlined,
+} from "@ant-design/icons";
 const { TextArea } = Input;
 import AIChatBody_components from "./AIChatBody_components";
 import useAIChatDoc from "../status/AIChatDoc_status";
-import { getNewChat,getAsk } from "../api/AIChatDoc_api";
+import { getNewChat, getAsk } from "../api/AIChatDoc_api";
 import useLogin from "../status/Login_status";
 import { useNavigate } from "react-router-dom";
 
 const AIChatDoc_components: FC = () => {
     const [inputValue, setInputValue] = useState<string>("");
     const [asking, setAsking] = useState<boolean>(false);
-    const { setAns,have, chat, id, newChat, clear, addChat } = useAIChatDoc();
+    const { setAns, have, chat, id, newChat, clear, addChat } = useAIChatDoc();
     const { isLogin, token, userId } = useLogin();
     const nav = useNavigate();
     const chatContainerRef = useRef<HTMLDivElement>(null);
-    
+
     const scrollToBottom = () => {
         if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+            chatContainerRef.current.scrollTop =
+                chatContainerRef.current.scrollHeight;
         }
     };
-    
+
     useEffect(() => {
         scrollToBottom();
     }, [chat]);
@@ -32,7 +37,7 @@ const AIChatDoc_components: FC = () => {
             return;
         }
         setAsking(true);
-        
+
         let currentId = id;
         // 如果没有现有对话，先创建新对话
         if (!have) {
@@ -40,7 +45,6 @@ const AIChatDoc_components: FC = () => {
             if (res.ok) {
                 newChat(res.id);
                 currentId = res.id;
-                
             } else {
                 console.error("Failed to create new chat:", res.message);
                 setAsking(false);
@@ -50,19 +54,18 @@ const AIChatDoc_components: FC = () => {
         const ask = inputValue;
         setInputValue("");
         addChat({ id: "", ask: ask, over: false, ans: "" });
-        
+
         // 使用正确的对话ID发送消息
         const askRes = await getAsk(userId, currentId, inputValue, token);
-        if(askRes.ok) {
+        if (askRes.ok) {
             setAns(askRes.id, askRes.ans);
         }
         setAsking(false);
-        
     };
 
-    const newAsk=()=>{
+    const newAsk = () => {
         clear();
-    }
+    };
 
     return (
         <ConfigProvider
@@ -75,7 +78,10 @@ const AIChatDoc_components: FC = () => {
                 },
             }}
         >
-            <div ref={chatContainerRef} className="mb-2 p-2  min-h-75 max-h-75 rounded-[5px] border border-gray-300 overflow-auto">
+            <div
+                ref={chatContainerRef}
+                className="mb-2 p-2  min-h-75 max-h-75 rounded-[5px] border border-gray-300 overflow-auto"
+            >
                 {have ? (
                     chat.map((i) => (
                         <AIChatBody_components
@@ -86,25 +92,31 @@ const AIChatDoc_components: FC = () => {
                         />
                     ))
                 ) : (
-                    <></>
+                    <h1 className="mt-30 text-xl text-center font-bold text-gray-600">
+                        输入您的问题开始对话吧！
+                    </h1>
                 )}
             </div>
             <TextArea
                 rows={3}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
+                placeholder="请输入您的问题。"
             />
             <div className="w-full pt-1 flex justify-end gap-2">
                 <div className="w-full flex items-center">
-                    <Switch
+                    {/* <Switch
                         checkedChildren="快速模式"
                         unCheckedChildren="详细模式"
                         defaultChecked
+                    /> */}
+                    <PlusCircleOutlined
+                        onClick={() => {
+                            newAsk();
+                        }}
                     />
                 </div>
-                <PlusCircleOutlined onClick={()=>{
-                    newAsk()
-                }} />
+
                 <Button
                     onClick={() => {
                         setInputValue("");
@@ -117,7 +129,7 @@ const AIChatDoc_components: FC = () => {
                     onClick={() => {
                         handleAsk();
                     }}
-                    disabled={asking||(inputValue=="")}
+                    disabled={asking || inputValue == ""}
                 >
                     <SendOutlined />
                     发送

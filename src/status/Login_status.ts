@@ -6,7 +6,8 @@ interface LoginState {
     userName: string;
     userId: string;
     token: string;
-    setLoginStatus: (userName: string, userId: string, token: string) => void;
+    avatar:string;
+    setLoginStatus: (userName: string, userId: string, token: string,avatar:string) => void;
     clearLoginStatus: () => void;
 }
 
@@ -17,12 +18,14 @@ const useLogin = create<LoginState>()(
             userName: "",
             userId: "",
             token: "",
-            setLoginStatus: (userName, userId, token) => {
+            avatar:"",
+            setLoginStatus: (userName, userId, token,avatar) => {
                 set((state) => ({
                     ...state,
                     userName: userName,
                     token: token,
                     userId: userId,
+                    avatar:avatar,
                     isLogin: true,
                 }));
             },
@@ -32,6 +35,7 @@ const useLogin = create<LoginState>()(
                     token: "",
                     userName: "",
                     userId: "",
+                    avatar:"",
                     isLogin: false,
                 }));
             },
@@ -43,6 +47,7 @@ const useLogin = create<LoginState>()(
                 userName: state.userName,
                 userId: state.userId,
                 token: state.token,
+                avatar:""
             }),
         },
     ),

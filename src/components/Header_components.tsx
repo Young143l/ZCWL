@@ -1,5 +1,5 @@
 import { useState, type FC } from "react";
-import { Menu, Avatar, Drawer, Popover, Button, ConfigProvider } from "antd";
+import { Menu, Drawer, Popover, Button, ConfigProvider } from "antd";
 import type { MenuProps } from "antd";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -7,11 +7,10 @@ import {
     BookOutlined,
     FolderOutlined,
     CodeOutlined,
-    UserOutlined,
     MenuOutlined,
 } from "@ant-design/icons";
 import useLogin from "../status/Login_status";
-
+import UserAvatar_components from "./UserAvatar_components";
 type MenuItem = Required<MenuProps>["items"][number];
 
 const items: MenuItem[] = [
@@ -147,7 +146,9 @@ const Header_components: FC = () => {
                         }
                         content={isLogin ? LoginContent : unLoginContent}
                     >
-                        <Avatar size="large" icon={<UserOutlined />} src={isLogin?"https://img.young143.top/young143/a.jpg":undefined} />
+                        <div>
+                            <UserAvatar_components />
+                        </div>
                     </Popover>
                 </div>
                 {/* 手机端开抽屉关 */}
@@ -167,7 +168,7 @@ const Header_components: FC = () => {
                     size="280"
                 >
                     <div className="flex flex-col justify-center items-center  m-2 gap-1">
-                        <Avatar icon={<UserOutlined />} size={"large"} />
+                        <UserAvatar_components />
                         {isLogin ? (
                             <>
                                 <p className="text-xl text-center text-black">
@@ -209,5 +210,3 @@ const Header_components: FC = () => {
 };
 
 export default Header_components;
-
-

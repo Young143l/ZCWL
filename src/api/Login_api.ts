@@ -1,4 +1,5 @@
 interface LoginResponse {
+    avatar:string,
     userName: string;
     userId: string;
     token: string;
@@ -7,11 +8,11 @@ interface LoginResponse {
 const login: (
     userId: string,
     password: string,
-    setLogin: (userName: string, userId: string, token: string) => void,
+    setLogin: (userName: string, userId: string, token: string,avatar:string) => void,
 ) => Promise<{ success: boolean; userName: string }> = async (
     userId: string,
     password: string,
-    setLogin: (userName: string, userId: string, token: string) => void,
+    setLogin: (userName: string, userId: string, token: string,avatar:string) => void,
 ) => {
     try {
         const res: Response = await fetch(import.meta.env.VITE_BACK_END+"/users/login", {
@@ -30,7 +31,8 @@ const login: (
         }
         const json: LoginResponse = await res.json();
         if (json && json.userName && json.userId && json.token) {
-            setLogin(json.userName, json.userId, json.token);
+            setLogin(json.userName, json.userId, json.token,json.avatar);
+            console.log(json);
             return { success: true, userName: json.userName };
         } else {
             throw new Error("Login failed: invalid response data");
