@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9f1ed2fb-fcac-413f-b157-ab4a82e20c2e" name="更改" comment="修复AI流式聊天功能与安全漏洞&#10;- 修复AI流式聊天的流式输出问题&#10;- 解决Resilience4j和Spring Retry API兼容性问题&#10;- 修复部分安全漏洞">
+      <change beforePath="$PROJECT_DIR$/TestAIAPI.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_login_token.py" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;chundaoketa&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:Young143l/ZCWL_back_end.git&quot;,
+    &quot;accountId&quot;: &quot;308e865e-1df0-4c11-8353-d28520d86e18&quot;
+  }
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="userSettingsFile" value="D:\code\da_chuang\pom.xml" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="38GxDEuJhIHAg1kGZb4sS3caDWA" />
+  <component name="ProjectViewState">
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
+    &quot;JUnit.AddUserTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AuthControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AuthServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.BaseTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.DialogControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.DocContentControllerTest (1).executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.DocContentControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.DocControllerIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.DocControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.DocTagsControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.JsonStructureTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.LoginControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.LoginControllerTest.testLoginUserNotFound.executor&quot;: &quot;Debug&quot;,
+    &quot;JUnit.QueAnsControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.TagsControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserControllerTest.testGetUserById.executor&quot;: &quot;Debug&quot;,
+    &quot;JUnit.UserTagPreferencesControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JavaScript 调试.login_test.html.executor&quot;: &quot;Run&quot;,
+    &quot;JavaScript 调试.register_test.html.executor&quot;: &quot;Run&quot;,
+    &quot;JavaScript 调试.test_validation.html.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.zcwl [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.zcwl [compile].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.zcwl [dependency:tree,|,findstr,jjwt].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.zcwl [mvn,dependency:tree,|,grep,jjwt].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.zcwl [org.apache.maven.plugins:maven-clean-plugin:3.5.0:clean].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.ZcwlApplication.executor&quot;: &quot;Run&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/code/da_chuang/pom.xml&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;全局库&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;,
+    &quot;应用程序.PasswordEncryptionTest.executor&quot;: &quot;Run&quot;,
+    &quot;应用程序.ZcwlApplication.executor&quot;: &quot;Run&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="com.example.zcwl.controller" />
+    </key>
+  </component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="mvn mvn dependency:tree | grep jjwt" />
+      <command value="mvn dependency:tree | findstr jjwt" />
+    </option>
+  </component>
+  <component name="RunManager" selected="JUnit.DocContentControllerTest">
+    <configuration name="DocContentControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="zcwl" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.zcwl.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.example.zcwl.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.example.zcwl.controller.DocContentControllerTest" />
+      <option name="METHOD_NAME" value="" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DocContentControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="zcwl" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.zcwl.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.example.zcwl.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.example.zcwl.controller.DocContentControllerTest" />
+      <option name="METHOD_NAME" value="" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DocContentControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="zcwl" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.zcwl.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.example.zcwl.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.example.zcwl.controller.DocContentControllerTest" />
+      <option name="METHOD_NAME" value="" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" value="-ea--enable-native-access=ALL-UNNAMED" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="LoginControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="zcwl" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.zcwl.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.example.zcwl.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.example.zcwl.controller.LoginControllerTest" />
+      <option name="METHOD_NAME" value="" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" value="--enable-native-access=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="da_chuang" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="da_chuang" />
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+    <configuration name="ZcwlApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="zcwl" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.zcwl.ZcwlApplication" />
+      <option name="VM_PARAMETERS" value="--sun-misc-unsafe-memory-access=allow" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="JUnit.DocContentControllerTest" />
+      <item itemvalue="JUnit.LoginControllerTest" />
+      <item itemvalue="Spring Boot.ZcwlApplication" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.DocContentControllerTest" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.28238.7" />
+        <option value="bundled-js-predefined-d6986cc7102b-a71380e98a7c-JavaScript-IU-252.28238.7" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="StructureViewState">
+    <option name="selectedTab" value="逻辑" />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="9f1ed2fb-fcac-413f-b157-ab4a82e20c2e" name="更改" comment="" />
+      <created>1768439587883</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1768439587883</updated>
+      <workItem from="1768439589316" duration="1469000" />
+      <workItem from="1768442204720" duration="900000" />
+      <workItem from="1768443291890" duration="97000" />
+      <workItem from="1768458953773" duration="5650000" />
+      <workItem from="1768465603563" duration="7717000" />
+      <workItem from="1768523489800" duration="16989000" />
+      <workItem from="1768551782840" duration="3191000" />
+      <workItem from="1768559431385" duration="6133000" />
+      <workItem from="1768710940347" duration="3980000" />
+      <workItem from="1768917154428" duration="40000" />
+      <workItem from="1768917829094" duration="172000" />
+      <workItem from="1769151052413" duration="213000" />
+      <workItem from="1769151317979" duration="22776000" />
+      <workItem from="1769242789383" duration="6388000" />
+      <workItem from="1769402768309" duration="9357000" />
+      <workItem from="1769505064223" duration="4629000" />
+      <workItem from="1769532953526" duration="1244000" />
+      <workItem from="1769534442104" duration="14063000" />
+      <workItem from="1769582323716" duration="66000" />
+      <workItem from="1769582404168" duration="8023000" />
+      <workItem from="1769590626343" duration="1045000" />
+      <workItem from="1769591740388" duration="435000" />
+      <workItem from="1769592204804" duration="13273000" />
+      <workItem from="1769680971891" duration="16604000" />
+      <workItem from="1770107564850" duration="12773000" />
+      <workItem from="1770139838163" duration="2262000" />
+      <workItem from="1770142136724" duration="968000" />
+      <workItem from="1770143128802" duration="164000" />
+      <workItem from="1770143296477" duration="75000" />
+      <workItem from="1770143383466" duration="28000" />
+      <workItem from="1770143417376" duration="64000" />
+      <workItem from="1770143490114" duration="184000" />
+      <workItem from="1770143709166" duration="281000" />
+      <workItem from="1770144004612" duration="278000" />
+      <workItem from="1770144302926" duration="392000" />
+      <workItem from="1770144733693" duration="108000" />
+      <workItem from="1770144926700" duration="1222000" />
+      <workItem from="1770146153281" duration="186000" />
+      <workItem from="1770146344695" duration="520000" />
+      <workItem from="1770146938429" duration="15918000" />
+      <workItem from="1770263560318" duration="8477000" />
+    </task>
+    <task id="LOCAL-00001" summary="文档.md">
+      <option name="closed" value="true" />
+      <created>1769169794092</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1769169794092</updated>
+    </task>
+    <task id="LOCAL-00002" summary="修改警告">
+      <option name="closed" value="true" />
+      <created>1769170121260</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1769170121260</updated>
+    </task>
+    <task id="LOCAL-00003" summary="看看API文档这些接口对不对,还有一些新接口注册之类的">
+      <option name="closed" value="true" />
+      <created>1769170530810</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1769170530810</updated>
+    </task>
+    <task id="LOCAL-00004" summary="看看API文档这些接口对不对,还有一些新接口注册之类的">
+      <option name="closed" value="true" />
+      <created>1769170686236</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1769170686236</updated>
+    </task>
+    <task id="LOCAL-00005" summary="看看API文档这些接口对不对,还有一些新接口注册之类的">
+      <option name="closed" value="true" />
+      <created>1769171690618</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1769171690618</updated>
+    </task>
+    <task id="LOCAL-00006" summary="再修改了一下">
+      <option name="closed" value="true" />
+      <created>1769189661950</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1769189661950</updated>
+    </task>
+    <task id="LOCAL-00007" summary="连接池稳定">
+      <option name="closed" value="true" />
+      <created>1769248115191</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1769248115191</updated>
+    </task>
+    <task id="LOCAL-00008" summary="连接池稳定">
+      <option name="closed" value="true" />
+      <created>1769250247450</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1769250247450</updated>
+    </task>
+    <task id="LOCAL-00009" summary="连接池稳定">
+      <option name="closed" value="true" />
+      <created>1769590360970</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1769590360970</updated>
+    </task>
+    <task id="LOCAL-00010" summary="新增">
+      <option name="closed" value="true" />
+      <created>1769596741193</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1769596741193</updated>
+    </task>
+    <task id="LOCAL-00011" summary="新增">
+      <option name="closed" value="true" />
+      <created>1769601190826</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1769601190826</updated>
+    </task>
+    <task id="LOCAL-00012" summary="token">
+      <option name="closed" value="true" />
+      <created>1769601207794</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1769601207794</updated>
+    </task>
+    <task id="LOCAL-00013" summary="feat(auth): 实现完整的用户登录验证功能&#10;&#10;- 集成数据库用户查询验证，支持通过用户ID或用户名查找&#10;- 添加密码验证逻辑，确保用户凭据安全性&#10;- 集成Spring Security用户详情加载机制&#10;- 实现JWT令牌生成和返回功能&#10;- 添加详细的调试日志输出便于问题排查&#10;- 在JWT工具类中添加密钥初始化检查机制">
+      <option name="closed" value="true" />
+      <created>1769605910305</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1769605910305</updated>
+    </task>
+    <task id="LOCAL-00014" summary="修复AI流式聊天功能与安全漏洞&#10;- 修复AI流式聊天的流式输出问题&#10;- 解决Resilience4j和Spring Retry API兼容性问题&#10;- 修复部分安全漏洞">
+      <option name="closed" value="true" />
+      <created>1770273656395</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1770273656396</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="application.properties" />
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.py" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="CUSTOM_BOOLEAN_PROPERTIES">
+                <map>
+                  <entry key="Show.Git.Branches" value="true" />
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="文档.md" />
+    <MESSAGE value="修改警告" />
+    <MESSAGE value="看看API文档这些接口对不对,还有一些新接口注册之类的" />
+    <MESSAGE value="再修改了一下" />
+    <MESSAGE value="连接池稳定" />
+    <MESSAGE value="新增" />
+    <MESSAGE value="token" />
+    <MESSAGE value="feat(auth): 实现完整的用户登录验证功能&#10;&#10;- 集成数据库用户查询验证，支持通过用户ID或用户名查找&#10;- 添加密码验证逻辑，确保用户凭据安全性&#10;- 集成Spring Security用户详情加载机制&#10;- 实现JWT令牌生成和返回功能&#10;- 添加详细的调试日志输出便于问题排查&#10;- 在JWT工具类中添加密钥初始化检查机制" />
+    <MESSAGE value="修复AI流式聊天功能与安全漏洞&#10;- 修复AI流式聊天的流式输出问题&#10;- 解决Resilience4j和Spring Retry API兼容性问题&#10;- 修复部分安全漏洞" />
+    <option name="LAST_COMMIT_MESSAGE" value="修复AI流式聊天功能与安全漏洞&#10;- 修复AI流式聊天的流式输出问题&#10;- 解决Resilience4j和Spring Retry API兼容性问题&#10;- 修复部分安全漏洞" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
