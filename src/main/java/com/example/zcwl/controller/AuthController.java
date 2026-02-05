@@ -91,7 +91,7 @@ public class AuthController {
             @RequestBody UserDTO userDTO) {
         
         // 显式验证用户名长度，确保不超过数据库字段限制
-        if (userDTO.getUsername().length() > 20) {
+        if (userDTO.getUserName().length() > 20) {
             Map<String, Object> errorResponse = new HashMap<>();
             Map<String, String> errors = new HashMap<>();
             errors.put("username", "用户名长度必须在6-20个字符之间");

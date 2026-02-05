@@ -92,6 +92,8 @@ public class SecurityConfig {
                         .requestMatchers("/aichatdoc/**").permitAll()
                         // 允许API AI聊天文档路径
                         .requestMatchers("/api/aichatdoc/**").permitAll()
+                        // 允许所有OPTIONS请求
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // 允许新AI测试路径
                         .requestMatchers("/new-ai/**").permitAll()
                         // 允许测试AI聊天文档路径

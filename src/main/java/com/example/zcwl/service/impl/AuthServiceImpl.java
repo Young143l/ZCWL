@@ -108,7 +108,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public User register(UserDTO userDTO) {
         // 验证用户名长度
-        if (userDTO.getUsername() == null || userDTO.getUsername().length() < 6 || userDTO.getUsername().length() > 20) {
+        if (userDTO.getUserName() == null || userDTO.getUserName().length() < 6 || userDTO.getUserName().length() > 20) {
             throw new RuntimeException("用户名长度必须在6-20个字符之间");
         }
         
@@ -123,12 +123,12 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 检查密码是否与用户名相同
-        if (userDTO.getPassword().equals(userDTO.getUsername())) {
+        if (userDTO.getPassword().equals(userDTO.getUserName())) {
             throw new RuntimeException("密码不能与用户名相同");
         }
 
         // 检查用户名是否已存在
-        if (userRepository.findByName(userDTO.getUsername()) != null) {
+        if (userRepository.findByName(userDTO.getUserName()) != null) {
             throw new RuntimeException("Username already exists");
         }
 
@@ -138,7 +138,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 检查用户ID是否已存在
-        if (userRepository.findByuId(userDTO.getUsername()) != null) {
+        if (userRepository.findByuId(userDTO.getUserName()) != null) {
             throw new RuntimeException("用户ID已存在");
         }
 
@@ -147,9 +147,9 @@ public class AuthServiceImpl implements AuthService {
         
         // 手动设置User对象的属性，避免复制phone字段
         // 设置用户ID（这里简单使用用户名作为ID）
-        user.setUId(userDTO.getUsername());
+        user.setUId(userDTO.getUserName());
         // 设置用户名
-        user.setName(userDTO.getUsername());
+        user.setName(userDTO.getUserName());
         // 设置邮箱
         user.setEmail(userDTO.getEmail());
         // 直接存储明文密码，便于前期维护

@@ -43,11 +43,11 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User createUser(UserDTO userDTO) {
-        logger.info("Creating user: {}", userDTO.getUsername());
+        logger.info("Creating user: {}", userDTO.getUserName());
 
         // 显式验证用户名长度，确保不超过数据库字段限制
-        if (userDTO.getUsername() == null || userDTO.getUsername().length() < 6 || userDTO.getUsername().length() > 20) {
-            logger.warn("Username length invalid: {}", userDTO.getUsername());
+        if (userDTO.getUserName() == null || userDTO.getUserName().length() < 6 || userDTO.getUserName().length() > 20) {
+            logger.warn("Username length invalid: {}", userDTO.getUserName());
             throw new RuntimeException("用户名长度必须在6-20个字符之间");
         }
         
@@ -58,8 +58,8 @@ public class UserServiceImpl implements UserService {
         }
 
         // 检查密码是否与用户名相同
-        if (userDTO.getPassword().equals(userDTO.getUsername())) {
-            logger.warn("Password cannot be the same as username for user: {}", userDTO.getUsername());
+        if (userDTO.getPassword().equals(userDTO.getUserName())) {
+            logger.warn("Password cannot be the same as username for user: {}", userDTO.getUserName());
             throw new RuntimeException("密码不能与用户名相同");
         }
 
@@ -67,8 +67,8 @@ public class UserServiceImpl implements UserService {
         validatePasswordStrength(userDTO.getPassword());
 
         // 检查用户名是否已存在
-        if (userRepository.findByName(userDTO.getUsername()) != null) {
-            logger.warn("Username already exists: {}", userDTO.getUsername());
+        if (userRepository.findByName(userDTO.getUserName()) != null) {
+            logger.warn("Username already exists: {}", userDTO.getUserName());
             throw new RuntimeException("Username already exists");
         }
 
@@ -79,17 +79,17 @@ public class UserServiceImpl implements UserService {
         }
 
         // 检查用户ID是否已存在
-        if (userRepository.findByuId(userDTO.getUsername()) != null) {
-            logger.warn("User ID already exists: {}", userDTO.getUsername());
+        if (userRepository.findByuId(userDTO.getUserName()) != null) {
+            logger.warn("User ID already exists: {}", userDTO.getUserName());
             throw new RuntimeException("用户ID已存在");
         }
 
         // 创建User实体对象
         User user = new User();
         // 设置用户ID
-        user.setUId(userDTO.getUsername());
+        user.setUId(userDTO.getUserName());
         // 设置用户名
-        user.setName(userDTO.getUsername());
+        user.setName(userDTO.getUserName());
         // 设置邮箱
         user.setEmail(userDTO.getEmail());
         // 使用明文存储密码，便于前期维护
@@ -147,7 +147,7 @@ public class UserServiceImpl implements UserService {
             User user = optionalUser.get();
             
             // 手动设置各个字段，确保密码被正确加密
-            user.setName(userDTO.getUsername());
+            user.setName(userDTO.getUserName());
             user.setEmail(userDTO.getEmail());
             
             // 如果提供了密码，则使用明文存储
