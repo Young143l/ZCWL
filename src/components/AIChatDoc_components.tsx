@@ -39,7 +39,6 @@ const AIChatDoc_components: FC = () => {
         setAsking(true);
 
         let currentId = id;
-        // 如果没有现有对话，先创建新对话
         if (!have) {
             const res = await getNewChat(userId, token);
             if (res.ok) {
@@ -55,16 +54,30 @@ const AIChatDoc_components: FC = () => {
         setInputValue("");
         addChat({ id: "", ask: ask, over: false, ans: "" });
 
-        // 使用正确的对话ID发送消息
         const askRes = await getAsk(userId, currentId, inputValue, token);
         if (askRes.ok) {
-            setAns(askRes.id, askRes.ans);
+            const t = chat.length;
+            const reader = askRes.ans as ReadableStreamDefaultReader<
+                Uint8Array<ArrayBuffer>
+            >;
+            const decoder = new TextDecoder();
+            let buffer = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    break;
+                }
+                buffer += decoder.decode(value, { stream: true });
+                setAns(t.toString(), buffer);
+            }
         }
         setAsking(false);
     };
 
     const newAsk = () => {
         clear();
+        setAsking(false);
     };
 
     return (
@@ -89,6 +102,7 @@ const AIChatDoc_components: FC = () => {
                             ans={i.ans}
                             ask={i.ask}
                             id={i.id}
+                            key={i.id}
                         />
                     ))
                 ) : (

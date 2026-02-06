@@ -5,6 +5,7 @@ import { type AIChatBody } from "../status/AIChatDoc_status";
 import ReactMarkdown from "react-markdown";
 import "github-markdown-css/github-markdown.css";
 import remarkGfm from "remark-gfm";
+import UserAvatar_components from "./UserAvatar_components";
 const AIChatBody_components: FC<AIChatBody> = ({ ask, ans, over }) => {
     return (
         <div className="w-full">
@@ -13,13 +14,13 @@ const AIChatBody_components: FC<AIChatBody> = ({ ask, ans, over }) => {
                     {ask}
                 </div>
                 <div>
-                    <Avatar />
+                    <UserAvatar_components />
                 </div>
             </div>
             <br />
             <div className="flex justify-start gap-1.5">
                 <div>
-                    <Avatar icon={<OpenAIOutlined />} />
+                    <Avatar size="large" icon={<OpenAIOutlined />} />
                 </div>
                 <div className="border border-gray-300 rounded-xl p-2 whitespace-normal max-w-5/6">
                     {over ? (
