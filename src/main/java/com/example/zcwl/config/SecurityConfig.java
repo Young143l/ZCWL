@@ -80,26 +80,12 @@ public class SecurityConfig {
                         // DELETE /users/** 需要认证
                         .requestMatchers("/doc/**").permitAll()
                         .requestMatchers("/api/doc-contents/**").permitAll()
-                        // 允许测试路径
-                        .requestMatchers("/test").permitAll()
-                        // 允许简单测试路径
-                        .requestMatchers("/simple-test/**").permitAll()
-                        // 允许无依赖测试路径
-                        .requestMatchers("/test-no-dep/**").permitAll()
-                        // 允许AI聊天路径
-                        .requestMatchers("/ai/**").permitAll()
                         // 允许AI聊天文档路径
                         .requestMatchers("/aichatdoc/**").permitAll()
-                        // 允许API AI聊天文档路径
-                        .requestMatchers("/api/aichatdoc/**").permitAll()
+                        // 允许RAG相关API路径
+                        .requestMatchers("/api/rag/**").permitAll()
                         // 允许所有OPTIONS请求
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // 允许新AI测试路径
-                        .requestMatchers("/new-ai/**").permitAll()
-                        // 允许测试AI聊天文档路径
-                        .requestMatchers("/test-aichatdoc/**").permitAll()
-                        // 允许新AI聊天文档路径
-                        .requestMatchers("/new-aichatdoc/**").permitAll()
                         // 允许Swagger相关路径
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
                         // 其他路径需要认证

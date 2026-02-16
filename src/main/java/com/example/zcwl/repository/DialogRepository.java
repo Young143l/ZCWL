@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 对话数据访问接口
@@ -23,5 +24,14 @@ public interface DialogRepository extends JpaRepository<Dialog, Integer> {
     @Query("SELECT d FROM Dialog d WHERE d.user.uId = ?1")
     // @Query：使用JPQL查询语句，根据用户ID查询所有对话
     List<Dialog> findByUserUId(String uId);
+
+    /**
+     * 根据对话ID查询对话，并同时加载关联的用户对象
+     * 使用join fetch避免懒加载错误
+     * @param id 对话ID
+     * @return 包含用户对象的对话
+     */
+    @Query("SELECT d FROM Dialog d JOIN FETCH d.user WHERE d.dId = ?1")
+    Optional<Dialog> findByIdWithUser(Integer id);
 
 }

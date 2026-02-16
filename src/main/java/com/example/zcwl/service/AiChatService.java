@@ -48,4 +48,20 @@ public interface AiChatService {
      * @return 流式返回的回答
      */
     Flux<String> addChatMessageStream(Integer id, String ask, String uId);
+
+    /**
+     * 调用AI模型获取回答
+     * @param dialogId 对话ID
+     * @param ask 用户问题
+     * @return AI回答
+     */
+    String callAI(Integer dialogId, String ask);
+
+    /**
+     * 调用AI模型获取流式回答
+     * @param dialogId 对话ID
+     * @param ask 用户问题
+     * @return 流式回答的Flux
+     */
+    Flux<String> callAIStream(Integer dialogId, String ask);
 }

@@ -105,7 +105,6 @@
 |----------------------------|------|---------|----------------|
 | `/register`                | POST | 用户注册    | 新用户注册时调用       |
 | `/users/login`             | POST | 用户登录    | 用户登录时调用        |
-| `/validate-token`          | GET  | 验证token | 验证token是否有效时调用 |
 
 #### 4.1.1 用户注册
 - **请求 URL**: `http://localhost:8080/register`
@@ -113,19 +112,18 @@
 - **请求体**:
   ```json
   {
-    "username": "张三",
-    "email": "zhangsan@example.com"
+    "userName": "用户名",
+    "email": "邮箱",
+    "password": "密码"
   }
   ```
 - **成功响应** (201 Created):
   ```json
   {
-    "uId": "张三",
-    "name": "张三",
+    "uId": "用户ID",
+    "name": "用户名",
+    "email": "邮箱"
   }
-  ```
-- **失败响应** (400 Bad Request):
-  ```json
   ```
 
 #### 4.1.2 用户登录
@@ -134,124 +132,118 @@
 - **请求体**:
   ```json
   {
-    "userId": "张三",
-    "password": "123456"
+    "userId": "用户ID",
+    "password": "密码"
   }
   ```
 - **成功响应** (200 OK):
   ```json
   {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "username": "张三",
-    "userId": "张三"
+    "token": "JWT令牌",
+    "userId": "用户ID",
+    "userName": "用户名"
   }
-  ```
-- **失败响应** (401 Unauthorized):
-  ```json
-  ```
-
-#### 4.1.3 验证token
-- **请求方法**: GET
-- **成功响应** (200 OK):
-  ```json
-  true
-  ```
-- **失败响应** (401 Unauthorized):
-  ```json
-  false
   ```
 
 ### 4.2 用户管理 API
 
-| API 路径            | 请求方法   | 用途         | 前端调用示例       |
-|-------------------|--------|------------|--------------|
+| API 路径        | 请求方法   | 用途       | 前端调用示例     |
+|---------------|--------|----------|------------|
+| `/users/{id}` | GET    | 获取用户信息  | 获取当前用户信息时调用 |
 
-#### 4.2.1 创建用户
-- **请求方法**: POST
-- **请求体**:
-  ```json
-  {
-    "username": "李四",
-    "email": "lisi@example.com",
-  }
+#### 4.2.1 获取用户信息
+- **请求 URL**: `http://localhost:8080/users/{id}`
+- **请求方法**: GET
+- **请求头**:
   ```
-- **成功响应** (201 Created):
+  Authorization: Bearer {token}
+  ```
+- **成功响应** (200 OK):
   ```json
   {
-    "uId": "李四",
-    "name": "李四",
+    "name": "用户名",
+    "avatar": "头像URL",
+    "email": "邮箱"
   }
   ```
 
 ### 4.3 文档管理 API
 
 | API 路径           | 请求方法   | 用途         |
-| `/api/docs`       | POST   | 创建文档       |
-| `/api/docs/{id}`  | GET    | 根据 ID 查询文档 |
 | `/api/docs`       | GET    | 查询所有文档（分页） |
-| `/api/docs/{id}`  | PUT    | 更新文档       |
-| `/api/docs/{id}`  | DELETE | 删除文档       |
+| `/api/docs/{id}`  | GET    | 根据 ID 查询文档 |
 
 ### 4.4 文档内容 API
 
 | API 路径                                  | 请求方法   | 用途                    |
-| `/api/doc-contents`                       | POST   | 创建文档内容                |
 | `/api/doc-contents/{docId}/{chapterId}`   | GET    | 根据文档 ID 和章节 ID 查询文档内容 |
-| `/api/doc-contents/doc/{docId}`           | GET    | 根据文档 ID 查询所有文档内容      |
-| `/api/doc-contents`                       | GET    | 查询所有文档内容（分页）          |
-| `/api/doc-contents/{docId}/{chapterId}`   | PUT    | 更新文档内容                |
-| `/api/doc-contents/{docId}/{chapterId}`   | DELETE | 删除文档内容                |
 
 ### 4.5 标签管理 API
 
 | API 路径           | 请求方法   | 用途         |
-| `/api/tags`       | POST   | 创建标签       |
-| `/api/tags/{id}`  | GET    | 根据 ID 查询标签 |
 | `/api/tags`       | GET    | 查询所有标签（分页） |
-| `/api/tags/{id}`  | PUT    | 更新标签       |
-| `/api/tags/{id}`  | DELETE | 删除标签       |
 
-### 4.6 文档标签关系 API
+### 4.6 对话管理 API
 
-| API 路径                          | 请求方法   | 用途                  |
-| `/api/doc-tags`                   | POST   | 创建文档标签关系            |
-| `/api/doc-tags/{docId}/{tagId}`   | GET    | 根据文档 ID 和标签 ID 查询关系 |
-| `/api/doc-tags/doc/{docId}`       | GET    | 根据文档 ID 查询所有标签关系    |
-| `/api/doc-tags/tag/{tagId}`       | GET    | 根据标签 ID 查询所有文档关系    |
-| `/api/doc-tags`                   | GET    | 查询所有文档标签关系（分页）      |
-| `/api/doc-tags/{docId}/{tagId}`   | DELETE | 删除文档标签关系            |
+| API 路径               | 请求方法   | 用途             |
+| `/api/dialogs/user/{userId}` | GET    | 根据用户 ID 查询所有对话 |
 
-### 4.7 用户标签偏好 API
-
-| API 路径                                       | 请求方法   | 用途                  |
-|----------------------------------------------|--------|---------------------|
-| `/api/user-tag-preferences`                  | POST   | 创建用户标签偏好            |
-| `/api/user-tag-preferences/{userId}/{tagId}` | GET    | 根据用户 ID 和标签 ID 查询偏好 |
-| `/api/user-tag-preferences/user/{userId}`    | GET    | 根据用户 ID 查询所有标签偏好    |
-| `/api/user-tag-preferences/tag/{tagId}`      | GET    | 根据标签 ID 查询所有用户偏好    |
-| `/api/user-tag-preferences`                  | GET    | 查询所有用户标签偏好（分页）      |
-| `/api/user-tag-preferences/{userId}/{tagId}` | PUT    | 更新用户标签偏好            |
-| `/api/user-tag-preferences/{userId}/{tagId}` | DELETE | 删除用户标签偏好            |
-
-### 4.8 对话管理 API
-
-| API 路径                       | 请求方法   | 用途             |
-| `/api/dialogs`                 | POST   | 创建对话           |
-| `/api/dialogs/{id}`            | GET    | 根据 ID 查询对话     |
-| `/api/dialogs/user/{userId}`   | GET    | 根据用户 ID 查询所有对话 |
-| `/api/dialogs`                 | GET    | 查询所有对话（分页）     |
-| `/api/dialogs/{id}`            | PUT    | 更新对话           |
-| `/api/dialogs/{id}`            | DELETE | 删除对话           |
-
-### 4.9 问答管理 API
+### 4.7 问答管理 API
 
 | API 路径                            | 请求方法   | 用途                |
-| `/api/que-ans`                      | POST   | 创建问答              |
-| `/api/que-ans/{dialogId}/{times}`   | GET    | 根据对话 ID 和问答次数查询问答 |
 | `/api/que-ans/dialog/{dialogId}`    | GET    | 根据对话 ID 查询所有问答    |
-| `/api/que-ans`                      | GET    | 查询所有问答（分页）        |
-| `/api/que-ans/{dialogId}/{times}`   | PUT    | 更新问答              |
-| `/api/que-ans/{dialogId}/{times}`   | DELETE | 删除问答              |
+
+### 4.10 AI 对话 API
+
+| API 路径                  | 请求方法 | 用途      | 前端调用示例     |
+|-------------------------|------|---------|------------|
+| `/aichatdoc`            | POST | 创建新对话   | 用户开始新对话时调用 |
+| `/aichatdoc/{dialogId}` | POST | 发送消息到对话 | 用户发送消息时调用  |
+
+#### 4.10.1 创建新对话
+- **请求 URL**: `http://localhost:8080/aichatdoc`
+- **请求方法**: POST
+- **请求头**:
+  ```
+  Authorization: Bearer {token}
+  Content-Type: application/json
+  ```
+- **请求体**:
+  ```json
+  {
+    "u_id": "用户ID"
+  }
+  ```
+- **成功响应** (200 OK):
+  ```json
+{
+  "id": "对话ID"
+}
+```
+
+#### 4.10.2 发送消息到对话
+- **请求 URL**: `http://localhost:8080/aichatdoc/{dialogId}`
+- **请求方法**: POST
+- **请求头**:
+  ```
+  Authorization: Bearer {token}
+  Content-Type: application/json
+  ```
+- **请求体**:
+  ```json
+  {
+    "ask": "用户问题",
+    "u_id": "用户ID"
+  }
+  ```
+- **成功响应** (200 OK):
+  - 流式响应，返回AI的回答内容
+  - 示例响应（流式）:
+    ```
+    你好！很高兴你对学习C语言感兴趣。C语言是编程世界的重要基石，被誉为"编程的语言"。根据相关资料，学习C语言能帮你深刻理解计算机底层原理，为学习其他语言打下坚实基础，并极大提升逻辑思维能力。
+    
+    为了帮助你更好地学习C语言，我为你准备了一份详细的学习计划...
+    ```
 
 ## 5. 前端如何调用 API
 
@@ -260,18 +252,31 @@
 前端可以使用任何 HTTP 客户端库（如 Axios、Fetch API 等）调用这些 API。以下是使用 Fetch API 调用的示例：
 
 ```javascript
-// 创建用户示例
+// 基本API调用示例
+fetch('http://localhost:8080/api/endpoint', {
   method: 'POST',
   headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('token')}`
   },
   body: JSON.stringify({
-    username: '张三',
-    email: 'zhangsan@example.com',
+    key: 'value'
   }),
 })
-.then(response => response.json())
-.then(data => console.log(data))
-.catch(error => console.error('Error:', error));
+.then(response => {
+  if (!response.ok) {
+    throw new Error(`请求失败: ${response.status}`);
+  }
+  return response.json();
+})
+.then(data => {
+  console.log('请求成功:', data);
+  // 处理返回的数据
+})
+.catch(error => {
+  console.error('错误:', error);
+  // 显示错误信息给用户
+});
 ```
 
 ### 5.2 使用token进行认证
@@ -289,7 +294,7 @@ fetch('http://localhost:8080/users/login', {
   },
   body: JSON.stringify({
     userId: '张三',
-    password: '123456'
+    password: 'Password123!'
   }),
 })
 .then(response => {
@@ -301,7 +306,7 @@ fetch('http://localhost:8080/users/login', {
 .then(data => {
   // 保存token到本地存储
   localStorage.setItem('token', data.token);
-  localStorage.setItem('username', data.username);
+  localStorage.setItem('username', data.userName);
   localStorage.setItem('userId', data.userId);
   console.log('登录成功:', data);
   // 跳转到主页面
@@ -314,58 +319,235 @@ fetch('http://localhost:8080/users/login', {
 });
 ```
 
-#### 5.2.2 携带token调用需要认证的接口
+#### 5.2.2 创建新对话
 
 ```javascript
-// 携带token调用API示例
-const token = localStorage.getItem('token');
-
-if (!token) {
-  // 没有token，跳转到登录页面
-  window.location.href = '/login';
-  return;
-}
-
-  method: 'GET',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}` // 在请求头中携带token
-  },
-})
-.then(response => {
-  if (!response.ok) {
-    // 处理401错误（token过期或无效）
-    if (response.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('username');
-      localStorage.removeItem('userId');
-      // 跳转到登录页面
-      window.location.href = '/login';
-    }
-    throw new Error('请求失败');
+// 创建新对话示例
+const createNewChat = async () => {
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('userId');
+  
+  if (!token || !userId) {
+    window.location.href = '/login';
+    return null;
   }
-  return response.json();
-})
-.then(data => {
-  console.log('获取用户列表成功:', data);
-  // 处理返回的数据，如显示用户列表
-  renderUserList(data);
-})
-.catch(error => {
-  console.error('请求失败:', error);
-  // 显示错误信息给用户
-  document.getElementById('error-message').textContent = '获取用户列表失败';
+  
+  try {
+    const response = await fetch('http://localhost:8080/aichatdoc', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        u_id: userId
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error('创建对话失败');
+    }
+    
+    const data = await response.json();
+    console.log('创建对话成功:', data);
+    return data.id; // 返回对话ID
+  } catch (error) {
+    console.error('创建对话错误:', error);
+    alert('创建对话失败，请重试');
+    return null;
+  }
+};
+
+// 使用示例
+const dialogId = await createNewChat();
+if (dialogId) {
+  // 跳转到对话页面
+  window.location.href = `/chat/${dialogId}`;
+}
+```
+
+#### 5.2.3 发送消息并处理流式响应
+
+```javascript
+// 发送消息到对话（处理流式响应）
+const sendMessage = async (dialogId, message) => {
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('userId');
+  
+  if (!token || !userId) {
+    window.location.href = '/login';
+    return;
+  }
+  
+  try {
+    const response = await fetch(`http://localhost:8080/aichatdoc/${dialogId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        ask: message,
+        u_id: userId
+      })
+    });
+    
+    if (!response.ok) {
+      // 处理非流式错误响应
+      const errorData = await response.json();
+      throw new Error(errorData.message || '发送消息失败');
+    }
+    
+    // 处理流式响应
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullResponse = '';
+    
+    // 显示加载状态
+    showLoading(true);
+    
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      const chunk = decoder.decode(value, { stream: true });
+      fullResponse += chunk;
+      
+      // 实时更新UI显示
+      updateChatResponse(chunk);
+    }
+    
+    // 完成加载
+    showLoading(false);
+    console.log('消息发送成功，完整响应:', fullResponse);
+    
+  } catch (error) {
+    console.error('发送消息错误:', error);
+    showLoading(false);
+    showError(error.message || '发送消息失败');
+  }
+};
+
+// 使用示例
+document.getElementById('send-button').addEventListener('click', async () => {
+  const message = document.getElementById('message-input').value;
+  if (!message.trim()) return;
+  
+  // 添加用户消息到聊天界面
+  addMessageToChat('user', message);
+  document.getElementById('message-input').value = '';
+  
+  // 发送消息到服务器
+  await sendMessage(currentDialogId, message);
 });
 ```
 
-#### 5.2.3 处理token过期
+#### 5.2.4 向量相似搜索
+
+```javascript
+// 向量相似搜索示例
+const searchSimilarContent = async (query) => {
+  try {
+    const response = await fetch('http://localhost:8080/api/rag/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query: query
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error('搜索失败');
+    }
+    
+    const results = await response.json();
+    console.log('搜索结果:', results);
+    
+    // 显示搜索结果
+    displaySearchResults(results);
+    return results;
+  } catch (error) {
+    console.error('搜索错误:', error);
+    showError('搜索失败，请重试');
+    return [];
+  }
+};
+
+// 使用示例
+const query = '如何学习C语言';
+const results = await searchSimilarContent(query);
+```
+
+#### 5.2.5 处理token过期
 
 前端应该在每次API调用后检查响应状态码，如果收到401 Unauthorized错误，说明token已经过期或无效，需要：
 1. 清除本地存储中的token和用户信息
 2. 跳转到登录页面，要求用户重新登录
 3. 重新获取新的token
 
-### 5.3 前端登录代码示例
+```javascript
+// 统一的API调用函数（包含token过期处理）
+const apiCall = async (url, options = {}) => {
+  const token = localStorage.getItem('token');
+  
+  const defaultHeaders = {
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` })
+  };
+  
+  const config = {
+    ...options,
+    headers: {
+      ...defaultHeaders,
+      ...options.headers
+    }
+  };
+  
+  try {
+    const response = await fetch(url, config);
+    
+    if (response.status === 401) {
+      // Token过期，跳转到登录页面
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('userId');
+      window.location.href = '/login';
+      throw new Error('登录已过期，请重新登录');
+    }
+    
+    if (!response.ok) {
+      throw new Error(`请求失败: ${response.status}`);
+    }
+    
+    // 检查是否是流式响应
+    if (response.headers.get('Content-Type')?.includes('text/plain')) {
+      return response.body; // 返回ReadableStream
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('API调用错误:', error);
+    throw error;
+  }
+};
+```
+
+### 5.3 前端最佳实践
+
+1. **统一的API调用封装**：创建一个API服务层，封装所有API调用，处理认证、错误和重试逻辑
+2. **状态管理**：使用状态管理库（如Redux、Vuex等）管理全局状态，如用户信息、对话列表等
+3. **错误处理**：统一处理API错误，显示友好的错误信息给用户
+4. **加载状态**：在API请求期间显示加载指示器，提升用户体验
+5. **输入验证**：在前端进行输入验证，减少无效的API调用
+6. **字符限制**：实现字符限制验证，防止发送超过2000字符的消息
+7. **重试机制**：对于网络错误，实现自动重试机制
+8. **缓存策略**：缓存频繁使用的数据，减少API调用
+9. **响应式设计**：确保前端在不同设备上都能正常工作
+10. **性能优化**：优化API调用，减少不必要的请求，使用批量请求等
+
+### 5.4 前端登录代码示例
 
 以下是一个完整的前端登录页面代码示例，与后端API完全匹配：
 
@@ -544,6 +726,7 @@ if (!token) {
             align-items: center;
             height: 100vh;
         }
+
         .login-container {
             background-color: white;
             padding: 40px;
@@ -551,20 +734,24 @@ if (!token) {
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             width: 350px;
         }
+
         h2 {
             text-align: center;
             margin-bottom: 30px;
             color: #333;
         }
+
         .form-group {
             margin-bottom: 20px;
         }
+
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
             color: #555;
         }
+
         input {
             width: 100%;
             padding: 10px;
@@ -572,11 +759,13 @@ if (!token) {
             border-radius: 4px;
             font-size: 16px;
         }
+
         input:focus {
             outline: none;
             border-color: #4CAF50;
             box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
         }
+
         .btn {
             width: 100%;
             padding: 12px;
@@ -589,9 +778,11 @@ if (!token) {
             cursor: pointer;
             transition: background-color 0.3s;
         }
+
         .btn:hover {
             background-color: #45a049;
         }
+
         .error-message {
             color: red;
             text-align: center;
@@ -601,85 +792,88 @@ if (!token) {
             border-radius: 4px;
             display: none;
         }
+
         .login-link {
             text-align: center;
             margin-top: 20px;
         }
+
         .login-link a {
             color: #4CAF50;
             text-decoration: none;
         }
+
         .login-link a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h2>用户注册</h2>
-        <form id="register-form">
-            <div class="form-group">
-                <label for="username">用户名</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="email">邮箱</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">密码</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit" class="btn">注册</button>
-            <div id="error-message" class="error-message"></div>
-        </form>
-        <div class="login-link">
-            已有账号？<a href="login.html">立即登录</a>
+<div class="login-container">
+    <h2>用户注册</h2>
+    <form id="register-form">
+        <div class="form-group">
+            <label for="username">用户名</label>
+            <input type="text" id="username" name="username" required>
         </div>
+        <div class="form-group">
+            <label for="email">邮箱</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">密码</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn">注册</button>
+        <div id="error-message" class="error-message"></div>
+    </form>
+    <div class="login-link">
+        已有账号？<a href="login.html">立即登录</a>
     </div>
+</div>
 
-    <script>
-        document.getElementById('register-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('error-message');
-            
-            // 重置错误信息
-            errorMessage.style.display = 'none';
-            
-            // 发送注册请求
-            fetch('http://localhost:8080/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    username: username,
-                    email: email,
-                    password: password
+<script>
+    document.getElementById('register-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const errorMessage = document.getElementById('error-message');
+
+        // 重置错误信息
+        errorMessage.style.display = 'none';
+
+        // 发送注册请求
+        fetch('http://localhost:8080/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                userName: username,
+                email: email,
+                password: password
+            })
+        })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('注册失败');
+                    }
+                    return response.json();
                 })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                // 注册成功，跳转到登录页面
-                alert('注册成功！请登录');
-                window.location.href = 'login.html';
-            })
-            .catch(error => {
-                // 显示错误信息
-                errorMessage.textContent = error.message;
-                errorMessage.style.display = 'block';
-            });
-        });
-    </script>
+                .then(() => {
+                    // 注册成功，跳转到登录页面
+                    alert('注册成功！请登录');
+                    window.location.href = 'login.html';
+                })
+                .catch(error => {
+                    // 显示错误信息
+                    errorMessage.textContent = error.message;
+                    errorMessage.style.display = 'block';
+                });
+    });
+</script>
 </body>
 </html>
 ```
