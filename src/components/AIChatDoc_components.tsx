@@ -1,4 +1,4 @@
-import { Input, Button, ConfigProvider } from "antd";
+import { Input, Button, ConfigProvider, message } from "antd";
 import { useState, type FC, useEffect, useRef } from "react";
 import {
     SendOutlined,
@@ -19,7 +19,7 @@ const AIChatDoc_components: FC = () => {
     const { isLogin, token, userId } = useLogin();
     const nav = useNavigate();
     const chatContainerRef = useRef<HTMLDivElement>(null);
-
+    const [messageApi, contextHolder] = message.useMessage();
     const scrollToBottom = () => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop =
@@ -32,6 +32,13 @@ const AIChatDoc_components: FC = () => {
     }, [chat]);
 
     const handleAsk = async () => {
+        if (chat.length >= 100) {
+            messageApi.open({
+                type: "warning",
+                content: "此对话次数超限，请开启新的对话。",
+            });
+            return;
+        }
         if (!isLogin) {
             nav("/login");
             return;
@@ -45,7 +52,11 @@ const AIChatDoc_components: FC = () => {
                 newChat(res.id);
                 currentId = res.id;
             } else {
-                console.error("Failed to create new chat:", res.message);
+                // console.error("Failed to create new chat:", res.message);
+                messageApi.open({
+                    type: "error",
+                    content: "内部错误",
+                });
                 setAsking(false);
                 return;
             }
@@ -71,6 +82,12 @@ const AIChatDoc_components: FC = () => {
                 buffer += decoder.decode(value, { stream: true });
                 setAns(t.toString(), buffer);
             }
+        } else {
+            messageApi.open({
+                type: "error",
+                content: "内部错误",
+            });
+            setAns(chat.length.toString(), "");
         }
         setAsking(false);
     };
@@ -91,6 +108,7 @@ const AIChatDoc_components: FC = () => {
                 },
             }}
         >
+            {contextHolder}
             <div
                 ref={chatContainerRef}
                 className="mb-2 p-2  min-h-75 max-h-75 rounded-[5px] border border-gray-300 overflow-auto"
@@ -116,8 +134,10 @@ const AIChatDoc_components: FC = () => {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="请输入您的问题。"
+                maxLength={2000}
+                showCount
             />
-            <div className="w-full pt-1 flex justify-end gap-2">
+            <div className="w-full pt-1 flex justify-end gap-2 mt-5">
                 <div className="w-full flex items-center">
                     {/* <Switch
                         checkedChildren="快速模式"

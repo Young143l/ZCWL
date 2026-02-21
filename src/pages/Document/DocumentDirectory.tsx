@@ -1,11 +1,11 @@
 import { useEffect, useState, type FC } from "react";
 import { useParams } from "react-router-dom";
-import { type DocDir, type DocInfo, getDoc } from "../api/Doc_api";
-import Chaper_componenents from "../components/Chapter_components";
-import DocInfoCard_components from "../components/DocInfoCard_components";
+import { type DocDir, type DocInfo, getDoc } from "../../api/Doc_api";
+import Chaper_componenents from "../../components/Chapter_components";
+import DocInfoCard_components from "../../components/DocInfoCard_components";
 import { Skeleton } from "antd";
-import Template_Page from "./Template_Page";
-import DocBreadcrumb_components from "../components/DocBreadcrumb_components";
+import Template_Page from "../Template_Page";
+import DocBreadcrumb_components from "../../components/DocBreadcrumb_components";
 const DocumentDirectory: FC = () => {
     const { d_id } = useParams();
     const [docDirectory, setDocDirectory] = useState<DocDir[]>([]);

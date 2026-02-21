@@ -36,7 +36,13 @@ export const getDoc: (d_id: string) => Promise<{
         }
         const json: { docInfo: DocInfo; docDir: DocDir[] } = await res.json();
         if (json) {
-            return { ok: true, docInfo: json.docInfo,docDir: json.docDir};
+            return { ok: true, docInfo: json.docInfo,docDir: json.docDir.sort((a:DocDir,b:DocDir)=>{
+                if(a.id>b.id){
+                    return 1;
+                }else{
+                    return -1;
+                }
+            })};
         }
         throw Error("Response Error!");
     } catch (e) {

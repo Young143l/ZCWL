@@ -1,6 +1,6 @@
 import { useEffect, useState, type FC } from "react";
 import { Link, useParams } from "react-router-dom";
-import Template_Page from "./Template_Page";
+import Template_Page from "../Template_Page";
 import ReactMarkdown from "react-markdown";
 import { Menu, type MenuProps } from "antd";
 import {
@@ -8,8 +8,8 @@ import {
     getDoc,
     type DocInfo,
     type DocContent,
-} from "../api/Doc_api";
-import DocBreadcrumb_components from "../components/DocBreadcrumb_components";
+} from "../../api/Doc_api";
+import DocBreadcrumb_components from "../../components/DocBreadcrumb_components";
 type MenuItem = Required<MenuProps>["items"][number];
 import "github-markdown-css/github-markdown.css";
 import remarkGfm from "remark-gfm";

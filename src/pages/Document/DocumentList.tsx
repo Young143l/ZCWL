@@ -1,9 +1,9 @@
 import { Divider, Skeleton, Empty, Card } from "antd";
-import DocCard_component from "../components/DocCard_components";
-import Hello_Sum_component from "../components/Hello_Sum_components";
+import DocCard_component from "../../components/DocCard_components";
+import Hello_Sum_component from "../../components/Hello_Sum_components";
 import { useEffect, useState } from "react";
-import { type DocInfo, getDocList } from "../api/Doc_api";
-import Template_Page from "./Template_Page";
+import { type DocInfo, getDocList } from "../../api/Doc_api";
+import Template_Page from "../Template_Page";
 const DocumentList = () => {
     const [docList, setDocList] = useState<DocInfo[]>([]);
     const [load, setLoad] = useState<boolean>(true);

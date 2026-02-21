@@ -9,11 +9,13 @@ import Main_layout from "./layout/Main_layout.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Home from "./pages/Home.tsx";
 import Login from "./pages/Login.tsx";
-import DocumentList from "./pages/DocumentList.tsx";
-import DocumentContent from "./pages/DocumentContent.tsx";
+import DocumentList from "./pages/Document/DocumentList.tsx";
+import DocumentContent from "./pages/Document/DocumentContent.tsx";
 import "./index.css";
-import DocumentDirectory from "./pages/DocumentDirectory.tsx";
-import {ConfigProvider} from "antd"
+import DocumentDirectory from "./pages/Document/DocumentDirectory.tsx";
+import ProjectList from "./pages/Project/ProjectList.tsx";
+import { ConfigProvider } from "antd";
+import CodeSF from "./pages/Code/CodeSF.tsx";
 const router = createBrowserRouter([
     {
         element: (
@@ -40,6 +42,14 @@ const router = createBrowserRouter([
                 element: <DocumentList />,
             },
             {
+                path: "/project",
+                element: <ProjectList />,
+            },
+            {
+                path: "/code/sf",
+                element: <CodeSF />,
+            },
+            {
                 path: "*",
                 element: <NotFound />,
             },
@@ -56,8 +66,8 @@ createRoot(document.getElementById("root")!).render(
         <ConfigProvider
             theme={{
                 token: {
-                    colorPrimary:"#13c2c2",
-                    colorPrimaryBorder:"#87e8de"
+                    colorPrimary: "#13c2c2",
+                    colorPrimaryBorder: "#87e8de",
                 },
             }}
         >

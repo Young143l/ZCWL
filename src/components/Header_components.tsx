@@ -147,7 +147,7 @@ const Header_components: FC = () => {
                         content={isLogin ? LoginContent : unLoginContent}
                     >
                         <div>
-                            <UserAvatar_components />
+                            <UserAvatar_components size={"large"} />
                         </div>
                     </Popover>
                 </div>
@@ -168,7 +168,7 @@ const Header_components: FC = () => {
                     size="280"
                 >
                     <div className="flex flex-col justify-center items-center  m-2 gap-1">
-                        <UserAvatar_components />
+                        <UserAvatar_components size={"large"} />
                         {isLogin ? (
                             <>
                                 <p className="text-xl text-center text-black">

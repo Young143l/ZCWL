@@ -1,9 +1,8 @@
-import { FloatButton, Modal } from "antd";
+import { Avatar, FloatButton, Modal } from "antd";
 import {
     ArrowUpOutlined,
     SyncOutlined,
     HomeOutlined,
-    OpenAIOutlined,
 } from "@ant-design/icons";
 import { useState, type FC } from "react";
 import { useNavigate,useLocation } from "react-router-dom";
@@ -26,7 +25,7 @@ const FloatTools_components: FC = () => {
             <FloatButton.Group shape="square">
                 
                 <FloatButton
-                    icon={<OpenAIOutlined />}
+                    icon={<Avatar src="../../public/qwen.svg" size={24} />}
                     onClick={() => setIsAIChatOpen(true)}
                 />
                 {location.pathname==="/"?<></> :<FloatButton icon={<HomeOutlined />} onClick={() => nav("/")} />}

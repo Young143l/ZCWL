@@ -9,7 +9,7 @@ interface TemplateNoSiderProps {
 
 const Template_Page: FC<TemplateNoSiderProps> = ({ children, sider }) => {
     return (
-        <div className="w-full bg-white rounded-xl overflow-hidden p-2">
+        <div className="w-full bg-white rounded-xl  p-2">
             <Layout>
                 {sider ? (
                     <Sider className="hidden md:block" >{sider}</Sider>
