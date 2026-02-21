@@ -1,0 +1,21 @@
+{
+  "name": "zcwl_doc_manager",
+  "version": "1.0.0",
+  "description": "Manager the document of ZCWL.",
+  "author": "Young143",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "newdoc": "node dist/newdoc.js",
+    "dev_newdoc": "tsc && node dist/newdoc.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "pg": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "@types/pg": "^8.16.0",
+    "typescript": "^5.9.3"
+  }
+}
