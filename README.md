@@ -1,136 +1,198 @@
-# ZCWL_front_end
+# ZCWL Frontend
 
-智创未来（ZCWL）前端项目是一个基于 React 和 Vite 构建的现代化前端应用，专注于提供轻量级、高性能的用户界面体验。
+![React](https://img.shields.io/badge/React-19.2.0-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7.2.4-646CFF?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.18-06B6D4?logo=tailwind-css&logoColor=white)
+![Ant Design](https://img.shields.io/badge/Ant_Design-6.2.1-0170FE?logo=ant-design&logoColor=white)
 
-## 技术栈
+ZCWL (智能文档与代码工作平台) is a comprehensive web application that combines document management, code editing, and AI-powered chat functionality into a unified workspace. Built with modern web technologies, it provides an intuitive interface for managing projects, collaborating on documents, and getting AI assistance for coding and documentation tasks.
 
-- **React**: ^19.2.0 - 用于构建用户界面的 JavaScript 库
-- **Vite**: ^7.2.4 - 下一代前端构建工具，提供快速的热更新和冷启动
-- **TypeScript**: ~5.9.3 - 为 JavaScript 添加静态类型检查
-- **Ant Design**: ^6.2.1 - 企业级 UI 设计语言和组件库
-- **Tailwind CSS**: ^4.1.18 - 实用优先的 CSS 框架
-- **React Router DOM**: ^7.12.0 - React 应用的声明式路由
-- **Zustand**: ^5.0.10 - 轻量级状态管理解决方案
-- **React Markdown**: ^10.1.0 - 支持 Markdown 渲染的 React 组件
+## 🌟 Features
 
-## 项目结构
+### Document Management
+- **Document Organization**: Hierarchical document structure with directories and files
+- **Rich Text Editing**: Markdown-based document editing with preview support
+- **Document Browsing**: Easy navigation through document lists and directories
+- **Project Integration**: Documents organized within project contexts
 
-```
-ZCWL_front_end/
-├── src/
-│   ├── api/                    # API 请求模块
-│   │   ├── Doc_api.ts          # 文档相关API
-│   │   └── Login_api.ts        # 登录相关API
-│   ├── components/             # 可复用的UI组件
-│   │   ├── Chapter_components.tsx  # 章节组件
-│   │   ├── DocCard_components.tsx  # 文档卡片组件
-│   │   ├── DocInfo_components.tsx  # 文档信息组件
-│   │   ├── Footer_components.tsx   # 页脚组件
-│   │   ├── Header_components.tsx   # 页眉组件
-│   │   ├── Hello_Sum_components.tsx # 汇总组件
-│   │   └── ToTop_components.tsx     # 返回顶部组件
-│   ├── layout/                 # 页面布局组件
-│   │   └── Main_layout.tsx     # 主布局
-│   ├── pages/                  # 页面组件
-│   │   ├── DocumentContent.tsx # 文档内容页
-│   │   ├── DocumentDirectory.tsx # 文档目录页
-│   │   ├── DocumentList.tsx    # 文档列表页
-│   │   ├── Home.tsx            # 首页
-│   │   ├── Login.tsx           # 登录页
-│   │   └── NotFound.tsx        # 404页面
-│   ├── status/                 # 状态管理
-│   │   └── Login_status.tsx    # 登录状态管理
-│   ├── index.css               # 全局样式
-│   └── main.tsx                # 应用入口文件
-├── public/                     # 静态资源
-├── test/                       # 测试文件
-├── .env                        # 环境变量配置
-├── .env.template               # 环境变量模板
-├── .gitignore                  # Git 忽略配置
-├── eslint.config.js            # ESLint 配置
-├── index.html                  # HTML 模板
-├── package.json                # 项目依赖和脚本
-├── tsconfig.app.json           # TypeScript 应用配置
-├── tsconfig.json               # TypeScript 总配置
-├── tsconfig.node.json          # TypeScript Node配置
-├── vite.config.ts              # Vite 配置
-└── README.md                   # 项目说明文档
-```
+### Code Editing
+- **Integrated Code Editor**: Monaco editor integration for syntax highlighting and code completion
+- **Multiple Language Support**: Support for various programming languages
+- **Code Collaboration**: Share and collaborate on code snippets
 
-## 功能特性
+### AI Chat Assistant
+- **Intelligent Q&A**: AI-powered responses to technical and documentation questions
+- **Context-Aware**: Understands project context and provides relevant answers
+- **Streaming Responses**: Real-time response streaming for better user experience
+- **Conversation History**: Maintains chat history for ongoing conversations
 
-- 用户登录认证
-- 文档列表展示
-- 文档内容浏览
-- 响应式布局适配移动端
-- 状态管理（使用Zustand）
-- Markdown文档渲染
+### User Management
+- **Authentication**: Secure login system with token-based authentication
+- **User Profiles**: Personalized user experience with avatar support
+- **Session Management**: Persistent sessions with proper logout handling
 
-## 安装与运行
+### UI/UX Features
+- **Responsive Design**: Works seamlessly across desktop and mobile devices
+- **Modern Interface**: Clean, professional design using Ant Design components
+- **Floating Tools**: Accessible floating toolbar for quick actions
+- **Custom Themes**: Configurable theme support with Tailwind CSS
 
-### 环境要求
+## 🚀 Quick Start
 
-- Node.js (建议 v18 或更高版本)
-- npm 包管理器
+### Prerequisites
+- Node.js (v18 or higher)
+- npm (v8 or higher) or yarn
+- Git
 
-### 安装步骤
+### Installation
 
-1. 克隆项目到本地：
+1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone git@github.com:Young143l/ZCWL_front_end.git
    cd ZCWL_front_end
    ```
 
-2. 安装项目依赖：
+2. **Install dependencies**
    ```bash
    npm install
+   # or
+   yarn install
    ```
 
-3. 复制环境变量模板：
-   ```bash
-   cp .env.template .env
-   ```
+3. **Configure environment variables**
+   - Copy the template file:
+     ```bash
+     cp .env.template .env
+     ```
+   - Edit the `.env` file and set your backend URL:
+     ```env
+     VITE_BACK_END='http://your-backend-url'
+     ```
 
-4. 启动开发服务器：
+4. **Start the development server**
    ```bash
    npm run dev
+   # or
+   yarn dev
    ```
-   
-5. 在浏览器中打开 [http://localhost:5173](http://localhost:5173) 查看应用
 
-## 可用脚本
+5. **Open your browser**
+   Visit `http://localhost:5173` (or the port shown in the terminal)
 
-- `npm run dev` - 启动开发服务器（带有热重载）
-- `npm run build` - 构建生产版本到 `dist` 目录
-- `npm run preview` - 预览生产构建
-- `npm run lint` - 运行 ESLint 进行代码检查
+### Available Scripts
 
-## 开发指南
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Starts the development server with hot reloading |
+| `npm run build` | Builds the application for production |
+| `npm run preview` | Locally previews the production build |
+| `npm run lint` | Runs ESLint to check for code quality issues |
 
-### 组件开发
+## 📁 Project Structure
 
-- 所有可复用的UI组件放置在 [src/components](./src/components) 目录下
-- 页面级别的组件放置在 [src/pages](./src/pages) 目录下
-- 使用 TypeScript 编写组件，确保类型安全
+```
+ZCWL_front_end/
+├── public/                 # Static assets
+├── src/
+│   ├── api/               # API service layer
+│   │   ├── AIChatDoc_api.ts    # AI chat API endpoints
+│   │   ├── Doc_api.ts          # Document management API
+│   │   ├── Login_api.ts        # Authentication API
+│   │   └── Project_api.ts      # Project management API
+│   ├── components/        # Reusable UI components
+│   │   ├── AIChatBody_components.tsx   # AI chat message display
+│   │   ├── AIChatDoc_components.tsx    # AI chat interface
+│   │   ├── Chapter_components.tsx      # Document chapter components
+│   │   ├── DocBreadcrumb_components.tsx # Document navigation breadcrumbs
+│   │   ├── DocCard_components.tsx      # Document cards for listing
+│   │   ├── FloatTools_components.tsx   # Floating toolbar
+│   │   ├── Header_components.tsx       # Application header
+│   │   ├── Footer_components.tsx       # Application footer
+│   │   ├── SF_Ask_components.tsx       # Ask/Send functionality
+│   │   ├── SF_Editor_components.tsx    # Code editor components
+│   │   └── SF_View_componetns.tsx      # View/Display components
+│   ├── layout/            # Layout components
+│   │   └── Main_layout.tsx             # Main application layout
+│   ├── pages/             # Page components
+│   │   ├── Home.tsx                    # Home page
+│   │   ├── Login.tsx                   # Login page
+│   │   ├── NotFound.tsx                # 404 page
+│   │   ├── Code/                       # Code-related pages
+│   │   │   └── CodeSF.tsx              # Code editor page
+│   │   ├── Document/                   # Document-related pages
+│   │   │   ├── DocumentContent.tsx     # Document content view
+│   │   │   ├── DocumentDirectory.tsx   # Document directory view
+│   │   │   └── DocumentList.tsx        # Document list view
+│   │   └── Project/                    # Project-related pages
+│   │       └── ProjectList.tsx         # Project list view
+│   ├── status/            # State management (Zustand stores)
+│   │   ├── AIChatDoc_status.ts         # AI chat state
+│   │   └── Login_status.ts             # Authentication state
+│   ├── index.css          # Global styles
+│   └── main.tsx           # Application entry point
+├── .env.template          # Environment variables template
+├── vite.config.ts         # Vite configuration
+├── tsconfig.json          # TypeScript configuration
+├── package.json           # Project dependencies and scripts
+└── README.md              # This file
+```
 
-### API 调用
+## ⚙️ Environment Variables
 
-- API 调用封装在 [src/api](./src/api) 目录下
-- 使用 fetch API 进行网络请求
-- 统一处理错误和加载状态
+The application requires the following environment variables:
 
-### 状态管理
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `VITE_BACK_END` | Backend API base URL | `http://localhost:3000` or `https://api.yourdomain.com` |
 
-- 使用 Zustand 进行全局状态管理
-- 登录状态管理位于 [src/status/Login_status.tsx](./src/status/Login_status.tsx)
+**Note**: Environment variables prefixed with `VITE_` are exposed to the client-side code by Vite.
 
-## 部署
+## 🛠️ Technologies Used
 
-要部署此应用，请执行以下步骤：
+### Core Frameworks
+- **React 19**: Modern JavaScript library for building user interfaces
+- **TypeScript**: Typed superset of JavaScript for better code quality
+- **Vite**: Next-generation frontend build tool with instant HMR
 
-1. 构建生产版本：
+### UI Libraries
+- **Ant Design**: Enterprise-level UI design language and React components
+- **Tailwind CSS**: Utility-first CSS framework for rapid UI development
+
+### Additional Libraries
+- **@monaco-editor/react**: React wrapper for Monaco Editor (VS Code's editor)
+- **react-router-dom**: Declarative routing for React applications
+- **zustand**: Lightweight state management solution
+- **react-markdown**: Markdown renderer for React
+- **github-markdown-css**: GitHub-style markdown styling
+
+### Development Tools
+- **ESLint**: JavaScript/TypeScript linter for code quality
+- **Prettier**: Code formatter (configured via ESLint)
+
+## 🧪 Testing
+
+The project includes ESLint configuration for code quality assurance. Run the following command to check for linting errors:
+
+```bash
+npm run lint
+```
+
+## 📦 Deployment
+
+To deploy the application:
+
+1. **Build for production**
    ```bash
    npm run build
    ```
 
-2. 将 `dist/` 目录中的文件部署到静态服务器或 CDN 上
+2. **Serve the built files**
+   The build output will be in the `dist/` directory. You can serve it using any static file server:
+
+   ```bash
+   # Using Vite's preview server
+   npm run preview
+
+   # Or deploy to any static hosting service (Netlify, Vercel, GitHub Pages, etc.)
+   ```
