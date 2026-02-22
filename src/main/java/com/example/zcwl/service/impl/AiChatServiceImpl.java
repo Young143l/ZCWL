@@ -476,7 +476,7 @@ public class AiChatServiceImpl implements AiChatService {
         // 系统消息
         Map<String, String> systemMessage = new HashMap<>();
         systemMessage.put("role", "system");
-        systemMessage.put("content", "你是一个智能助手，必须严格按照用户的指令执行任务。当处理用户的最新问题时，请注意以下优先级：1. 首先参考最近的三轮对话内容，这是最重要的上下文 2. 然后参考历史记忆提取结果，作为补充信息 3. 最后参考相关资料。请确保你的回答基于上述信息，保持连贯性和一致性。");
+        systemMessage.put("content", "你是一个智能助手，必须严格按照用户的指令执行任务。当处理用户的最新问题时，请注意以下优先级：1. 首先参考最近的三轮对话内容，这是最重要的上下文 2. 然后参考历史记忆提取结果，作为补充信息 3. 最后提供的从知识库中提取的参考相关资料。请确保你的回答基于上述信息，保持连贯性和一致性。如果相关资料中没有此方面的内容则不需要参考，自行回答即可，但需要提示用户知识库中没有此相关内容。回答时不要说您提供的资料相关，涉及到资料的都给替换为知识库中。");
         messages.add(systemMessage);
         
         // 添加历史问答记录作为上下文（优先）
