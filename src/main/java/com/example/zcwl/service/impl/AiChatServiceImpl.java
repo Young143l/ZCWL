@@ -290,14 +290,59 @@ public class AiChatServiceImpl implements AiChatService {
                         // 在异步回调中重新加载Dialog对象，避免延迟加载错误
                         Dialog dialogToSave = dialogRepository.findById(dialogId)
                             .orElseThrow(() -> new RuntimeException("Dialog not found: " + dialogId));
-                        // 使用AopContext.currentProxy()获取代理对象，确保@Transactional注解生效
-                        AiChatServiceImpl proxy = (AiChatServiceImpl) AopContext.currentProxy();
-                        proxy.saveChatMessage(dialogToSave, ask, fullAnswer.toString());
+                        // 直接调用saveChatMessage方法，因为我们在异步线程中，AOP代理不可用
+                        // 注意：这里会失去@Transactional注解的作用，但我们可以在方法内部处理事务
+                        saveChatMessageWithoutTransaction(dialogToSave, ask, fullAnswer.toString());
                     } catch (Exception e) {
                         logger.error("保存对话消息失败: {}", e.getMessage(), e);
                     }
                 }, java.util.concurrent.Executors.newSingleThreadExecutor());
             });
+    }
+    
+    /**
+     * 保存问答记录并更新对话次数（无事务版本）
+     * 用于异步线程中调用，避免AOP代理问题
+     * @param dialog 对话对象
+     * @param ask 问题
+     * @param ans 回答
+     * @return 下一次问答次数
+     */
+    protected int saveChatMessageWithoutTransaction(Dialog dialog, String ask, String ans) {
+        // 获取当前问答次数
+        int qaTimes = dialog.getQaTimes() != null ? dialog.getQaTimes() : 0;
+        int nextTimes = qaTimes + 1;
+        
+        // 创建新的问答记录
+        QueAns queAns = new QueAns();
+        QueAns.QueAnsId queAnsId = new QueAns.QueAnsId(dialog.getdId(), nextTimes);
+        queAns.setId(queAnsId);
+        queAns.setDate(LocalDateTime.now());
+        queAns.setQue(ask);
+        // 保存完整的回答，不进行截断
+        queAns.setAns(ans);
+        queAns.setDialog(dialog);
+        queAnsRepository.save(queAns);
+        
+        // 更新对话的问答次数
+        dialog.setQaTimes(nextTimes);
+        dialogRepository.save(dialog);
+        
+        // 让AI提取用户特征和需求，保存到历史记录
+        // 直接调用方法，不使用代理
+        extractAndSaveUserFeatures(dialog, ask, ans);
+        
+        // 清除缓存，保证数据一致性
+        try {
+            String cacheKey = "chat:" + dialog.getdId();
+            redisTemplate.delete(cacheKey);
+            logger.info("清除对话缓存: {}", dialog.getdId());
+        } catch (Exception e) {
+            logger.error("Redis缓存删除错误: {}", e.getMessage(), e);
+            // 缓存错误不影响正常流程
+        }
+        
+        return nextTimes;
     }
     
     /**
@@ -357,9 +402,8 @@ public class AiChatServiceImpl implements AiChatService {
         dialogRepository.save(dialog);
         
         // 让AI提取用户特征和需求，保存到历史记录
-        // 使用AopContext.currentProxy()获取代理对象，确保@Transactional注解生效
-        AiChatServiceImpl proxy = (AiChatServiceImpl) AopContext.currentProxy();
-        proxy.extractAndSaveUserFeatures(dialog, ask, ans);
+        // 直接调用方法，不使用AOP代理
+        extractAndSaveUserFeatures(dialog, ask, ans);
         
         // 清除缓存，保证数据一致性
         try {

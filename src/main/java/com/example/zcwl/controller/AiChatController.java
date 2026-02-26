@@ -67,6 +67,19 @@ public class AiChatController {
         String uId = request.get("u_id");
         return aiChatService.createNewChat(uId);
     }
+    
+    /**
+     * 创建新的AI对话
+     * 接口：POST /aichatdoc/new
+     * @param request 请求参数
+     * @return 包含对话ID的Map
+     */
+    @PostMapping("/new")
+    public Map<String, Object> createNewChatNew(
+            @RequestBody Map<String, String> request) {
+        String uId = request.get("u_id");
+        return aiChatService.createNewChat(uId);
+    }
 
     /**
      * 新增指定ID的AI对话询问（流式返回）
@@ -126,10 +139,18 @@ public class AiChatController {
     public void handleException(Exception e, HttpServletResponse response) {
         logger.error("全局异常捕获: {}", e.getMessage(), e);
         try {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.setContentType("text/plain");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write("服务器内部错误: " + e.getMessage());
+            // 检查是否是Dialog not found错误
+            if (e.getMessage() != null && e.getMessage().startsWith("Dialog not found")) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.setContentType("text/plain");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("对话不存在: " + e.getMessage());
+            } else {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.setContentType("text/plain");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("服务器内部错误: " + e.getMessage());
+            }
             response.getWriter().close();
         } catch (Exception ex) {
             logger.error("发送错误响应失败: {}", ex.getMessage(), ex);
