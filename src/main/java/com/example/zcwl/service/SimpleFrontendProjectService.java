@@ -1,6 +1,7 @@
 package com.example.zcwl.service;
 
 import com.example.zcwl.entity.SimpleFrontendProject;
+import reactor.core.publisher.Flux;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
@@ -42,4 +43,21 @@ public interface SimpleFrontendProjectService {
      * @return 项目信息
      */
     Optional<SimpleFrontendProject> getSfProjectById(String sfId);
+
+    /**
+     * 流式生成代码
+     * @param message 生成代码的提示信息
+     * @return 流式响应的Flux
+     */
+    Flux<String> generateCodeStream(String message);
+
+    /**
+     * 在指定ID的项目中流式生成新的代码
+     * @param sfId 项目唯一标识符
+     * @param code 当前项目的代码内容
+     * @param message 新的代码生成提示信息
+     * @param selectId 选中的代码块ID列表
+     * @return 流式响应的Flux
+     */
+    Flux<String> generateCodeInSfProjectStream(String sfId, Map<String, String> code, String message, List<String> selectId);
 }

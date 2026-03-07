@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
 
 import java.util.*;
 import java.util.ArrayList;
@@ -307,5 +308,84 @@ public class CodeController {
         }
     }
 
+    /**
+     * 流式生成代码
+     * 接口：POST /code/stream
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 请求体：{"message":""}
+     * 响应：流式文本响应
+     */
+    @PostMapping("/stream")
+    public Flux<String> generateCodeStream(
+            @RequestBody Map<String, Object> request) {
+        logger.debug("流式生成代码: {}", request);
+        try {
+            // 验证请求参数
+            if (request == null || !request.containsKey("message") || request.get("message") == null || ((String) request.get("message")).trim().isEmpty()) {
+                return Flux.just("message参数不能为空");
+            }
+            
+            String message = (String) request.get("message");
+            return simpleFrontendProjectService.generateCodeStream(message);
+        } catch (Exception e) {
+            logger.error("流式生成代码失败", e);
+            return Flux.just("生成代码失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 在指定ID的项目中流式生成新的代码
+     * 接口：POST /code/sf/:id/stream
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 请求体：{"code":{"html":"", "css":"", "js":""}, "message":"", "selectId":["",""]}
+     * 响应：流式文本响应
+     */
+    @PostMapping("/sf/{id}/stream")
+    public Flux<String> generateCodeInSfProjectStream(
+            @PathVariable String id,
+            @RequestBody Map<String, Object> request) {
+        logger.debug("在项目 {} 中流式生成新代码: {}", id, request);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                return Flux.just("项目ID不能为空");
+            }
+            
+            // 验证请求体
+            if (request == null) {
+                return Flux.just("请求体不能为空");
+            }
+            
+            // 验证必要参数
+            if (!request.containsKey("code") || request.get("code") == null) {
+                return Flux.just("code参数不能为空");
+            }
+            
+            if (!request.containsKey("message") || request.get("message") == null || ((String) request.get("message")).trim().isEmpty()) {
+                return Flux.just("message参数不能为空");
+            }
+            
+            Map<String, String> code = (Map<String, String>) request.get("code");
+            // 处理前端可能传递的js字段
+            if (code != null) {
+                if (code.containsKey("js") && !code.containsKey("javascript")) {
+                    code.put("javascript", code.get("js"));
+                }
+            } else {
+                code = new HashMap<>();
+            }
+            
+            String message = (String) request.get("message");
+            List<String> selectId = (List<String>) request.get("selectId");
+            if (selectId == null) {
+                selectId = new ArrayList<>();
+            }
+            
+            return simpleFrontendProjectService.generateCodeInSfProjectStream(id, code, message, selectId);
+        } catch (Exception e) {
+            logger.error("流式生成代码失败", e);
+            return Flux.just("生成代码失败: " + e.getMessage());
+        }
+    }
 
 }

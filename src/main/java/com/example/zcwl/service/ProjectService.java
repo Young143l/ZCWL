@@ -1,6 +1,7 @@
 package com.example.zcwl.service;
 
 import com.example.zcwl.entity.Project;
+import reactor.core.publisher.Flux;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,4 +53,19 @@ public interface ProjectService {
      * @return 文档内容
      */
     String generateProjectDoc(Long id);
+
+    /**
+     * 流式处理项目相关问题
+     * @param id 项目ID
+     * @param question 问题内容
+     * @return 流式问题解答
+     */
+    Flux<String> askProjectStream(Long id, String question);
+
+    /**
+     * 流式生成项目学习分析文档
+     * @param id 项目ID
+     * @return 流式文档内容
+     */
+    Flux<String> generateProjectDocStream(Long id);
 }

@@ -26,7 +26,7 @@ import java.util.Optional;
  */
 
 @RestController
-@RequestMapping({"/api/doc-contents"})
+@RequestMapping({"/doc-contents"})
 
 
 public class DocContentsController {

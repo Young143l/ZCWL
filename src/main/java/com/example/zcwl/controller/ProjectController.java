@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
 
 import java.util.HashMap;
 import java.util.List;
@@ -254,6 +255,56 @@ public class ProjectController {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "生成文档失败");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 流式处理项目相关问题
+     * 接口：POST /project/ask/{id}/stream
+     * @param id 项目ID
+     * @param request 请求参数
+     * @return 流式问题解答
+     */
+    @PostMapping("/ask/{id}/stream")
+    public Flux<String> askProjectStream(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request) {
+        logger.debug("流式处理项目 {}: {}", id, request);
+        try {
+            // 验证请求参数
+            if (!request.containsKey("question")) {
+                return Flux.just("问题内容是必填项");
+            }
+            
+            String question = request.get("question");
+            return projectService.askProjectStream(id, question);
+        } catch (IllegalArgumentException e) {
+            logger.error("询问项目失败: {}", e.getMessage());
+            return Flux.just(e.getMessage());
+        } catch (Exception e) {
+            logger.error("询问项目失败", e);
+            return Flux.just("询问项目失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 流式生成该项目相关的学习分析文档
+     * 接口：GET /project/doc/{id}/stream
+     * @param id 项目ID
+     * @return 流式学习分析文档
+     */
+    @GetMapping("/doc/{id}/stream")
+    public Flux<String> generateProjectDocStream(
+            @PathVariable Long id) {
+        logger.debug("流式生成项目 {} 的学习分析文档", id);
+        try {
+            return projectService.generateProjectDocStream(id);
+        } catch (IllegalArgumentException e) {
+            logger.error("生成文档失败: {}", e.getMessage());
+            return Flux.just(e.getMessage());
+        } catch (Exception e) {
+            logger.error("生成文档失败", e);
+            return Flux.just("生成文档失败: " + e.getMessage());
         }
     }
 }

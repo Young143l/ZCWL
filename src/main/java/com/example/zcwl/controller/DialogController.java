@@ -31,9 +31,9 @@ import java.util.Optional;
 @RestController
 
 // @RequestMapping：设置这个控制器处理的基础URL路径
-// 作用：所有该控制器下的API接口都会以/api/dialogs开头
-// 例如：http://localhost:8080/api/dialogs
-@RequestMapping("/api/dialogs")
+// 作用：所有该控制器下的API接口都会以/dialogs开头
+// 例如：http://localhost:8080/dialogs
+@RequestMapping("/dialogs")
 
 @org.springframework.validation.annotation.Validated
 

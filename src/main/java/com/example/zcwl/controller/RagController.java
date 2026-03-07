@@ -19,7 +19,7 @@ import java.util.Map;
  * 处理基于向量检索的问答服务请求
  */
 @RestController
-@RequestMapping("/api/rag")
+@RequestMapping("/rag")
 public class RagController {
 
     private static final Logger logger = LoggerFactory.getLogger(RagController.class);

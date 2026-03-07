@@ -29,9 +29,9 @@ import java.util.Optional;
 @RestController
 
 // @RequestMapping：设置这个控制器处理的基础URL路径
-// 作用：所有该控制器下的API接口都会以/api/tags开头
-// 例如：http://localhost:8080/api/tags
-@RequestMapping("/api/tags")
+// 作用：所有该控制器下的API接口都会以/tags开头
+// 例如：http://localhost:8080/tags
+@RequestMapping("/tags")
 
 @org.springframework.validation.annotation.Validated
 public class TagsController {

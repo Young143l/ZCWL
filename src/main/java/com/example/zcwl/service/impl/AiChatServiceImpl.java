@@ -27,7 +27,6 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import reactor.core.publisher.Flux;
-import org.springframework.aop.framework.AopContext;
 
 // Resilience4j 导入
 import io.github.resilience4j.ratelimiter.RateLimiter;
@@ -303,12 +302,12 @@ public class AiChatServiceImpl implements AiChatService {
     /**
      * 保存问答记录并更新对话次数（无事务版本）
      * 用于异步线程中调用，避免AOP代理问题
+     *
      * @param dialog 对话对象
-     * @param ask 问题
-     * @param ans 回答
-     * @return 下一次问答次数
+     * @param ask    问题
+     * @param ans    回答
      */
-    protected int saveChatMessageWithoutTransaction(Dialog dialog, String ask, String ans) {
+    protected void saveChatMessageWithoutTransaction(Dialog dialog, String ask, String ans) {
         // 获取当前问答次数
         int qaTimes = dialog.getQaTimes() != null ? dialog.getQaTimes() : 0;
         int nextTimes = qaTimes + 1;
@@ -330,19 +329,17 @@ public class AiChatServiceImpl implements AiChatService {
         
         // 让AI提取用户特征和需求，保存到历史记录
         // 直接调用方法，不使用代理
-        extractAndSaveUserFeatures(dialog, ask, ans);
+        //extractAndSaveUserFeatures(dialog, ask, ans);
         
         // 清除缓存，保证数据一致性
         try {
             String cacheKey = "chat:" + dialog.getdId();
             redisTemplate.delete(cacheKey);
-            logger.info("清除对话缓存: {}", dialog.getdId());
         } catch (Exception e) {
             logger.error("Redis缓存删除错误: {}", e.getMessage(), e);
             // 缓存错误不影响正常流程
         }
-        
-        return nextTimes;
+
     }
     
     /**

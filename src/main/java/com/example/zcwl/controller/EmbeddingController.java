@@ -16,7 +16,7 @@ import java.util.Map;
  * 处理文本嵌入请求
  */
 @RestController
-@RequestMapping("/api/ai")
+@RequestMapping("/ai")
 public class EmbeddingController {
 
     private static final Logger logger = LoggerFactory.getLogger(EmbeddingController.class);
