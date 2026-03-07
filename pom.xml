@@ -27,6 +27,13 @@
         <logback.version>1.5.26</logback.version>
         <!-- 升级 Netty 到安全版本，修复多个 CVE -->
         <netty.version>4.1.130.Final</netty.version>
+        <!-- 升级 Jackson 到安全版本，修复 CVE-2026-29062 和 GHSA-72hv-8253-57qq -->
+        <jackson.version>2.20.1</jackson.version>
+        <tools.jackson.version>3.1.0</tools.jackson.version>
+        <!-- 升级 Tomcat 到安全版本，修复 CVE-2026-24734 -->
+        <tomcat.version>11.0.18</tomcat.version>
+
+
     </properties>
 
     <dependencyManagement>
@@ -51,6 +58,33 @@
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
             </dependency>
+
+            <!-- 强制升级Tomcat到安全版本，修复CVE-2026-24734漏洞 -->
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            
+            <!-- 强制升级tools.jackson到安全版本，修复CVE-2026-29062和GHSA-72hv-8253-57qq漏洞 -->
+            <dependency>
+                <groupId>tools.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${tools.jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            
+            <!-- 强制升级com.fasterxml.jackson到安全版本，修复GHSA-72hv-8253-57qq漏洞 -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>2.21.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            
+
         </dependencies>
     </dependencyManagement>
 
@@ -151,7 +185,7 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.12.5</version>
+            <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -237,50 +271,6 @@
             </exclusions>
         </dependency>
 
-        <!-- Spring WebFlux -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-            <exclusions>
-                <!-- 显式排除旧版本logback，避免漏洞 -->
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!-- Reactor Core -->
-        <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-core</artifactId>
-        </dependency>
-
-        <!-- Reactor Netty -->
-        <dependency>
-            <groupId>io.projectreactor.netty</groupId>
-            <artifactId>reactor-netty</artifactId>
-            <version>1.1.20</version>
-            <exclusions>
-                <!-- 排除有QUIC哈希碰撞DoS漏洞的依赖 -->
-                <exclusion>
-                    <groupId>io.netty.incubator</groupId>
-                    <artifactId>netty-incubator-codec-classes-quic</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        
-        <!-- Netty核心依赖 -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>${netty.version}</version>
-        </dependency>
-
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -289,11 +279,7 @@
             <optional>true</optional>
         </dependency>
         
-        <!-- Jackson JSON 解析库 -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
+
         
         <!-- Jakarta Servlet API -->
         <dependency>

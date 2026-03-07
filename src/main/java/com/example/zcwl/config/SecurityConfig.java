@@ -76,6 +76,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/users/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        // 允许code相关路径
+                        .requestMatchers("/code/**").permitAll()
                         // GET /users/:id 需要认证
                         // DELETE /users/** 需要认证
                         .requestMatchers("/doc/**").permitAll()

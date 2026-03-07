@@ -1,6 +1,8 @@
 package com.example.zcwl.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,12 +23,18 @@ public class SimpleFrontendProject {
     private Long id;
 
     @Column(name = "sf_id", unique = true, nullable = false)
+    @NotBlank(message = "sfId不能为空")
+    @Size(max = 50, message = "sfId长度不能超过50个字符")
     private String sfId;
 
     @Column(name = "project_name", nullable = false)
+    @NotBlank(message = "项目名称不能为空")
+    @Size(max = 100, message = "项目名称长度不能超过100个字符")
     private String projectName;
 
     @Column(name = "u_id", nullable = false)
+    @NotBlank(message = "用户ID不能为空")
+    @Size(max = 50, message = "用户ID长度不能超过50个字符")
     private String userId;
 
     @Column(name = "html", columnDefinition = "TEXT")

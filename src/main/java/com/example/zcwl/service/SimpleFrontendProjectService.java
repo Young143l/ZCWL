@@ -11,8 +11,8 @@ import java.util.Map;
 public interface SimpleFrontendProjectService {
 
     /**
-     * 获取指定用户的简单前端代码生成项目列表
-     * @param userId 用户ID
+     * 获取简单前端代码生成项目列表，可指定用户
+     * @param userId 用户ID，可为null
      * @return 项目列表
      */
     List<SimpleFrontendProject> getSfProjects(String userId);

@@ -9,7 +9,7 @@ import com.example.zcwl.repository.QueAnsRepository;
 import com.example.zcwl.repository.UserRepository;
 import com.example.zcwl.repository.ChatHistoryRepository;
 import com.example.zcwl.service.AiChatService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,7 +164,7 @@ public class AiChatServiceImpl implements AiChatService {
             if (cachedData != null) {
                 logger.info("从缓存中获取对话数据: {}", id);
                 // 反序列化缓存数据，添加类型参数避免未检查赋值
-                return objectMapper.readValue(cachedData, new com.fasterxml.jackson.core.type.TypeReference<>() {
+                return objectMapper.readValue(cachedData, new tools.jackson.core.type.TypeReference<>() {
                 });
             }
         } catch (Exception e) {
@@ -946,7 +946,7 @@ public class AiChatServiceImpl implements AiChatService {
     private Map<String, Object> parseJson(String json) {
         try {
             // 使用Jackson ObjectMapper解析JSON字符串为Map，添加类型参数避免未检查赋值
-            return objectMapper.readValue(json, new com.fasterxml.jackson.core.type.TypeReference<>() {
+            return objectMapper.readValue(json, new tools.jackson.core.type.TypeReference<>() {
             });
         } catch (Exception e) {
             logger.error("Error parsing JSON: {}", e.getMessage(), e);

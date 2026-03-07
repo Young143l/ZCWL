@@ -7,11 +7,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Web 配置类
- * 配置全局的 RestTemplate、WebClient Bean 和 CORS 过滤器
+ * 配置全局的 RestTemplate Bean 和 CORS 过滤器
  */
 @Configuration
 public class WebConfig {
@@ -32,20 +31,6 @@ public class WebConfig {
         // 如需自定义 ObjectMapper 配置，可以在这里进行
 
         return new RestTemplate(requestFactory);
-    }
-
-    /**
-     * 配置全局 WebClient Bean
-     * 统一设置超时、拦截器等
-     * @return 配置好的 WebClient
-     */
-    @Bean
-    public WebClient webClient() {
-        return WebClient.builder()
-                .codecs(configurer -> {
-                    configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024); // 16MB 最大内存
-                })
-                .build();
     }
 
     /**
