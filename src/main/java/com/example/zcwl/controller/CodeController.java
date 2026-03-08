@@ -32,13 +32,13 @@ public class CodeController {
 
     /**
      * 获取全部的代码生成项目的列表，可指定用户
-     * 接口：GET /code/projects?u_id="uid"
+     * 接口：GET /code/?uId="uid"
      * @param uId 用户ID
      * @return 项目列表
      */
-    @GetMapping("/projects")
+    @GetMapping("")
     public ResponseEntity<Map<String, Object>> getCodeProjects(
-            @RequestParam(value = "u_id", required = false) String uId) {
+            @RequestParam(value = "uId", required = false) String uId) {
         logger.debug("获取代码生成项目列表，用户ID: {}", uId);
         try {
             List<SimpleFrontendProject> projects = simpleFrontendProjectService.getSfProjects(uId);
@@ -64,39 +64,28 @@ public class CodeController {
         }
 
         Map<String, Object> response = new HashMap<>();
-        response.put("u_id", uId);
+        response.put("uId", uId);
         response.put("list", list);
         return response;
     }
 
-    /**
-     * 获取全部的代码生成项目的列表，可指定用户（兼容测试脚本）
-     * 接口：GET /code?u_id="uid"
-     * @param uId 用户ID
-     * @return 项目列表
-     */
-    @GetMapping("")
-    public ResponseEntity<Map<String, Object>> getCodeProjectsRoot(
-            @RequestParam(value = "u_id", required = false) String uId) {
-        logger.debug("获取代码生成项目列表（根路径），用户ID: {}", uId);
-        return getCodeProjects(uId);
-    }
+
 
     /**
      * 获取用户的简单前端代码生成项目列表
-     * 接口：GET /code/sf?u_id={用户id}
+     * 接口：GET /code/sf?uId={用户id}
      * @param uId 用户ID
      * @return 项目列表
      */
     @GetMapping("/sf")
     public ResponseEntity<Map<String, Object>> getSfProjectsByUserId(
-            @RequestParam("u_id") String uId) {
+            @RequestParam("uId") String uId) {
         logger.debug("获取用户 {} 的简单前端代码生成项目列表", uId);
         try {
             List<SimpleFrontendProject> projects = simpleFrontendProjectService.getSfProjects(uId);
             Map<String, Object> response = new HashMap<>();
             response.put("projects", projects);
-            response.put("u_id", uId);
+            response.put("uId", uId);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("获取项目列表失败", e);
@@ -127,10 +116,10 @@ public class CodeController {
             }
             
             // 验证必要参数
-            Object uIdObj = request.get("u_id");
+            Object uIdObj = request.get("uId");
             if (uIdObj == null || uIdObj.toString().trim().isEmpty()) {
                 Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("error", "u_id参数不能为空");
+                errorResponse.put("error", "uId参数不能为空");
                 return ResponseEntity.badRequest().body(errorResponse);
             }
             
@@ -182,7 +171,7 @@ public class CodeController {
 
     private ResponseEntity<Map<String, Object>> getMapResponseEntity(SimpleFrontendProject createdProject) {
         Map<String, Object> response = new HashMap<>();
-        response.put("sf_id", createdProject.getSfId());
+        response.put("sfId", createdProject.getSfId());
         response.put("code", Map.of(
                 "html", createdProject.getHtml(),
                 "css", createdProject.getCss(),
@@ -270,7 +259,7 @@ public class CodeController {
      * 获取指定ID的简易前端项目相关信息
      * 接口：GET /code/sf/:id
      * 请求头：Content-Type: application/json, Authorization: "Bearer token"
-     * 响应：成功(200 OK)：{"sf_id":"", "code":{"html":"", "css":"", "javascript":""}}
+     * 响应：成功(200 OK)：{"sfId":"", "name":"", "code":{"html":"", "css":"", "javascript":""}}
      */
     @GetMapping("/sf/{id}")
     public ResponseEntity<Map<String, Object>> getSfProjectById(
@@ -288,7 +277,8 @@ public class CodeController {
             if (projectOptional.isPresent()) {
                 SimpleFrontendProject project = projectOptional.get();
                 Map<String, Object> response = new HashMap<>();
-                response.put("sf_id", project.getSfId());
+                response.put("sfId", project.getSfId());
+                response.put("name", project.getProjectName());
                 response.put("code", Map.of(
                         "html", project.getHtml() != null ? project.getHtml() : "",
                         "css", project.getCss() != null ? project.getCss() : "",

@@ -10,7 +10,6 @@ import com.example.zcwl.utils.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
+    static {
+        LoggerFactory.getLogger(AuthServiceImpl.class);
+    }
+
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtTokenUtil jwtTokenUtil;
     private final UserRepository userRepository;
@@ -89,13 +91,17 @@ public class AuthServiceImpl implements AuthService {
             String token = jwtTokenUtil.generateToken(userDetails);
             System.out.println("Generated token: " + token);
             
+            // 测试token验证
+            System.out.println("Testing token validation...");
+            boolean isValid = jwtTokenUtil.validateToken(token, userDetails);
+            System.out.println("Token validation result: " + isValid);
+            
             // 返回登录响应
             LoginResponseDTO response = new LoginResponseDTO(token, user.getName(), user.getUId(), null);
             System.out.println("Login response: " + response);
             return response;
         } catch (Exception e) {
             System.out.println("Login error: " + e.getMessage());
-            e.printStackTrace();
             throw new RuntimeException("Invalid userId or password");
         }
     }

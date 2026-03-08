@@ -33,13 +33,13 @@ public class AiChatController {
 
     /**
      * 查询用户AI聊天记录
-     * 接口：GET /aichatdoc/?u_id=
+     * 接口：GET /aichatdoc/?uId=
      * @param uId 用户ID
      * @return 聊天记录列表
      */
     @GetMapping
     public Map<String, Object> getChatsByUserId(
-            @RequestParam("u_id") String uId) {
+            @RequestParam("uId") String uId) {
         return aiChatService.getChatsByUserId(uId);
     }
 
@@ -64,7 +64,7 @@ public class AiChatController {
     @PostMapping
     public Map<String, Object> createNewChat(
             @RequestBody Map<String, String> request) {
-        String uId = request.get("u_id");
+        String uId = request.get("uId");
         return aiChatService.createNewChat(uId);
     }
     
@@ -77,7 +77,7 @@ public class AiChatController {
     @PostMapping("/new")
     public Map<String, Object> createNewChatNew(
             @RequestBody Map<String, String> request) {
-        String uId = request.get("u_id");
+        String uId = request.get("uId");
         return aiChatService.createNewChat(uId);
     }
 
@@ -98,7 +98,7 @@ public class AiChatController {
         
         // 获取请求参数
         String ask = request.get("ask");
-        String uId = request.get("u_id");
+        String uId = request.get("uId");
         
         logger.debug("问题: {}", ask);
         logger.debug("用户ID: {}", uId);
@@ -110,8 +110,8 @@ public class AiChatController {
         }
         
         if (uId == null || uId.isEmpty()) {
-            logger.error("请求参数错误: u_id参数为空");
-            return Flux.error(new IllegalArgumentException("请求参数错误: u_id参数不能为空"));
+            logger.error("请求参数错误: uId参数为空");
+            return Flux.error(new IllegalArgumentException("请求参数错误: uId参数不能为空"));
         }
         
         logger.debug("调用aiChatService.addChatMessageStream获取流式回答...");

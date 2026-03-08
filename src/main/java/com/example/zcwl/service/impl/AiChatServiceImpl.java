@@ -654,7 +654,7 @@ public class AiChatServiceImpl implements AiChatService {
     private List<Map<String, Object>> getSimilarRecords(String query) {
         try {
             // 调用内部的向量搜索API
-            String searchUrl = "http://localhost:8080/api/rag/search";
+            String searchUrl = "http://localhost:8080/rag/search";
             
             Map<String, Object> requestData = new HashMap<>();
             requestData.put("query", query);
