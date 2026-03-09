@@ -82,10 +82,11 @@ public class SecurityConfig {
                         // DELETE /users/** 需要认证
                         .requestMatchers("/doc/**").permitAll()
                         .requestMatchers("/api/doc-contents/**").permitAll()
-                        // 允许AI聊天文档路径
+                        // 允许 AI 聊天文档路径
                         .requestMatchers("/aichatdoc/**").permitAll()
-                        // 允许RAG相关API路径
+                        // 允许 RAG 相关 API 路径（包括内部调用）
                         .requestMatchers("/api/rag/**").permitAll()
+                        .requestMatchers("/rag/**").permitAll()
                         // 允许所有OPTIONS请求
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // 允许Swagger相关路径
