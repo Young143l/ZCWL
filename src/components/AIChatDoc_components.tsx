@@ -1,4 +1,4 @@
-import { Input, Button, ConfigProvider, message } from "antd";
+import { Input, Button, ConfigProvider, message, theme } from "antd";
 import { useState, type FC, useEffect, useRef } from "react";
 import {
     SendOutlined,
@@ -20,6 +20,8 @@ const AIChatDoc_components: FC = () => {
     const nav = useNavigate();
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const [messageApi, contextHolder] = message.useMessage();
+    const pColor = theme.useToken().token.colorPrimaryBorder;
+
     const scrollToBottom = () => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop =
@@ -111,7 +113,10 @@ const AIChatDoc_components: FC = () => {
             {contextHolder}
             <div
                 ref={chatContainerRef}
-                className="mb-2 p-2  min-h-75 max-h-75 rounded-[5px] border border-gray-300 overflow-auto"
+                className="mb-2 p-2  min-h-75 max-h-75 rounded-[5px] border border-[${theme.useToken().token.colorPrimaryBorder}] overflow-auto"
+                style={{
+                    borderColor: pColor,
+                }}
             >
                 {have ? (
                     chat.map((i) => (

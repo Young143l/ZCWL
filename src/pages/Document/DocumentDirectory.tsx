@@ -14,14 +14,18 @@ const DocumentDirectory: FC = () => {
     const [load, setLoad] = useState<boolean>(true);
     useEffect(() => {
         getDoc(d_id as string).then(
-            (res: {
-                ok: boolean;
-                docInfo: DocInfo | undefined;
-                docDir: DocDir[];
-            }) => {
+            (res) => {
                 if (res.ok) {
-                    setDocDirectory(res.docDir);
-                    setdocInfo(res.docInfo);
+                    setDocDirectory((res as {
+                ok: boolean;
+                docInfo: DocInfo;
+                docDir: DocDir[];
+            }).docDir);
+                    setdocInfo((res as {
+                ok: boolean;
+                docInfo: DocInfo;
+                docDir: DocDir[];
+            }).docInfo);
                     setLoad(false);
                 }
             },

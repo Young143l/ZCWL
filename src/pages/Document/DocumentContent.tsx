@@ -2,12 +2,13 @@ import { useEffect, useState, type FC } from "react";
 import { Link, useParams } from "react-router-dom";
 import Template_Page from "../Template_Page";
 import ReactMarkdown from "react-markdown";
-import { Menu, type MenuProps } from "antd";
+import { Menu, theme, type MenuProps } from "antd";
 import {
     getDocContent,
     getDoc,
     type DocInfo,
     type DocContent,
+    type DocDir,
 } from "../../api/Doc_api";
 import DocBreadcrumb_components from "../../components/DocBreadcrumb_components";
 type MenuItem = Required<MenuProps>["items"][number];
@@ -21,12 +22,28 @@ const DocumentContent: FC = () => {
         undefined,
     );
     const [docInfo, setdocInfo] = useState<DocInfo | undefined>(undefined);
+    const pColor = theme.useToken().token.colorPrimaryBorder;
+
     useEffect(() => {
         getDoc(d_id as string).then((res) => {
             if (res.ok) {
-                setdocInfo(res.docInfo);
+                setdocInfo(
+                    (
+                        res as {
+                            ok: boolean;
+                            docInfo: DocInfo;
+                            docDir: DocDir[];
+                        }
+                    ).docInfo,
+                );
                 setItems(
-                    res.docDir.map((i) => {
+                    (
+                        res as {
+                            ok: boolean;
+                            docInfo: DocInfo;
+                            docDir: DocDir[];
+                        }
+                    ).docDir.map((i) => {
                         return {
                             key: i.id,
                             label: (
@@ -41,7 +58,14 @@ const DocumentContent: FC = () => {
         });
         getDocContent(d_id as string, c_id as string).then((res) => {
             if (res.ok) {
-                setDocContent(res.docContent);
+                setDocContent(
+                    (
+                        res as {
+                            ok: boolean;
+                            docContent: DocContent;
+                        }
+                    ).docContent,
+                );
             }
         });
     }, [d_id, c_id]);
@@ -63,11 +87,18 @@ const DocumentContent: FC = () => {
                     </div>
                 }
                 sider={
-                    <Menu
-                        defaultSelectedKeys={[c_id as string]}
-                        mode="inline"
-                        items={items}
-                    />
+                    <div
+                        className= "border-2 rounded-xl  overflow-hidden  "
+                        style={{
+                            borderColor: pColor,
+                        }}
+                    >
+                        <Menu
+                            defaultSelectedKeys={[c_id as string]}
+                            mode="inline"
+                            items={items}
+                        />
+                    </div>
                 }
             />
         </>

@@ -32,7 +32,7 @@ const login: (
         const json: LoginResponse = await res.json();
         if (json && json.userName && json.userId && json.token) {
             setLogin(json.userName, json.userId, json.token,json.avatar);
-            console.log(json);
+            // console.log(json);
             return { success: true, userName: json.userName };
         } else {
             throw new Error("Login failed: invalid response data");

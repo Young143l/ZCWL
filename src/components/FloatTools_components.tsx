@@ -1,12 +1,14 @@
-import { Avatar, FloatButton, Modal } from "antd";
+import { FloatButton, Modal } from "antd";
 import {
     ArrowUpOutlined,
     SyncOutlined,
     HomeOutlined,
 } from "@ant-design/icons";
+import Icon from "@ant-design/icons";
 import { useState, type FC } from "react";
 import { useNavigate,useLocation } from "react-router-dom";
 import AIChatDoc_components from "./AIChatDoc_components.tsx";
+import QwenIcon from '../../public/qwen.svg?react';
 
 const FloatTools_components: FC = () => {
     const location = useLocation();
@@ -23,9 +25,8 @@ const FloatTools_components: FC = () => {
                 <AIChatDoc_components />
             </Modal>
             <FloatButton.Group shape="square">
-                
                 <FloatButton
-                    icon={<Avatar src="../../public/qwen.svg" size={24} />}
+                    icon={<Icon component={QwenIcon}/>}
                     onClick={() => setIsAIChatOpen(true)}
                 />
                 {location.pathname==="/"?<></> :<FloatButton icon={<HomeOutlined />} onClick={() => nav("/")} />}

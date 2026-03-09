@@ -13,7 +13,7 @@ const Chaper_componenents: FC<Chapter> = ({id,name}) => {
     return (
         <div className="w-full">
             <Divider />
-            <div className="px-6 py-4">
+            <div className="px-6 py-4 ">
                 <div className="text-gray-700 text-xl mb-2 font-semibold">
                     #第{id}章
                 </div>

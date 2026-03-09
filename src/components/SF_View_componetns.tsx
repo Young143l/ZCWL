@@ -1,4 +1,4 @@
-import { message } from "antd";
+import { message, theme } from "antd";
 import { useEffect, useRef, useState, type FC } from "react";
 
 interface View {
@@ -15,6 +15,8 @@ const SF_View_componetns: FC<View> = ({ code, isSelect }) => {
     const [htmlsrc, setHtmlSrc] = useState<string>("");
     const [messageApi, contextHolder] = message.useMessage();
     const view = useRef<HTMLIFrameElement>(null);
+    const pColor = theme.useToken().token.colorPrimaryBorder;
+
     useEffect(() => {
         const handleMessage = (e: MessageEvent) => {
             if (e.data.type === "timeout") {
@@ -33,10 +35,15 @@ const SF_View_componetns: FC<View> = ({ code, isSelect }) => {
 
         debounceTimer.current = setTimeout(() => {
             const transformCode = (userJs: string) => {
-                return userJs.replace(
-                    /(for|while|do)\s*\(([\s\S]*?)\)\s*\{/g,
-                    "$1 ($2) { window.__LOOP_PROTECT__.check(); ",
-                );
+                return userJs
+                    .replace(
+                        /(for|while)\s*\(([\s\S]*?)\)\s*\{/g,
+                        "$1 ($2) { window.__LOOP_PROTECT__.check(); ",
+                    )
+                    .replace(
+                        /do\s*\{/g,
+                        "do { window.__LOOP_PROTECT__.check(); ",
+                    );
             };
 
             const htmlContent = code.html;
@@ -68,8 +75,78 @@ window.__LOOP_PROTECT__ = {
     }
 };
 
+const fakeStorage = {
+    _data:{},
+    setItem: function (key, value) {
+        this._data[key] = String(value);
+    },
+    getItem: function (key) {
+        return this._data.hasOwnProperty(key) ? this._data[key] : null;
+    },
+    removeItem: function (key) {
+        delete this._data[key];
+    },
+    clear: function () {
+        for (let k in this._data) delete this._data[k];
+    },
+    get length() {
+        return Object.keys(_data).length;
+        
+    },
+    key: function (i) {
+        return Object.keys(this._data)[i] || null;
+    }
+};
+Object.defineProperty(window, 'localStorage', {
+    value: fakeStorage,
+    writable: false,
+    configurable: true
+});
+Object.defineProperty(window, 'sessionStorage', {
+    value: fakeStorage,
+    writable: false,
+    configurable: true
+});
+    
+const methods = ['log', 'warn', 'error', 'info', 'debug', 'table','clear','count','assert'];
+
+const originalMethods = {};
+methods.forEach(method => {
+    originalMethods[method] = console[method];
+});
+
+methods.forEach(method => {
+    console[method] = function (...args) {
+        
+        const logData = {
+            type: 'consoleLog',      
+            level: method,           
+            payload: args,           
+            timestamp: Date.now()
+        };
+
+            window.parent.postMessage(logData, '*');
+
+        if (originalMethods[method]) {
+            originalMethods[method].apply(console, args);
+        }
+    };
+});
+
+window.addEventListener('unhandledrejection', event => {
+    const errorData = {
+        type: 'consoleLog',
+        level: 'error',
+        payload: [\`Unhandled Promise Rejection: \${event.reason}\`],
+        timestamp: Date.now()
+    };
+    window.parent.postMessage(errorData, '*');
+});
+
+
+
 const devCss = document.createElement("style");
-devCss.id = "devCss";
+devCss.id = "dev";
 devCss.textContent =\`body *:hover:not(:has(:hover)) {
     outline: 2px dashed #4a9eff;
     background-color: rgba(74, 158, 255, 0.08) !important;
@@ -77,31 +154,30 @@ devCss.textContent =\`body *:hover:not(:has(:hover)) {
     transition: all 0.1s ease-in-out;
 }\`;
 
-const devJs = document.createElement("script");
-devJs.id="devJs";
-devJs.text = \`document.addEventListener('click',(e) => {               
-    e.stopImmediatePropagation();
-    if (e.target != document.childNodes[0] && e.target != document.childNodes[0].childNodes[2])
-        window.parent.postMessage({
-            type: 'iframe-click',
-            id: e.target.id,
-            tagName:e.target.tagName,
-            timestamp: Date.now()
-        }, "*");
-},true);\`;
+function DsvClick(e){         
+        e.preventDefault(); 
+        e.stopPropagation(); 
+        e.stopImmediatePropagation();
+        if (e.target != document.childNodes[0] && e.target != document.childNodes[0].childNodes[2]){
+            window.parent.postMessage({
+                type: 'iframe-click',
+                id: e.target.id,
+                tagName:e.target.tagName,
+                timestamp: Date.now()
+            }, "*");
+        }
+    }
 
 window.addEventListener('message',(e)=>{
-    console.log(1);
     if(e.data.type=="start_dev"){
         document.head.appendChild(devCss);
-        document.head.appendChild(devJs);
+        document.addEventListener('click',DsvClick,true);
     }else if(e.data.type=="end_dev"){
-        document.getElementById("devCss").remove()
-        document.getElementById("devJs").remove()
+        document.getElementById("dev").remove()
+        document.removeEventListener('click',DsvClick,true);
     }
 })
 `;
-
             doc.head.appendChild(libJs);
             if (doc.body) {
                 doc.body.appendChild(userJs);
@@ -140,10 +216,14 @@ window.addEventListener('message',(e)=>{
     return (
         <>
             {contextHolder}
-            <div className=" h-full p-1">
+            <div className="h-full p-1">
                 <iframe
-                    className="w-full h-full border-2 border-gray-300 rounded-xl"
+                    className= "w-full h-full border-2  rounded-xl "
+                    style={{
+                        borderColor: pColor,
+                    }}
                     srcDoc={htmlsrc}
+                    src="zcwl-iframe"
                     sandbox={
                         "allow-scripts allow-popups allow-modals allow-forms"
                     }

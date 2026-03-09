@@ -1,0 +1,125 @@
+import { type SF, type code } from "../pages/Code/CodeSF";
+
+export interface CodeProject {
+    name: string;
+    id: string;
+    type: CodeType;
+}
+
+export type CodeType = "simple_frontend";
+
+export const getCodeList: (
+    token: string,
+    uId?: string,
+) => Promise<
+    { ok: boolean; message: unknown } | { ok: boolean; list: CodeProject[] }
+> = async (token: string, uId?: string) => {
+    try {
+        const uIds: string = `?uId=${uId}`;
+        const res = await fetch(
+            import.meta.env.VITE_BACK_END + `/code${uId ? uIds : ""}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json: { uId?: string; list: CodeProject[] } = await res.json();
+        return { ok: true, list: json.list };
+    } catch (e) {
+        return { ok: false, message: e };
+    }
+};
+
+export const newCodeSF: (
+    message: string,
+    uId: string,
+    name: string,
+    token: string,
+) => Promise<
+    { ok: boolean; message: unknown } | { ok: boolean; sfId: string }
+> = async (message: string, uId: string, name: string, token: string) => {
+    try {
+        const res = await fetch(import.meta.env.VITE_BACK_END + "/code/sf", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                uId: uId,
+                projectName: name,
+                message: message,
+            }),
+        });
+        // console.log(res)
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json = await res.json();
+        // console.log(json)
+        return { ok: true, sfId: json.sfId };
+    } catch (e: unknown) {
+        return { ok: false, message: e };
+    }
+};
+
+export const getCodeSF = async (token: string, sfId: string) => {
+    try {
+        const res = await fetch(
+            import.meta.env.VITE_BACK_END + `/code/sf/${sfId}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json: SF = await res.json();
+        return { ok: true, sf: json };
+    } catch (e) {
+        return { ok: false, message: e };
+    }
+};
+
+export const  askCodeSF =async (
+    token: string,
+    code: code,
+    selectId: string[],
+    message: string,
+    sfId:string
+) => {
+    try {
+        const res = await fetch(
+            import.meta.env.VITE_BACK_END + `/code/sf/${sfId}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body:JSON.stringify({
+                    code:code,
+                    message:message,
+                    selectId:selectId,
+                })
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json:{sfId:string,code:code} = await res.json();
+        return { ok: true, code:json.code };
+    } catch (e) {
+        return { ok: false, message: e };
+    }
+};

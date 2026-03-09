@@ -7,7 +7,7 @@ export const getNewChat = async (u_id: string, token: string) => {
                 Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-                u_id: u_id,
+                uId: u_id,
             }),
         });
         if (!res.ok) {
@@ -37,7 +37,7 @@ export const getAsk = async (
                 },
                 body: JSON.stringify({
                     ask: ask,
-                    u_id: u_id,
+                    uId: u_id,
                 }),
             },
         );

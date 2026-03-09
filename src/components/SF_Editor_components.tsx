@@ -1,9 +1,38 @@
 import { type Monaco, Editor } from "@monaco-editor/react";
-import { Menu, Button, Popover } from "antd";
-import { type FC, useState } from "react";
+import { Menu, Button, Popover, Modal, theme } from "antd";
+import { type FC, useEffect, useState } from "react";
 import { type SF } from "../pages/Code/CodeSF";
-import { SelectOutlined, DownloadOutlined } from "@ant-design/icons";
+import {
+    SelectOutlined,
+    DownloadOutlined,
+    CodeOutlined,
+    DeleteOutlined,
+} from "@ant-design/icons";
 import github from "../../public/GitHub Light.json";
+import { Console } from "console-feed";
+
+type Methods =
+    | "log"
+    | "debug"
+    | "info"
+    | "warn"
+    | "error"
+    | "table"
+    | "clear"
+    | "time"
+    | "timeEnd"
+    | "count"
+    | "assert"
+    | "command"
+    | "result"
+    | "dir";
+
+interface Message {
+    id: string;
+    method: Methods;
+    data: unknown[];
+    timestamp?: string;
+}
 
 const ItemsLable: FC<{
     text: "html" | "css" | "javascript";
@@ -47,9 +76,38 @@ const SF_Editor_components: FC<{
         monaco.editor.defineTheme("github-light", github);
     };
 
+    const pColor = theme.useToken().token.colorPrimaryBorder;
+
+    const [showLogs, setShowLogs] = useState<boolean>(false);
+    const [logs, setLogs] = useState<Message[]>([]);
+
+    useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            const data = event.data;
+            if (data.type === "consoleLog") {
+                const feedLog: Message = {
+                    id: data,
+                    timestamp: data.timestamp,
+                    method: data.level,
+                    data: data.payload,
+                };
+                setLogs((prevLogs) => [...prevLogs, feedLog]);
+            }
+        };
+        window.addEventListener("message", handleMessage);
+        return () => {
+            window.removeEventListener("message", handleMessage);
+        };
+    }, []);
+
     return (
         <div className="flex flex-col h-full p-1">
-            <div className="flex justify-between items-center mb-1 border-gray-300 border-2 rounded-xl overflow-x-hidden pr-1 gap-0.5">
+            <div
+                className="flex justify-between items-center mb-1  border-2 rounded-xl overflow-x-hidden pr-1 gap-0.5"
+                style={{
+                    borderColor: pColor,
+                }}
+            >
                 <div className="flex-1 min-w-0">
                     <Menu
                         mode="horizontal"
@@ -61,6 +119,46 @@ const SF_Editor_components: FC<{
                     color="primary"
                     icon={<DownloadOutlined />}
                     variant="text"
+                />
+                <Modal
+                    title="控制台输出"
+                    open={showLogs}
+                    onCancel={() => setShowLogs(false)}
+                    footer={null}
+                >
+                    <div
+                        className="w-full h-80 border-2 overflow-auto rounded-2xl bg-gray-50"
+                        style={{
+                            borderColor: pColor,
+                        }}
+                    >
+                        <div className="flex justify-between items-center p-2 bg-white border-b border-gray-200 rounded-t-2xl">
+                            <span className="text-sm font-medium text-gray-700">
+                                可显示部分控制台输出
+                            </span>
+                            <Button
+                                type="primary"
+                                size="small"
+                                icon={<DeleteOutlined />}
+                                onClick={() => {
+                                    setLogs([]);
+                                }}
+                            >
+                                清空
+                            </Button>
+                        </div>
+                        <div className="h-auto overflow-y-auto p-2 custom-scrollbar">
+                            <Console logs={logs} />
+                        </div>
+                    </div>
+                </Modal>
+                <Button
+                    color="primary"
+                    icon={<CodeOutlined />}
+                    variant="text"
+                    onClick={() => {
+                        setShowLogs(true);
+                    }}
                 />
                 <Popover
                     content={
@@ -83,7 +181,12 @@ const SF_Editor_components: FC<{
                     />
                 </Popover>
             </div>
-            <div className="flex-1 border-gray-300 border-2 rounded-xl overflow-hidden">
+            <div
+                className="flex-1 border-2 rounded-xl overflow-hidden"
+                style={{
+                    borderColor: pColor,
+                }}
+            >
                 <Editor
                     height="100%"
                     theme="github-light"
@@ -107,6 +210,7 @@ const SF_Editor_components: FC<{
                                     [cur]: value,
                                 },
                             }));
+                            setIsSelect(false);
                         }
                     }}
                 />

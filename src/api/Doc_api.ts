@@ -16,9 +16,9 @@ export interface DocContent {
     content: string;
 }
 
-export const getDoc: (d_id: string) => Promise<{
+export const getDoc: (d_id: string) => Promise<{ ok: boolean,message:unknown }|{
     ok: boolean;
-    docInfo: DocInfo | undefined;
+    docInfo: DocInfo;
     docDir: DocDir[];
 }> = async (d_id: string) => {
     try {
@@ -45,12 +45,12 @@ export const getDoc: (d_id: string) => Promise<{
             })};
         }
         throw Error("Response Error!");
-    } catch (e) {
-        return { ok: false, docInfo: undefined,docDir:[] };
+    } catch (e:unknown) {
+        return { ok: false, message:e };
     }
 };
 
-export const getDocList: () => Promise<{
+export const getDocList: () => Promise<{ok:boolean,message:unknown}|{
     ok: boolean;
     docList: DocInfo[];
 }> = async () => {
@@ -69,44 +69,18 @@ export const getDocList: () => Promise<{
         }
         const json:{docList:DocInfo[]} = await res.json();
         return { ok: true, docList: json.docList };
-    } catch (e) {
-        console.error("获取文档列表失败:", e);
-        return { ok: false, docList: [] };
+    } catch (e:unknown) {
+        return { ok: false, message:e };
     }
 };
 
-// export const getDocDirectory: (
-//     d_id: string,
-// ) => Promise<{ ok: boolean; docDire: DocDir[] }> = async (d_id: string) => {
-//     try {
-//         const res: Response = await fetch(
-//             import.meta.env.VITE_BACK_END + `/doc/${d_id}`,
-//             {
-//                 method: "GET",
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                 },
-//             },
-//         );
-//         if (!res.ok) {
-//             throw new Error(`HTTP error! status: ${res.status}`);
-//         }
-//         const json: { docInfo: DocInfo; docDir: DocDir[] } = await res.json();
-//         if (json) {
-//             return { ok: true, docDire: json.docDir };
-//         }
-//         throw Error("Response Error!");
-//     } catch (e) {
-//         return { ok: false, docDire: [] };
-//     }
-// };
 
 export const getDocContent: (
     d_id: string,
     c_id: string,
-) => Promise<{
+) => Promise< { ok: boolean,message:unknown }|{
     ok: boolean;
-    docContent: DocContent | undefined;
+    docContent: DocContent;
 }> = async (d_id: string, c_id: string) => {
     try {
         const res: Response = await fetch(
@@ -126,7 +100,7 @@ export const getDocContent: (
             return { ok: true, docContent: json };
         }
         throw Error("Response Error!");
-    } catch (e) {
-        return { ok: false, docContent: undefined };
+    } catch (e:unknown) {
+        return { ok: false, message: e};
     }
 };

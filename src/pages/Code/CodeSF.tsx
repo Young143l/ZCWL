@@ -1,22 +1,31 @@
 import Template_Page from "../Template_Page";
-import { Splitter } from "antd";
-import { useState, type FC } from "react";
+import { Spin, Splitter } from "antd";
+import { useEffect, useState, type FC } from "react";
 import SF_Editor_components from "../../components/SF_Editor_components";
 import SF_View_componetns from "../../components/SF_View_componetns";
 import SF_Ask_components from "../../components/SF_Ask_components";
+import { useParams } from "react-router-dom";
+import { getCodeSF } from "../../api/Code_api";
+import { LoadingOutlined } from "@ant-design/icons";
+
+import useLogin from "../../status/Login_status";
+
+export interface code {
+    html: string;
+    css: string;
+    javascript: string;
+}
 
 export interface SF {
-    id: string;
-    code: {
-        html: string;
-        css: string;
-        javascript: string;
-    };
+    sfId: string;
+    name: string;
+    code: code;
 }
 
 const CodeSF: FC = () => {
     const [sf, setSf] = useState<SF>({
-        id: "",
+        sfId: "",
+        name: "",
         code: {
             html: `<!DOCTYPE html>
 <html lang="en">
@@ -33,9 +42,28 @@ const CodeSF: FC = () => {
         },
     });
     const [isSelect, setIsSelect] = useState<boolean>(false);
+    const { sf_id } = useParams();
+    const { token } = useLogin();
+    const [loading, setLoading] = useState<boolean>(true);
+    useEffect(() => {
+        getCodeSF(token, sf_id as string).then((res) => {
+            if (res.ok) {
+                setSf(res.sf as SF);
+                setTimeout(() => {
+                    setLoading(false);
+                }, 500);
+            }
+        });
+    }, [sf_id, token]);
 
     return (
         <>
+            <Spin
+                indicator={<LoadingOutlined spin />}
+                spinning={loading}
+                size="large"
+                fullscreen
+            />
             <Template_Page>
                 <div className="h-[calc(100vh-95px)] w-full">
                     <Splitter>
