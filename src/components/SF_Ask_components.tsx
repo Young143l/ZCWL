@@ -9,7 +9,7 @@ import { useEffect, useRef, useState, type FC } from "react";
 import { type SF, type code } from "../pages/Code/CodeSF";
 import { askCodeSF } from "../api/Code_api";
 import useLogin from "../status/Login_status";
-import LoadingWindow_components from "./LoadingWindow_components";
+import LoadingWindow_components from "./AILoadingWindow_components";
 
 interface SF_Ask {
     isSelect: boolean;
@@ -100,8 +100,8 @@ const SF_Ask_components: FC<SF_Ask> = ({
                 <div
                     className="h-full border-2 rounded-2xl p-1.5 flex flex-col gap-2 overflow-auto "
                     style={{
-                            borderColor:pColor
-                        }}
+                        borderColor: pColor,
+                    }}
                 >
                     {selectedIds.length ? (
                         <div className="flex flex-wrap gap-0.5">

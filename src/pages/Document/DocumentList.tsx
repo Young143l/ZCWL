@@ -9,7 +9,7 @@ const DocumentList = () => {
     const [docList, setDocList] = useState<DocInfo[]>([]);
     const [nowDocList, setNowDocList] = useState<DocInfo[]>([]);
     const [load, setLoad] = useState<boolean>(true);
-
+    const pColor = theme.useToken().token.colorPrimary;
     useEffect(() => {
         getDocList().then((res) => {
             if (res.ok) {
@@ -47,7 +47,10 @@ const DocumentList = () => {
             <Template_Page>
                 <div className="flex justify-between">
                     <h1
-                        className={`text-xl border-l-4 pl-1 border-[${theme.useToken().token.colorPrimary}] ml-5 mt-5`}
+                        className={`text-xl border-l-4 pl-1  ml-5 mt-5`}
+                        style={{
+                            borderColor: pColor,
+                        }}
                     >
                         学习文档
                     </h1>

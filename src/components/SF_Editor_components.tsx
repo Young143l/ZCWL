@@ -4,12 +4,14 @@ import { type FC, useEffect, useState } from "react";
 import { type SF } from "../pages/Code/CodeSF";
 import {
     SelectOutlined,
-    DownloadOutlined,
     CodeOutlined,
     DeleteOutlined,
 } from "@ant-design/icons";
 import github from "../../public/GitHub Light.json";
 import { Console } from "console-feed";
+import { delCodeSF } from "../api/Code_api";
+import useLogin from "../status/Login_status";
+import { useNavigate } from "react-router-dom";
 
 type Methods =
     | "log"
@@ -56,6 +58,8 @@ const SF_Editor_components: FC<{
     isSelect: boolean;
     setIsSelect: React.Dispatch<React.SetStateAction<boolean>>;
 }> = ({ sf, setSf, isSelect, setIsSelect }) => {
+    // "use no memo";
+    const { token } = useLogin();
     const [cur, setCur] = useState<"html" | "css" | "javascript">("html");
     const items = [
         {
@@ -71,9 +75,20 @@ const SF_Editor_components: FC<{
             key: "javascript",
         },
     ];
+    const nav = useNavigate();
 
     const handleEditorWillMount = (monaco: Monaco) => {
         monaco.editor.defineTheme("github-light", github);
+    };
+
+    const handleDel = () => {
+        delCodeSF(sf.sfId, token).then((res) => {
+            if (!res.ok) {
+                return;
+            } else {
+                nav("/code");
+            }
+        });
     };
 
     const pColor = theme.useToken().token.colorPrimaryBorder;
@@ -108,6 +123,14 @@ const SF_Editor_components: FC<{
                     borderColor: pColor,
                 }}
             >
+                <h1
+                    className="ml-2 mr-2 text-xl border-l-4 pl-1"
+                    style={{
+                        borderColor: pColor,
+                    }}
+                >
+                    {sf.name}
+                </h1>
                 <div className="flex-1 min-w-0">
                     <Menu
                         mode="horizontal"
@@ -117,8 +140,11 @@ const SF_Editor_components: FC<{
                 </div>
                 <Button
                     color="primary"
-                    icon={<DownloadOutlined />}
+                    icon={<DeleteOutlined />}
                     variant="text"
+                    onClick={() => {
+                        handleDel();
+                    }}
                 />
                 <Modal
                     title="控制台输出"

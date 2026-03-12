@@ -17,6 +17,7 @@ import ProjectList from "./pages/Project/ProjectList.tsx";
 import { ConfigProvider } from "antd";
 import CodeSF from "./pages/Code/CodeSF.tsx";
 import Code from "./pages/Code/Code.tsx";
+import CodeCP from "./pages/Code/CodeCP.tsx";
 const router = createBrowserRouter([
     {
         element: (
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
             {
                 path: "/code/sf/:sf_id",
                 element: <CodeSF />,
+            },
+            {
+                path:"/code/cp",
+                element:<CodeCP/>
             },
             {
                 path: "/code",
