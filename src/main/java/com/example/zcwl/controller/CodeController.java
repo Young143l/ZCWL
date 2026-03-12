@@ -378,4 +378,52 @@ public class CodeController {
         }
     }
 
+    /**
+     * 删除指定ID的简单前端代码生成项目
+     * 接口：GET /code/sf/delete/:id
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 响应：成功(200 OK)：{"status":"success", "message":"项目删除成功", "id":"项目ID"}
+     */
+    @GetMapping("/sf/delete/{id}")
+    public ResponseEntity<Map<String, Object>> deleteSfProject(
+            @PathVariable String id,
+            Authentication authentication) {
+        logger.debug("删除简单前端代码生成项目: {}", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 获取当前用户ID
+            String userId = authentication.getName();
+            
+            // 执行删除操作
+            boolean deleted = simpleFrontendProjectService.deleteSfProject(id, userId);
+            if (deleted) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("id", id);
+                response.put("status", "success");
+                response.put("message", "项目删除成功");
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目不存在");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+        } catch (SecurityException e) {
+            logger.error("删除项目失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("删除项目失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "删除项目失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
 }

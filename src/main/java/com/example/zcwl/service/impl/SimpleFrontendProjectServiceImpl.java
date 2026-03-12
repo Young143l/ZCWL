@@ -657,4 +657,29 @@ public class SimpleFrontendProjectServiceImpl implements SimpleFrontendProjectSe
             );
         }
     }
+
+    @Override
+    public boolean deleteSfProject(String sfId, String userId) {
+        logger.debug("删除简单前端代码生成项目: {}, 用户ID: {}", sfId, userId);
+        
+        // 查找项目
+        Optional<SimpleFrontendProject> projectOptional = simpleFrontendProjectRepository.findBySfId(sfId);
+        if (projectOptional.isEmpty()) {
+            logger.debug("项目不存在: {}", sfId);
+            return false;
+        }
+        
+        SimpleFrontendProject project = projectOptional.get();
+        
+        // 验证用户是否有权限删除该项目
+        if (!project.getUserId().equals(userId)) {
+            logger.warn("用户 {} 无权删除项目 {}", userId, sfId);
+            throw new SecurityException("无权删除该项目");
+        }
+        
+        // 执行删除操作
+        simpleFrontendProjectRepository.delete(project);
+        logger.info("项目 {} 已成功删除", sfId);
+        return true;
+    }
 }

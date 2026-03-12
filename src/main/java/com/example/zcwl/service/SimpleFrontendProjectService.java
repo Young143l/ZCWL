@@ -60,4 +60,12 @@ public interface SimpleFrontendProjectService {
      * @return 流式响应的Flux
      */
     Flux<String> generateCodeInSfProjectStream(String sfId, Map<String, String> code, String message, List<String> selectId);
+
+    /**
+     * 删除指定ID的简单前端代码生成项目
+     * @param sfId 项目唯一标识符
+     * @param userId 用户ID
+     * @return 是否删除成功
+     */
+    boolean deleteSfProject(String sfId, String userId);
 }
