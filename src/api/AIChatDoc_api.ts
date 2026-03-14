@@ -43,7 +43,7 @@ export const getAsk = async (
         );
 
         if (!res.ok) {
-            throw new Error("");
+            throw new Error(`HTTP error! status: ${res.status}`);
         }
 
         const reader = res.body?.getReader();

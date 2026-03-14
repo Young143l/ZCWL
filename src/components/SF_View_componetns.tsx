@@ -216,9 +216,9 @@ window.addEventListener('message',(e)=>{
     return (
         <>
             {contextHolder}
-            <div className="h-full p-1">
+            <div className=" h-full p-1">
                 <iframe
-                    className= "w-full h-full border-2  rounded-xl "
+                    className="w-full h-full border-2  rounded-xl "
                     style={{
                         borderColor: pColor,
                     }}

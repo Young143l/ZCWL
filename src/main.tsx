@@ -13,11 +13,12 @@ import DocumentList from "./pages/Document/DocumentList.tsx";
 import DocumentContent from "./pages/Document/DocumentContent.tsx";
 import "./index.css";
 import DocumentDirectory from "./pages/Document/DocumentDirectory.tsx";
-import ProjectList from "./pages/Project/ProjectList.tsx";
+// import ProjectList from "./pages/Project/ProjectList.tsx";
 import { ConfigProvider } from "antd";
 import CodeSF from "./pages/Code/CodeSF.tsx";
 import Code from "./pages/Code/Code.tsx";
 import CodeCP from "./pages/Code/CodeCP.tsx";
+import Project from "./pages/Project/Project.tsx";
 const router = createBrowserRouter([
     {
         element: (
@@ -45,7 +46,7 @@ const router = createBrowserRouter([
             },
             {
                 path: "/project",
-                element: <ProjectList />,
+                element: <Project />,
             },
             {
                 path: "/code/sf/:sf_id",

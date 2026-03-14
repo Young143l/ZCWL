@@ -1,5 +1,5 @@
 import { type Monaco, Editor } from "@monaco-editor/react";
-import { Menu, Button, Popover, Modal, theme } from "antd";
+import { Menu, Button, Popover, Popconfirm, Modal, theme, message } from "antd";
 import { type FC, useEffect, useState } from "react";
 import { type SF } from "../pages/Code/CodeSF";
 import {
@@ -76,18 +76,27 @@ const SF_Editor_components: FC<{
         },
     ];
     const nav = useNavigate();
+    const [messageApi, contextHolder] = message.useMessage();
 
     const handleEditorWillMount = (monaco: Monaco) => {
         monaco.editor.defineTheme("github-light", github);
     };
 
     const handleDel = () => {
-        delCodeSF(sf.sfId, token).then((res) => {
-            if (!res.ok) {
-                return;
-            } else {
-                nav("/code");
-            }
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                delCodeSF(sf.sfId, token).then((res) => {
+                    if (!res.ok) {
+                        messageApi.error("删除失败");
+                    } else {
+                        messageApi.success("删除成功");
+                        setTimeout(() => {
+                            nav("/code");
+                        }, 500);
+                    }
+                });
+                resolve(null);
+            }, 1000);
         });
     };
 
@@ -116,132 +125,134 @@ const SF_Editor_components: FC<{
     }, []);
 
     return (
-        <div className="flex flex-col h-full p-1">
-            <div
-                className="flex justify-between items-center mb-1  border-2 rounded-xl overflow-x-hidden pr-1 gap-0.5"
-                style={{
-                    borderColor: pColor,
-                }}
-            >
-                <h1
-                    className="ml-2 mr-2 text-xl border-l-4 pl-1"
+        <>
+            {contextHolder}
+            <div className="flex flex-col h-full p-1">
+                <div
+                    className="flex justify-between items-center mb-1  border-2 rounded-xl overflow-x-hidden pr-1 gap-0.5"
                     style={{
                         borderColor: pColor,
                     }}
                 >
-                    {sf.name}
-                </h1>
-                <div className="flex-1 min-w-0">
-                    <Menu
-                        mode="horizontal"
-                        items={items}
-                        selectedKeys={[cur]}
-                    />
-                </div>
-                <Button
-                    color="primary"
-                    icon={<DeleteOutlined />}
-                    variant="text"
-                    onClick={() => {
-                        handleDel();
-                    }}
-                />
-                <Modal
-                    title="控制台输出"
-                    open={showLogs}
-                    onCancel={() => setShowLogs(false)}
-                    footer={null}
-                >
-                    <div
-                        className="w-full h-80 border-2 overflow-auto rounded-2xl bg-gray-50"
-                        style={{
-                            borderColor: pColor,
-                        }}
-                    >
-                        <div className="flex justify-between items-center p-2 bg-white border-b border-gray-200 rounded-t-2xl">
-                            <span className="text-sm font-medium text-gray-700">
-                                可显示部分控制台输出
-                            </span>
-                            <Button
-                                type="primary"
-                                size="small"
-                                icon={<DeleteOutlined />}
-                                onClick={() => {
-                                    setLogs([]);
-                                }}
-                            >
-                                清空
-                            </Button>
-                        </div>
-                        <div className="h-auto overflow-y-auto p-2 custom-scrollbar">
-                            <Console logs={logs} />
-                        </div>
+                    <h1 className="ml-2 mr-2 text-xl  pl-1">{sf.name}</h1>
+                    <div className="flex-1 min-w-0">
+                        <Menu
+                            mode="horizontal"
+                            items={items}
+                            selectedKeys={[cur]}
+                        />
                     </div>
-                </Modal>
-                <Button
-                    color="primary"
-                    icon={<CodeOutlined />}
-                    variant="text"
-                    onClick={() => {
-                        setShowLogs(true);
-                    }}
-                />
-                <Popover
-                    content={
-                        <>
-                            <p>选择模式已开启，选</p>
-                            <p>择你要更改的组件。</p>
-                        </>
-                    }
-                    placement="bottom"
-                    trigger="click"
-                    open={isSelect}
-                >
+                    <Popconfirm
+                        title="删除此项目"
+                        description={`您确定要删除${sf.name}吗？`}
+                        onConfirm={handleDel}
+                        onOpenChange={() => console.log("open change")}
+                        okText="删除"
+                        cancelText="取消"
+                    >
+                        <Button
+                            color="primary"
+                            icon={<DeleteOutlined />}
+                            variant="text"
+                        />
+                    </Popconfirm>
+                    <Modal
+                        title="控制台输出"
+                        open={showLogs}
+                        onCancel={() => setShowLogs(false)}
+                        footer={null}
+                    >
+                        <div
+                            className="w-full h-80 border-2 overflow-auto rounded-2xl bg-gray-50"
+                            style={{
+                                borderColor: pColor,
+                            }}
+                        >
+                            <div className="flex justify-between items-center p-2 bg-white border-b border-gray-200 rounded-t-2xl">
+                                <span className="text-sm font-medium text-gray-700">
+                                    可显示部分控制台输出
+                                </span>
+                                <Button
+                                    type="primary"
+                                    size="small"
+                                    icon={<DeleteOutlined />}
+                                    onClick={() => {
+                                        setLogs([]);
+                                    }}
+                                >
+                                    清空
+                                </Button>
+                            </div>
+                            <div className="h-auto overflow-y-auto p-2 custom-scrollbar">
+                                <Console logs={logs} />
+                            </div>
+                        </div>
+                    </Modal>
                     <Button
                         color="primary"
-                        variant={isSelect ? "solid" : "text"}
-                        icon={<SelectOutlined />}
+                        icon={<CodeOutlined />}
+                        variant="text"
                         onClick={() => {
-                            setIsSelect(!isSelect);
+                            setShowLogs(true);
                         }}
                     />
-                </Popover>
-            </div>
-            <div
-                className="flex-1 border-2 rounded-xl overflow-hidden"
-                style={{
-                    borderColor: pColor,
-                }}
-            >
-                <Editor
-                    height="100%"
-                    theme="github-light"
-                    beforeMount={handleEditorWillMount}
-                    language={cur}
-                    options={{
-                        minimap: { enabled: false },
-                        fixedOverflowWidgets: true,
-                        fontSize: 14,
-                        scrollBeyondLastLine: false,
-                        renderLineHighlight: "all",
-                        wordWrap: "on",
-                    }}
-                    value={sf.code[cur]}
-                    onChange={(value: string | undefined) => {
-                        if (value !== undefined) {
-                            setSf((prevStatus) => ({
-                                ...prevStatus,
-                                code: {
-                                    ...prevStatus.code,
-                                    [cur]: value,
-                                },
-                            }));
-                            setIsSelect(false);
+                    <Popover
+                        content={
+                            <>
+                                <p>选择模式已开启，选</p>
+                                <p>择你要更改的组件。</p>
+                            </>
                         }
+                        placement="bottom"
+                        trigger="click"
+                        open={isSelect}
+                    >
+                        <Button
+                            color="primary"
+                            variant={isSelect ? "solid" : "text"}
+                            icon={<SelectOutlined />}
+                            onClick={() => {
+                                setIsSelect(!isSelect);
+                            }}
+                        />
+                    </Popover>
+                </div>
+                <div
+                    className="flex-1 border-2 rounded-xl overflow-hidden"
+                    style={{
+                        borderColor: pColor,
                     }}
-                />
+                >
+                    <Editor
+                        height="100%"
+                        theme="github-light"
+                        beforeMount={handleEditorWillMount}
+                        language={cur}
+                        options={{
+                            minimap: { enabled: false },
+                            fixedOverflowWidgets: true,
+                            fontSize: 14,
+                            scrollBeyondLastLine: false,
+                            renderLineHighlight: "all",
+                            wordWrap: "on",
+                        }}
+                        value={sf.code[cur]}
+                        onChange={(value: string | undefined) => {
+                            if (value !== undefined) {
+                                setSf((prevStatus) => ({
+                                    ...prevStatus,
+                                    code: {
+                                        ...prevStatus.code,
+                                        [cur]: value,
+                                    },
+                                }));
+                                setIsSelect(false);
+                            }
+                        }}
+                    />
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

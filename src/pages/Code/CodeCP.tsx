@@ -9,7 +9,7 @@ export type CodeType = "python";
 
 export interface CP {
     id: string;
-    name:string;
+    name: string;
     type: CodeType;
     code: string;
 }
@@ -18,7 +18,7 @@ const CodeCP: FC = () => {
     const pColor = theme.useToken().token.colorPrimaryBorder;
     const [cp, setCP] = useState<CP>({
         type: "python",
-        name:"test",
+        name: "test",
         id: "",
         code: "",
     });
@@ -45,13 +45,15 @@ const CodeCP: FC = () => {
                             >
                                 <div className="p-1 h-full">
                                     <div
-                                        className="border-2 rounded-xl overflow-hidden h-full"
+                                        className=" border-2 rounded-xl overflow-hidden h-full"
                                         style={{
                                             borderColor: pColor,
                                         }}
                                     >
                                         <div className="h-8 border-b border-gray-300 flex justify-between items-center p-4">
-                                            <div className="font-medium text-xl">{cp.name}</div>
+                                            <div className="font-medium text-xl">
+                                                {cp.name}
+                                            </div>
                                         </div>
                                         <Editor
                                             height="100%"
