@@ -74,18 +74,7 @@ public class User implements Serializable {  // 实现Serializable接口，支�
     @Column(name = "password", nullable = false)  // 映射到数据库的password列，指定长度和非空约束
     private String password;
 
-    /**
-     * 头像
-     * 使用TEXT类型，允许为空
-     * -- GETTER --
-     *  获取头像
-     * -- SETTER --
-     *  设置头像
-     *
-     */
-    @Column(name = "avatar", columnDefinition = "TEXT")  // 映射到数据库的avatar列，使用TEXT类型，允许为空
-    private String avatar;
-
+    
     // getter和setter方法
 
 }

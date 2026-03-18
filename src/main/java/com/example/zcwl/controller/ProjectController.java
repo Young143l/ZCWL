@@ -80,11 +80,18 @@ public class ProjectController {
                 errorResponse.put("error", "项目名称是必填项");
                 return ResponseEntity.badRequest().body(errorResponse);
             }
+
+            // 验证请求参数
+            if (!request.containsKey("url")) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "url是必填项");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
             
             // 创建项目实体
             Project project = new Project();
             project.setProjectName((String) request.get("projectName"));
-            project.setDescription((String) request.get("description"));
+            project.setUrl((String) request.get("url"));
             project.setUserId(userId);
             
             // 调用服务层创建项目
@@ -93,10 +100,10 @@ public class ProjectController {
             // 构建响应
             Map<String, Object> response = new HashMap<>();
             response.put("id", createdProject.getId());
-            response.put("projectName", createdProject.getProjectName());
-            response.put("description", createdProject.getDescription());
-            response.put("createdAt", createdProject.getCreatedAt());
-            response.put("status", "success");
+            //response.put("projectName", createdProject.getProjectName());
+            //response.put("cloudStorageId", createdProject.getCloudStorageId());
+            //response.put("createdAt", createdProject.getCreatedAt());
+            //response.put("status", "success");
             
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {

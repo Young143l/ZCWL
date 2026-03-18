@@ -26,6 +26,9 @@ public class Project {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "url")
+    private String url;
+
     @Column(name = "u_id", nullable = false)
     private String userId;
 
@@ -38,13 +41,26 @@ public class Project {
     @Column(name = "status")
     private String status;
 
+    @Column(name = "cloud_storage_id")
+    private String cloudStorageId;
+
+    // 显式添加cloudStorageId的setter方法
+    public void setCloudStorageId(String cloudStorageId) {
+        this.cloudStorageId = cloudStorageId;
+    }
+
+    // 显式添加cloudStorageId的getter方法
+    public String getCloudStorageId() {
+        return cloudStorageId;
+    }
+
     // 构造函数
     public Project() {
     }
 
-    public Project(String projectName, String description, String userId) {
+    public Project(String projectName, String description, String url, String userId) {
         this.projectName = projectName;
-        this.description = description;
+        this.url = url;
         this.userId = userId;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
