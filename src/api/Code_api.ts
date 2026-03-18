@@ -224,6 +224,7 @@ export const getCodeCP = async (token: string, cpId: string) => {
             throw new Error(`HTTP error! status: ${res.status}`);
         }
         const json: CP = await res.json();
+        // console.log(json)
         return { ok: true, cp: json };
     } catch (e) {
         return { ok: false, message: e };

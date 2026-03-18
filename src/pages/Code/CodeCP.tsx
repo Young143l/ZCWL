@@ -28,14 +28,14 @@ const CodeCP: FC = () => {
     const { cp_id } = useParams();
     const { token } = useLogin();
 
-
-    useEffect(()=>{
-        getCodeCP(token,cp_id as string).then((res)=>{
-            if(res.ok){
-                setCP((res.cp as CP))
+    useEffect(() => {
+        getCodeCP(token, cp_id as string).then((res) => {
+            if (res.ok) {
+                // console.log(res.cp)
+                setCP(res.cp as CP);
             }
-        })
-    },[cp_id,token])
+        });
+    }, [cp_id, token]);
 
     const handleEditorWillMount = (monaco: Monaco) => {
         monaco.editor.defineTheme("github-light", github);
@@ -59,18 +59,18 @@ const CodeCP: FC = () => {
                             >
                                 <div className="p-1 h-full">
                                     <div
-                                        className=" border-2 rounded-xl overflow-hidden h-full"
+                                        className=" border-2 rounded-xl overflow-hidden h-full flex flex-col"
                                         style={{
                                             borderColor: pColor,
                                         }}
                                     >
-                                        <div className="h-8 border-b border-gray-300 flex justify-between items-center p-4">
+                                        <div className="h-8 border-b border-b-gray-600 flex  justify-between items-center p-4">
                                             <div className="font-medium text-xl">
                                                 {cp.name}
                                             </div>
                                         </div>
                                         <Editor
-                                            height="100%"
+                                            // height="100%"
                                             theme="github-light"
                                             beforeMount={handleEditorWillMount}
                                             language={cp.type}

@@ -46,6 +46,7 @@ export const login: (
             throw new Error(`HTTP error! status: ${res.status}`);
         }
         const json: LoginResponse = await res.json();
+        console.log(json);
         if (json && json.userName && json.userId && json.token) {
             setLogin(
                 json.userName,

@@ -46,7 +46,7 @@ const Hello_Sum_components: FC<HS> = ({ AllCmd, title }) => {
     const proFile = useMemo(() => {
         switch (title) {
             case "Home":
-                return "Welcome to CFWW !";
+                return "Welcome to CFww !";
             case "Document":
                 return "Clean Docs,Clear Minds.";
             case "Project":
@@ -63,15 +63,18 @@ const Hello_Sum_components: FC<HS> = ({ AllCmd, title }) => {
 
         for (let i = 0; i < AllCmd.length + 1; i++) {
             if (i == AllCmd.length) {
-                const timer = window.setTimeout(() => {
-                    setShow(true);
-                }, 200 * (i-1)+100);
+                const timer = window.setTimeout(
+                    () => {
+                        setShow(true);
+                    },
+                    180 * (i - 1) + 100,
+                );
 
                 timers.push(timer);
             } else {
                 const timer = window.setTimeout(() => {
                     setCmd((prev) => prev + AllCmd[i]);
-                }, 200 * i);
+                }, 180 * i);
 
                 timers.push(timer);
             }
@@ -83,7 +86,7 @@ const Hello_Sum_components: FC<HS> = ({ AllCmd, title }) => {
     }, [isLogin, AllCmd]);
 
     return (
-        <div className="w-full h-[calc(100vh-64px-40px)] mb-8 rounded-xl">
+        <div className="w-full h-[calc(100vh-64px-40px)] mb-8 rounded-xl select-none">
             <div className="flex flex-col bg-[#F8F8F875] rounded-xl border-4 border-white overflow-hidden h-full backdrop-blur-sm">
                 <div className="bg-white px-4 py-3 flex items-center">
                     <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
@@ -102,11 +105,16 @@ const Hello_Sum_components: FC<HS> = ({ AllCmd, title }) => {
                 >
                     <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start w-full max-w-5xl p-2">
                         <div className="w-full md:w-auto flex justify-center md:justify-start shrink-0">
-                            <img
-                                src={`../../public/${title.toLowerCase()}.jpg`}
-                                alt="Profile"
+                            <video
                                 className="w-48 h-48 md:w-64 md:h-64 object-cover rounded-xl  border border-white"
-                            />
+                                // controls
+                                autoPlay
+                                loop
+                                muted
+                                poster={`../../public/${title.toLowerCase()}.jpg`}
+                            >
+                                <source src={`../../public/${title.toLowerCase()}.mp4`} type="video/mp4" />
+                            </video>
                         </div>
 
                         <div className="flex-1 min-w-0 space-y-3 w-full ">
