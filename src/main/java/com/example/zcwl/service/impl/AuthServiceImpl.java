@@ -97,7 +97,7 @@ public class AuthServiceImpl implements AuthService {
             System.out.println("Token validation result: " + isValid);
             
             // 返回登录响应
-            LoginResponseDTO response = new LoginResponseDTO(token, user.getName(), user.getUId(), user.getEmail());
+            LoginResponseDTO response = new LoginResponseDTO(token, user.getName(), user.getUId(), null);
             System.out.println("Login response: " + response);
             return response;
         } catch (Exception e) {

@@ -3,9 +3,6 @@ package com.example.zcwl.service.impl;
 import com.example.zcwl.entity.Project;
 import com.example.zcwl.repository.ProjectRepository;
 import com.example.zcwl.service.ProjectService;
-import com.example.zcwl.utils.QiniuUtil;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +17,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +35,6 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
     private final RestTemplate restTemplate;
-    private final QiniuUtil qiniuUtil;
     
     // OpenAI API 配置
     @Value("${spring.ai.openai.api-key}")
@@ -56,18 +46,13 @@ public class ProjectServiceImpl implements ProjectService {
     @Value("${spring.ai.openai.chat.options.model}")
     private String model;
     
-    // 临时目录配置
-    @Value("${java.io.tmpdir}")
-    private String tempDir;
-    
     // 缓存，用于存储生成的结果，提高性能
     private final ConcurrentMap<String, String> cache = new ConcurrentHashMap<>();
 
     @Autowired
-    public ProjectServiceImpl(ProjectRepository projectRepository, RestTemplate restTemplate, QiniuUtil qiniuUtil) {
+    public ProjectServiceImpl(ProjectRepository projectRepository, RestTemplate restTemplate) {
         this.projectRepository = projectRepository;
         this.restTemplate = restTemplate;
-        this.qiniuUtil = qiniuUtil;
     }
     
     /**
@@ -160,39 +145,16 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project createProject(Project project) {
-        logger.info("开始创建新项目: {}", project.getProjectName());
-        
+        logger.debug("创建新项目: {}", project.getProjectName());
         // 检查项目名称是否已存在
         Project existingProject = projectRepository.findByProjectNameAndUserId(project.getProjectName(), project.getUserId());
         if (existingProject != null) {
-            logger.error("项目名称已存在: {}", project.getProjectName());
             throw new IllegalArgumentException("项目名称已存在");
         }
-        
-        // 克隆Git项目并上传到云存储
-        String projectUrl = project.getUrl();
-        if (projectUrl != null && !projectUrl.isEmpty()) {
-            logger.info("开始克隆和上传项目: {}", project.getProjectName());
-            String cloudStorageId = cloneAndUploadProject(project.getProjectName(), projectUrl);
-            
-            if (cloudStorageId != null) {
-                logger.info("项目克隆上传成功，云存储ID: {}", cloudStorageId);
-                project.setCloudStorageId(cloudStorageId);
-            } else {
-                logger.error("项目克隆上传失败: {}", project.getProjectName());
-                throw new RuntimeException("项目克隆上传失败");
-            }
-        } else {
-            logger.warn("项目URL为空，跳过克隆上传: {}", project.getProjectName());
-        }
-        
         project.setCreatedAt(LocalDateTime.now());
         project.setUpdatedAt(LocalDateTime.now());
         project.setStatus("active");
-        
-        Project savedProject = projectRepository.save(project);
-        logger.info("项目创建成功，ID: {}", savedProject.getId());
-        return savedProject;
+        return projectRepository.save(project);
     }
 
     @Override
@@ -508,164 +470,6 @@ public class ProjectServiceImpl implements ProjectService {
         } catch (Exception e) {
             logger.error("解析流式响应失败: {}", e.getMessage(), e);
             return "";
-        }
-    }
-
-    @Override
-    public String cloneAndUploadProject(String projectName, String projectUrl) {
-        logger.info("开始克隆和上传项目，项目名称: {}, URL: {}", projectName, projectUrl);
-        
-        if (projectUrl == null || projectUrl.isEmpty()) {
-            logger.error("项目URL为空，项目名称: {}", projectName);
-            return null;
-        }
-        
-        // 创建临时目录
-        Path tempProjectDir = null;
-        Git git = null;
-        
-        try {
-            // 创建临时目录
-            tempProjectDir = Files.createTempDirectory(Paths.get(tempDir), "project_" + projectName + "_");
-            logger.info("创建临时目录: {}", tempProjectDir);
-            
-            // 克隆Git仓库
-            logger.info("开始克隆Git仓库: {}", projectUrl);
-            git = Git.cloneRepository()
-                    .setURI(projectUrl)
-                    .setDirectory(tempProjectDir.toFile())
-                    .call();
-            
-            logger.info("Git仓库克隆成功，项目: {}", projectName);
-            
-            // 上传到七牛云
-            logger.info("开始上传项目文件到七牛云，项目: {}", projectName);
-            boolean uploadSuccess = uploadDirectoryToQiniu(tempProjectDir.toFile(), projectName);
-            
-            if (uploadSuccess) {
-                logger.info("项目文件上传成功，项目: {}，云存储ID: {}", projectName, projectName);
-                // 返回云存储ID（使用项目名称作为云存储ID）
-                return projectName;
-            } else {
-                logger.error("项目文件上传失败，项目: {}", projectName);
-                return null;
-            }
-            
-        } catch (GitAPIException e) {
-            logger.error("克隆Git仓库失败: {}", e.getMessage(), e);
-            return null;
-        } catch (IOException e) {
-            logger.error("文件操作失败: {}", e.getMessage(), e);
-            return null;
-        } finally {
-            // 关闭Git仓库
-            if (git != null) {
-                git.close();
-            }
-            
-            // 清理临时目录
-            if (tempProjectDir != null) {
-                try {
-                    deleteDirectory(tempProjectDir.toFile());
-                    logger.info("临时目录清理完成: {}", tempProjectDir);
-                } catch (IOException e) {
-                    logger.error("清理临时目录失败: {}", e.getMessage(), e);
-                }
-            }
-        }
-    }
-    
-    /**
-     * 递归上传目录到七牛云
-     * @param directory 目录
-     * @param basePath 基础路径（包含项目名称）
-     * @return 上传是否成功
-     */
-    private boolean uploadDirectoryToQiniu(File directory, String basePath) {
-        logger.info("开始上传目录: {} 到路径: {}", directory.getName(), basePath);
-        
-        if (!directory.exists() || !directory.isDirectory()) {
-            logger.error("目录不存在或不是目录: {}", directory.getAbsolutePath());
-            return false;
-        }
-        
-        File[] files = directory.listFiles();
-        if (files == null || files.length == 0) {
-            logger.warn("目录为空: {}", directory.getAbsolutePath());
-            return true;
-        }
-        
-        int successCount = 0;
-        int failCount = 0;
-        
-        for (File file : files) {
-            try {
-                if (file.isDirectory()) {
-                    // 递归处理子目录，构建完整的路径
-                    String subDirPath = basePath + "/" + file.getName();
-                    boolean subDirSuccess = uploadDirectoryToQiniu(file, subDirPath);
-                    if (subDirSuccess) {
-                        successCount++;
-                    } else {
-                        failCount++;
-                    }
-                } else {
-                    // 上传文件，构建完整的文件路径
-                    String qiniuPath = basePath + "/" + file.getName();
-                    
-                    logger.info("上传文件: {} -> {}", file.getName(), qiniuPath);
-                    
-                    try (FileInputStream fis = new FileInputStream(file)) {
-                        String fileUrl = qiniuUtil.uploadFile(fis, qiniuPath);
-                        logger.info("文件上传成功: {} -> {}", file.getName(), fileUrl);
-                        successCount++;
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("上传文件失败: {}, 错误: {}", file.getName(), e.getMessage(), e);
-                failCount++;
-            }
-        }
-        
-        logger.info("目录上传完成，成功: {}, 失败: {}", successCount, failCount);
-        return failCount == 0;
-    }
-    
-    /**
-     * 获取相对路径
-     * @param baseDir 基础目录
-     * @param file 文件
-     * @return 相对路径
-     */
-    private String getRelativePath(File baseDir, File file) {
-        String basePath = baseDir.getAbsolutePath();
-        String filePath = file.getAbsolutePath();
-        
-        if (filePath.startsWith(basePath)) {
-            return filePath.substring(basePath.length() + 1).replace("\\", "/");
-        }
-        
-        return file.getName();
-    }
-    
-    /**
-     * 递归删除目录
-     * @param directory 目录
-     * @throws IOException IO异常
-     */
-    private void deleteDirectory(File directory) throws IOException {
-        if (directory.exists()) {
-            File[] files = directory.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isDirectory()) {
-                        deleteDirectory(file);
-                    } else {
-                        Files.delete(file.toPath());
-                    }
-                }
-            }
-            Files.delete(directory.toPath());
         }
     }
 }

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>控制台应用</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background-color: #252526;
+            padding: 15px 20px;
+            border-bottom: 1px solid #3e3e42;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #cccccc;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ff0000;
+            transition: background-color 0.3s ease;
+        }
+        
+        .status-dot.connected {
+            background-color: #00ff00;
+        }
+        
+        .status-text {
+            font-size: 14px;
+            color: #cccccc;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .console-container {
+            flex: 1;
+            background-color: #1e1e1e;
+            border: 1px solid #3e3e42;
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .console-header {
+            background-color: #252526;
+            padding: 10px 15px;
+            border-bottom: 1px solid #3e3e42;
+            font-size: 14px;
+            color: #cccccc;
+        }
+        
+        .console-output {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .console-output .system-message {
+            color: #6a9955;
+        }
+        
+        .console-output .user-input {
+            color: #dcdcaa;
+        }
+        
+        .console-output .command-output {
+            color: #f0f0f0;
+        }
+        
+        .input-container {
+            display: flex;
+            border-top: 1px solid #3e3e42;
+        }
+        
+        .input-prompt {
+            background-color: #1e1e1e;
+            padding: 10px 15px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            color: #6a9955;
+            border: none;
+            outline: none;
+        }
+        
+        .command-input {
+            flex: 1;
+            background-color: #1e1e1e;
+            padding: 10px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            color: #f0f0f0;
+            border: none;
+            outline: none;
+        }
+        
+        .command-input::placeholder {
+            color: #666666;
+        }
+        
+        .footer {
+            background-color: #252526;
+            padding: 10px 20px;
+            border-top: 1px solid #3e3e42;
+            font-size: 12px;
+            color: #888888;
+            text-align: center;
+        }
+        
+        /* 滚动条样式 */
+        .console-output::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .console-output::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+        
+        .console-output::-webkit-scrollbar-thumb {
+            background: #424242;
+            border-radius: 4px;
+        }
+        
+        .console-output::-webkit-scrollbar-thumb:hover {
+            background: #555555;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 16px;
+            }
+            
+            .main-content {
+                padding: 10px;
+            }
+            
+            .console-output {
+                font-size: 13px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>控制台应用</h1>
+        <div class="status-indicator">
+            <div class="status-dot" id="statusDot"></div>
+            <span class="status-text" id="statusText">未连接</span>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="console-container">
+            <div class="console-header">
+                终端 - WebSocket 控制台
+            </div>
+            <div class="console-output" id="consoleOutput"></div>
+            <div class="input-container">
+                <div class="input-prompt">></div>
+                <input type="text" class="command-input" id="commandInput" placeholder="输入命令...">
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        控制台应用 v1.0 | 基于 WebSocket 实现
+    </div>
+
+    <script>
+        let socket = null;
+        let commandHistory = [];
+        let historyIndex = -1;
+        
+        // 连接WebSocket
+        function connectWebSocket() {
+            try {
+                // 构建WebSocket URL
+                const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${wsProtocol}//${window.location.host}/console`;
+                
+                logSystemMessage(`正在连接到 ${wsUrl}...`);
+                
+                socket = new WebSocket(wsUrl);
+                
+                socket.onopen = function() {
+                    document.getElementById('statusDot').classList.add('connected');
+                    document.getElementById('statusText').textContent = '已连接';
+                    logSystemMessage('WebSocket 连接成功！');
+                };
+                
+                socket.onmessage = function(event) {
+                    logCommandOutput(event.data);
+                };
+                
+                socket.onclose = function() {
+                    document.getElementById('statusDot').classList.remove('connected');
+                    document.getElementById('statusText').textContent = '已断开';
+                    logSystemMessage('WebSocket 连接已断开！');
+                };
+                
+                socket.onerror = function(error) {
+                    document.getElementById('statusDot').classList.remove('connected');
+                    document.getElementById('statusText').textContent = '错误';
+                    logSystemMessage(`WebSocket 错误: ${error.message}`);
+                };
+            } catch (error) {
+                logSystemMessage(`连接错误: ${error.message}`);
+            }
+        }
+        
+        // 发送命令
+        function sendCommand() {
+            const input = document.getElementById('commandInput');
+            const command = input.value.trim();
+            
+            if (command && socket && socket.readyState === WebSocket.OPEN) {
+                // 添加到命令历史
+                commandHistory.push(command);
+                historyIndex = commandHistory.length;
+                
+                // 发送命令
+                socket.send(command);
+                logUserInput(command);
+                input.value = '';
+            } else if (!socket || socket.readyState !== WebSocket.OPEN) {
+                logSystemMessage('错误: WebSocket 未连接');
+            }
+        }
+        
+        // 记录系统消息
+        function logSystemMessage(message) {
+            const output = document.getElementById('consoleOutput');
+            const div = document.createElement('div');
+            div.className = 'system-message';
+            div.textContent = `[系统] ${message}`;
+            output.appendChild(div);
+            scrollToBottom();
+        }
+        
+        // 记录用户输入
+        function logUserInput(command) {
+            const output = document.getElementById('consoleOutput');
+            const div = document.createElement('div');
+            div.className = 'user-input';
+            div.textContent = `> ${command}`;
+            output.appendChild(div);
+            scrollToBottom();
+        }
+        
+        // 记录命令输出
+        function logCommandOutput(output) {
+            const consoleOutput = document.getElementById('consoleOutput');
+            const div = document.createElement('div');
+            div.className = 'command-output';
+            div.textContent = output;
+            consoleOutput.appendChild(div);
+            scrollToBottom();
+        }
+        
+        // 滚动到底部
+        function scrollToBottom() {
+            const output = document.getElementById('consoleOutput');
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        // 处理键盘事件
+        function handleKeyPress(e) {
+            const input = document.getElementById('commandInput');
+            
+            if (e.key === 'Enter') {
+                sendCommand();
+            } else if (e.key === 'ArrowUp') {
+                // 向上浏览历史
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    input.value = commandHistory[historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                // 向下浏览历史
+                e.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    input.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    input.value = '';
+                }
+            }
+        }
+        
+        // 页面加载时连接WebSocket
+        window.onload = function() {
+            connectWebSocket();
+            
+            // 添加键盘事件监听
+            document.getElementById('commandInput').addEventListener('keydown', handleKeyPress);
+            
+            // 点击输入框外部时，输入框获得焦点
+            document.getElementById('consoleOutput').addEventListener('click', function() {
+                document.getElementById('commandInput').focus();
+            });
+        };
+        
+        // 页面关闭时断开连接
+        window.onbeforeunload = function() {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.close();
+            }
+        };
+    </script>
+</body>
+</html>

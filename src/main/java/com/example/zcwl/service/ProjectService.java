@@ -68,12 +68,4 @@ public interface ProjectService {
      * @return 流式文档内容
      */
     Flux<String> generateProjectDocStream(Long id);
-
-    /**
-     * 克隆Git项目并上传到云存储
-     * @param projectName 项目名称
-     * @param projectUrl 项目URL
-     * @return 云存储ID（项目名称）
-     */
-    String cloneAndUploadProject(String projectName, String projectUrl);
 }

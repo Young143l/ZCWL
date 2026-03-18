@@ -38,24 +38,24 @@ public class LoginResponseDTO implements Serializable {
     private String userName;
 
     /**
-     * 用户 ID
+     * 用户ID
      * -- GETTER --
-     *  获取用户 ID
+     *  获取用户ID
      * -- SETTER --
-     *  设置用户 ID
+     *  设置用户ID
      *
      */
     private String userId;
-    
+
     /**
-     * 邮箱
+     * 头像
      * -- GETTER --
-     *  获取邮箱
+     *  获取头像
      * -- SETTER --
-     *  设置邮箱
+     *  设置头像
      *
      */
-    private String email;
+    private String avatar;
 
     /**
      * 构造函数
@@ -73,14 +73,14 @@ public class LoginResponseDTO implements Serializable {
      * 构造函数
      * @param token JWT token
      * @param userName 用户名
-     * @param userId 用户 ID
-     * @param email 邮箱
+     * @param userId 用户ID
+     * @param avatar 头像
      */
-    public LoginResponseDTO(String token, String userName, String userId, String email) {
+    public LoginResponseDTO(String token, String userName, String userId, String avatar) {
         this.token = token;
         this.userName = userName;
         this.userId = userId;
-        this.email = email;
+        this.avatar = avatar;
     }
 
 }
