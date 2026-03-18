@@ -43,7 +43,7 @@ const DocumentList = () => {
 
     return (
         <>
-            <Hello_Sum_component AllCmd="Cfww --document" />
+            <Hello_Sum_component AllCmd="Cfww --document" title="Document" />
             <Template_Page>
                 <div className="flex justify-between p-2">
                     <h1

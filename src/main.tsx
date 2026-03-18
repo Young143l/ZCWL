@@ -58,7 +58,7 @@ const router = createBrowserRouter([
                 element: <CodeSF />,
             },
             {
-                path:"/code/cp",
+                path:"/code/cp/:cp_id",
                 element:<CodeCP/>
             },
             {

@@ -3,7 +3,7 @@ import type { FC } from "react";
 const Home: FC = () => {
     return (
         <>
-            <Hello_Sum_component AllCmd="Cfww --info" />
+            <Hello_Sum_component AllCmd="Cfww --info" title="Home" />
         </>
     );
 };

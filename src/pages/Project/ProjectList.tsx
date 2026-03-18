@@ -9,7 +9,7 @@ const ProjectList: FC = () => {
 
     return (
         <>
-            <Hello_Sum_components AllCmd="Cfww --project" />
+            <Hello_Sum_components AllCmd="Cfww --project" title="Project" />
             <Template_Page>
                 <div className="w-full p-2 flex flex-col gap-2.5">
                     <div className="flex justify-between">

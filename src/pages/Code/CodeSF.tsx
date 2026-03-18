@@ -7,7 +7,6 @@ import SF_Ask_components from "../../components/SF_Ask_components";
 import { useParams } from "react-router-dom";
 import { getCodeSF } from "../../api/Code_api";
 import { LoadingOutlined } from "@ant-design/icons";
-
 import useLogin from "../../status/Login_status";
 
 export interface code {
@@ -45,6 +44,7 @@ const CodeSF: FC = () => {
     const { sf_id } = useParams();
     const { token } = useLogin();
     const [loading, setLoading] = useState<boolean>(true);
+    const [reLoadKey,setReLoadKey] = useState<number>(0);
     useEffect(() => {
         getCodeSF(token, sf_id as string).then((res) => {
             if (res.ok) {
@@ -78,6 +78,7 @@ const CodeSF: FC = () => {
                                 setSf={setSf}
                                 isSelect={isSelect}
                                 setIsSelect={setIsSelect}
+                                setReLoadKey={setReLoadKey}
                             />
                         </Splitter.Panel>
                         <Splitter.Panel collapsible>
@@ -91,6 +92,7 @@ const CodeSF: FC = () => {
                                     <SF_View_componetns
                                         code={sf.code}
                                         isSelect={isSelect}
+                                        reLoadKey={reLoadKey}
                                     />
                                 </Splitter.Panel>
                                 <Splitter.Panel collapsible>

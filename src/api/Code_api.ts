@@ -1,3 +1,4 @@
+import type { CP } from "../pages/Code/CodeCP";
 import { type SF, type code } from "../pages/Code/CodeSF";
 
 export interface CodeProject {
@@ -6,7 +7,7 @@ export interface CodeProject {
     type: CodeType;
 }
 
-export type CodeType = "simple_frontend" | "console_project";
+export type CodeType = "simple_frontend" | "console_project_py";
 export type CPType = "python";
 
 export const getCodeList: (
@@ -195,11 +196,35 @@ export const newCodeCP: (
             }),
         });
         if (!res.ok) {
+            const json = await res.json()
+            console.log(json)
             throw new Error(`HTTP error! status: ${res.status}`);
         }
         const json: { cpId: string; code: string; type: string } =
             await res.json();
         return { ok: true, cpId: json.cpId };
+    } catch (e) {
+        return { ok: false, message: e };
+    }
+};
+
+export const getCodeCP = async (token: string, cpId: string) => {
+    try {
+        const res = await fetch(
+            import.meta.env.VITE_BACK_END + `/code/cp/${cpId}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json: CP = await res.json();
+        return { ok: true, cp: json };
     } catch (e) {
         return { ok: false, message: e };
     }

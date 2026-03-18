@@ -6,6 +6,7 @@ import {
     SelectOutlined,
     CodeOutlined,
     DeleteOutlined,
+    ReloadOutlined,
 } from "@ant-design/icons";
 import github from "../../public/GitHub Light.json";
 import { Console } from "console-feed";
@@ -39,7 +40,7 @@ interface Message {
 const ItemsLable: FC<{
     text: "html" | "css" | "javascript";
     setCur: React.Dispatch<React.SetStateAction<"html" | "css" | "javascript">>;
-}> = ({ text, setCur }) => {
+}> = ({ text, setCur}) => {
     return (
         <div
             className="font-bold select-none"
@@ -57,7 +58,8 @@ const SF_Editor_components: FC<{
     setSf: React.Dispatch<React.SetStateAction<SF>>;
     isSelect: boolean;
     setIsSelect: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({ sf, setSf, isSelect, setIsSelect }) => {
+    setReLoadKey: React.Dispatch<React.SetStateAction<number>>;
+}> = ({ sf, setSf, isSelect, setIsSelect,setReLoadKey }) => {
     // "use no memo";
     const { token } = useLogin();
     const [cur, setCur] = useState<"html" | "css" | "javascript">("html");
@@ -156,6 +158,14 @@ const SF_Editor_components: FC<{
                             variant="text"
                         />
                     </Popconfirm>
+                    <Button
+                        color="primary"
+                        icon={<ReloadOutlined />}
+                        variant="text"
+                        onClick={() => {
+                           setReLoadKey((prev:number)=>prev+1)
+                        }}
+                    />
                     <Modal
                         title="控制台输出"
                         open={showLogs}

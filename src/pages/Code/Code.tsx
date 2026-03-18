@@ -7,7 +7,7 @@ import CodeCreater_components from "../../components/CodeCreater_components";
 const Code: FC = () => {
     return (
         <>
-            <Hello_Sum_components AllCmd="Cfww --code" />
+            <Hello_Sum_components AllCmd="Cfww --code" title="Code" />
             <Template_Page>
                 <CodeCreater_components />
                 <CodeList_components />

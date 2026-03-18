@@ -1,14 +1,17 @@
-import { useState, type FC } from "react";
+import { useEffect, useState, type FC } from "react";
 import Template_Page from "../Template_Page";
 import { Splitter, theme } from "antd";
 import { Editor, type Monaco } from "@monaco-editor/react";
 import github from "../../../public/GitHub Light.json";
 import Console_components from "../../components/Console_components";
+import { useParams } from "react-router-dom";
+import { getCodeCP } from "../../api/Code_api";
+import useLogin from "../../status/Login_status";
 
 export type CodeType = "python";
 
 export interface CP {
-    id: string;
+    cpId: string;
     name: string;
     type: CodeType;
     code: string;
@@ -19,9 +22,20 @@ const CodeCP: FC = () => {
     const [cp, setCP] = useState<CP>({
         type: "python",
         name: "test",
-        id: "",
+        cpId: "",
         code: "",
     });
+    const { cp_id } = useParams();
+    const { token } = useLogin();
+
+
+    useEffect(()=>{
+        getCodeCP(token,cp_id as string).then((res)=>{
+            if(res.ok){
+                setCP((res.cp as CP))
+            }
+        })
+    },[cp_id,token])
 
     const handleEditorWillMount = (monaco: Monaco) => {
         monaco.editor.defineTheme("github-light", github);

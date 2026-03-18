@@ -1,0 +1,19 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+  <!-- 表盘背景 -->
+  <circle cx="50" cy="50" r="42" stroke="#FFB6C1" stroke-width="10" fill="none" />
+  
+  <!-- 时针组 (宽度调整为 10，长度 25) -->
+  <g id="hour-hand" transform-origin="50 50">
+    <rect x="45" y="15" width="10" height="35" rx="5" fill="#FFB6C1" />
+  </g>
+
+  <!-- 分针组 (宽度调整为 10，长度 35，保持 90 度夹角) -->
+  <g id="minute-hand" transform-origin="50 50">
+    <rect x="50" y="45" width="25" height="10" rx="5" fill="#FFB6C1" />
+  </g>
+
+
+  <!-- 中心装饰点 -->
+  <circle cx="50" cy="50" r="4" fill="#FFB6C1" />
+  <circle cx="50" cy="50" r="2" fill="#FFFFFF" />
+</svg>

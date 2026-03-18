@@ -1,7 +1,7 @@
 import { Select, Button, theme } from "antd";
 import { useState, type FC } from "react";
 import LoadingWindow_components from "./AILoadingWindow_components";
-import { newCodeSF, type CodeType } from "../api/Code_api";
+import { newCodeCP, newCodeSF, type CodeType, type CPType } from "../api/Code_api";
 import useLogin from "../status/Login_status";
 import { useNavigate } from "react-router-dom";
 import { SendOutlined } from "@ant-design/icons";
@@ -33,6 +33,23 @@ const CodeCreater_components: FC = () => {
             }, 300);
         });
     };
+    const creatCodeCP = (type:CPType) => {
+        newCodeCP( userId,type, message,appName, token).then((res) => {
+            if (!res.ok) {
+                setLoading(false);
+                setSuccess(false);
+                setTimeout(() => {
+                    setIsOpen(false);
+                }, 1500);
+                return;
+            }
+            setLoading(false);
+            setSuccess(true);
+            setTimeout(() => {
+                nav(`/code/sf/${(res as { ok: boolean; cpId: string }).cpId}`);
+            }, 300);
+        });
+    };
 
     const handleMake = () => {
         if (!isLogin) {
@@ -44,6 +61,10 @@ const CodeCreater_components: FC = () => {
         switch (appType) {
             case "simple_frontend": {
                 creatCodeSF();
+                break;
+            }
+            case "console_project_py":{
+                creatCodeCP("python")
                 break;
             }
         }
@@ -100,6 +121,10 @@ const CodeCreater_components: FC = () => {
                                     value: "simple_frontend",
                                     label: "html单页应用",
                                 },
+                                {
+                                    value:"console_project_py",
+                                    label:"Python控制台应用"
+                                }
                             ]}
                             className="w-[120]"
                             value={appType}

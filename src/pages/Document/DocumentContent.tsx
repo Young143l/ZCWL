@@ -2,7 +2,7 @@ import { useEffect, useState, type FC } from "react";
 import { Link, useParams } from "react-router-dom";
 import Template_Page from "../Template_Page";
 import ReactMarkdown from "react-markdown";
-import { Menu, theme, type MenuProps } from "antd";
+import { Menu, Spin, theme, type MenuProps } from "antd";
 import {
     getDocContent,
     getDoc,
@@ -14,6 +14,7 @@ import DocBreadcrumb_components from "../../components/DocBreadcrumb_components"
 type MenuItem = Required<MenuProps>["items"][number];
 import "github-markdown-css/github-markdown.css";
 import remarkGfm from "remark-gfm";
+import { LoadingOutlined } from "@ant-design/icons";
 
 const DocumentContent: FC = () => {
     const { d_id, c_id } = useParams();
@@ -23,6 +24,7 @@ const DocumentContent: FC = () => {
     );
     const [docInfo, setdocInfo] = useState<DocInfo | undefined>(undefined);
     const pColor = theme.useToken().token.colorPrimaryBorder;
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         getDoc(d_id as string).then((res) => {
@@ -54,6 +56,9 @@ const DocumentContent: FC = () => {
                         } as MenuItem;
                     }),
                 );
+                setTimeout(() => {
+                    setLoading(false);
+                }, 500);
             }
         });
         getDocContent(d_id as string, c_id as string).then((res) => {
@@ -72,6 +77,12 @@ const DocumentContent: FC = () => {
 
     return (
         <>
+            <Spin
+                indicator={<LoadingOutlined spin />}
+                spinning={loading}
+                size="large"
+                fullscreen
+            />
             <DocBreadcrumb_components
                 d_id={d_id as string}
                 d_name={docInfo?.name as string}
@@ -88,7 +99,7 @@ const DocumentContent: FC = () => {
                 }
                 sider={
                     <div
-                        className= "border-2 rounded-xl  overflow-hidden  "
+                        className="border-2 rounded-xl  overflow-hidden  "
                         style={{
                             borderColor: pColor,
                         }}

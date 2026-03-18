@@ -7,16 +7,17 @@ interface View {
         css: string;
         javascript: string;
     };
-    isSelect: boolean;
+    isSelect: boolean
+    reLoadKey:number
 }
 
-const SF_View_componetns: FC<View> = ({ code, isSelect }) => {
+const SF_View_componetns: FC<View> = ({ code, isSelect,reLoadKey}) => {
     const debounceTimer = useRef<number | null>(null);
     const [htmlsrc, setHtmlSrc] = useState<string>("");
     const [messageApi, contextHolder] = message.useMessage();
-    const view = useRef<HTMLIFrameElement>(null);
+    // const view = useRef<HTMLIFrameElement>(null);
     const pColor = theme.useToken().token.colorPrimaryBorder;
-
+    const view = useRef<HTMLIFrameElement>(null);
     useEffect(() => {
         const handleMessage = (e: MessageEvent) => {
             if (e.data.type === "timeout") {
@@ -228,6 +229,7 @@ window.addEventListener('message',(e)=>{
                         "allow-scripts allow-popups allow-modals allow-forms"
                     }
                     ref={view}
+                    key={reLoadKey}
                 ></iframe>
             </div>
         </>
