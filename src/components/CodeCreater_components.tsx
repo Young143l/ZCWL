@@ -15,7 +15,7 @@ const CodeCreater_components: FC = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [success, setSuccess] = useState<boolean>(false);
     const nav = useNavigate();
-    const pColor = theme.useToken().token.colorPrimary;
+    const pColor = theme.useToken().token.colorPrimaryBorder;
     const creatCodeSF = () => {
         newCodeSF(message, userId, appName, token).then((res) => {
             if (!res.ok) {

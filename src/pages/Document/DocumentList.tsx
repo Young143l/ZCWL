@@ -9,7 +9,7 @@ const DocumentList = () => {
     const [docList, setDocList] = useState<DocInfo[]>([]);
     const [nowDocList, setNowDocList] = useState<DocInfo[]>([]);
     const [load, setLoad] = useState<boolean>(true);
-    const pColor = theme.useToken().token.colorPrimary;
+    const pColor = theme.useToken().token.colorPrimaryBorder;
     useEffect(() => {
         getDocList().then((res) => {
             if (res.ok) {
@@ -45,16 +45,16 @@ const DocumentList = () => {
         <>
             <Hello_Sum_component AllCmd="Cfww --document" />
             <Template_Page>
-                <div className="flex justify-between">
+                <div className="flex justify-between p-2">
                     <h1
-                        className={`text-xl border-l-4 pl-1  ml-5 mt-5`}
+                        className={`text-xl border-l-4 pl-1 `}
                         style={{
                             borderColor: pColor,
                         }}
                     >
                         学习文档
                     </h1>
-                    <div className="max-w-64 mt-5 mr-5">
+                    <div className="max-w-64 ">
                         <Input
                             placeholder="Search..."
                             prefix={<SearchOutlined />}
@@ -63,7 +63,7 @@ const DocumentList = () => {
                     </div>
                 </div>
                 {load ? (
-                    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-5 p-5">
+                    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-2 p-2">
                         <Skeleton.Node
                             active
                             style={{
@@ -98,7 +98,7 @@ const DocumentList = () => {
                         />
                     </div>
                 ) : nowDocList.length ? (
-                    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-5 p-5">
+                    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-2 p-2">
                         {nowDocList.map((i) => {
                             return (
                                 <DocCard_component

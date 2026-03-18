@@ -6,7 +6,8 @@ export interface CodeProject {
     type: CodeType;
 }
 
-export type CodeType = "simple_frontend";
+export type CodeType = "simple_frontend" | "console_project";
+export type CPType = "python";
 
 export const getCodeList: (
     token: string,
@@ -160,6 +161,46 @@ export const delCodeSF: (
             throw new Error("Delete error!");
         }
     } catch (e: unknown) {
+        return { ok: false, message: e };
+    }
+};
+
+export const newCodeCP: (
+    uId: string,
+    type: CPType,
+    message: string,
+    name: string,
+    token: string,
+) => Promise<
+    { ok: false; message: unknown } | { ok: true; cpId: string }
+> = async (
+    uId: string,
+    type: CPType,
+    message: string,
+    name: string,
+    token: string,
+) => {
+    try {
+        const res = await fetch(import.meta.env.VITE_BACK_END + "/code/cp", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                uId: uId,
+                type: type,
+                projectName: name,
+                message: message,
+            }),
+        });
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json: { cpId: string; code: string; type: string } =
+            await res.json();
+        return { ok: true, cpId: json.cpId };
+    } catch (e) {
         return { ok: false, message: e };
     }
 };

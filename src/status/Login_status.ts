@@ -47,7 +47,7 @@ const useLogin = create<LoginState>()(
                 userName: state.userName,
                 userId: state.userId,
                 token: state.token,
-                avatar:""
+                avatar:state.avatar
             }),
         },
     ),

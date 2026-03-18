@@ -36,14 +36,14 @@ const SF_View_componetns: FC<View> = ({ code, isSelect }) => {
         debounceTimer.current = setTimeout(() => {
             const transformCode = (userJs: string) => {
                 return userJs
-                    .replace(
-                        /(for|while)\s*\(([\s\S]*?)\)\s*\{/g,
-                        "$1 ($2) { window.__LOOP_PROTECT__.check(); ",
-                    )
-                    .replace(
-                        /do\s*\{/g,
-                        "do { window.__LOOP_PROTECT__.check(); ",
-                    );
+                    // .replace(
+                    //     /(for|while)\s*\(([\s\S]*?)\)\s*\{/g,
+                    //     "$1 ($2) { window.__LOOP_PROTECT__.check(); ",
+                    // )
+                    // .replace(
+                    //     /do\s*\{/g,
+                    //     "do { window.__LOOP_PROTECT__.check(); ",
+                    // );
             };
 
             const htmlContent = code.html;

@@ -12,7 +12,7 @@ import {
 import useLogin from "../status/Login_status";
 import UserAvatar_components from "./UserAvatar_components";
 type MenuItem = Required<MenuProps>["items"][number];
-
+import useAIChatDoc from "../status/AIChatDoc_status";
 const items: MenuItem[] = [
     {
         label: (
@@ -56,7 +56,7 @@ const Header_components: FC = () => {
     const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
     const location = useLocation();
     const { isLogin, userName, clearLoginStatus } = useLogin();
-
+    const { clear } = useAIChatDoc();
     // 计算当前激活的菜单项，而不是使用状态
     const getCurrentKey = (pathname: string): string => {
         if (pathname === "/") {
@@ -86,6 +86,7 @@ const Header_components: FC = () => {
             <Button
                 onClick={() => {
                     clearLoginStatus();
+                    clear();
                 }}
             >
                 登出

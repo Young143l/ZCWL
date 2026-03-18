@@ -10,7 +10,7 @@ import { SearchOutlined } from "@ant-design/icons";
 const CodeList_components: FC = () => {
     const [codeList, setCodeList] = useState<CodeProject[] | null>(null);
     const [nowCodeList, setNowCodeList] = useState<CodeProject[] | null>(null);
-    const pColor = theme.useToken().token.colorPrimary;
+    const pColor = theme.useToken().token.colorPrimaryBorder;
     const [waiting, setWaiting] = useState<boolean>(true);
     const { token, userId, isLogin } = useLogin();
     const nav = useNavigate();

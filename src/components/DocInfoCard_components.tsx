@@ -1,23 +1,38 @@
 import type { FC } from "react";
 import type { DocInfo } from "../api/Doc_api";
+import { theme } from "antd";
 
 const DocInfoCard_components: FC<DocInfo> = ({ name, summary, img }) => {
+    const pColor = theme.useToken().token.colorPrimaryBorder;
+
     return (
-        <div className="bg-white rounded-xl  overflow-hidden  transition-shadow duration-300">
-            <div className="p-5 flex gap-2.5 flex-wrap">
-                <div className="w-1/3">
+        <div
+            className="bg-white rounded-xl  border overflow-hidden"
+            style={{
+                borderColor: pColor,
+            }}
+        >
+            <div className="p-5 flex gap-4 h-full">
+                <div className="shrink-0 w-24 h-24 sm:w-32 sm:h-32 relative">
                     <img
                         src={img}
                         alt={name}
-                        className="w-50 h-50 object-cover rounded-lg"
+                        className="w-full h-full object-cover rounded-lg "
                     />
                 </div>
-                <div className="w-1/2">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2 truncate">
+
+                <div className="flex-1 min-w-0 flex flex-col justify-start">
+                    <h3
+                        className="text-4xl font-bold  mb-3 truncate"
+                        title={name}
+                        style={{
+                            color: pColor,
+                        }}
+                    >
                         {name}
                     </h3>
 
-                    <p className="text-gray-600 text-sm line-clamp-3">
+                    <p className="text-base text-gray-600 leading-relaxed line-clamp-3">
                         {summary}
                     </p>
                 </div>

@@ -84,7 +84,6 @@ const Project: FC = () => {
     const onSelect: DirectoryTreeProps["onSelect"] = (key, info) => {
         if (info.node.isLeaf) {
             setFilePath(key[0] as string);
-            console.log(key[0] as string);
         }
     };
     useEffect(() => {
