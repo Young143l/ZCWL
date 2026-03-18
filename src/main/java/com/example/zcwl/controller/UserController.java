@@ -187,10 +187,9 @@ public class UserController {
         // 使用Optional的map方法处理查询结果
         // 如果找到数据，返回200状态码和数据；否则返回404状态码
         return optionalUser.map(user -> {
-            // 构建响应对象，包含name、avatar和email
+            // 构建响应对象，包含 name 和 email
             java.util.Map<String, Object> response = new java.util.HashMap<>();
             response.put("name", user.getName());
-            response.put("avatar", user.getAvatar());
             response.put("email", user.getEmail());
             return ResponseEntity.ok(response);
         })

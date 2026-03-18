@@ -139,9 +139,10 @@
 - **成功响应** (200 OK):
   ```json
   {
-    "token": "JWT令牌",
-    "userId": "用户ID",
-    "userName": "用户名"
+    "token": "JWT 令牌",
+    "userId": "用户 ID",
+    "userName": "用户名",
+    "email": "邮箱"
   }
   ```
 
@@ -162,7 +163,6 @@
   ```json
   {
     "name": "用户名",
-    "avatar": "头像URL",
     "email": "邮箱"
   }
   ```
