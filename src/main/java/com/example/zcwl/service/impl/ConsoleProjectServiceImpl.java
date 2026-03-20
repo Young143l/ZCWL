@@ -68,8 +68,8 @@ public class ConsoleProjectServiceImpl implements ConsoleProjectService {
     }
 
     @Override
-    public ConsoleProject createCpProject(String userId, String projectName, String message) {
-        logger.debug("创建新的控制台应用代码生成项目: {}, 用户ID: {}", projectName, userId);
+    public ConsoleProject createCpProject(String userId, String projectName, String message, String type) {
+        logger.debug("创建新的控制台应用代码生成项目: {}, 用户ID: {}, 类型: {}", projectName, userId, type);
         
         // 检查项目名称是否已存在
         Optional<ConsoleProject> existingProject = consoleProjectRepository.findByProjectNameAndUserId(projectName, userId);
@@ -80,11 +80,11 @@ public class ConsoleProjectServiceImpl implements ConsoleProjectService {
         // 生成唯一的cpId
         String cpId = generateCpId();
         
-        // 默认为控制台应用类型
-        String type = "console";
+        // 确保类型为小写
+        String normalizedType = type.toLowerCase();
         
         // 生成控制台应用代码
-        String generatedCode = generateCode(message, type);
+        String generatedCode = generateCode(message, normalizedType);
         
         // 创建项目实体
         ConsoleProject project = new ConsoleProject(
@@ -92,7 +92,7 @@ public class ConsoleProjectServiceImpl implements ConsoleProjectService {
                 projectName,
                 userId,
                 generatedCode,
-                type
+                normalizedType
         );
         
         return consoleProjectRepository.save(project);

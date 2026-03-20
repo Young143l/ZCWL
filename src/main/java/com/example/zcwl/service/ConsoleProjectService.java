@@ -22,9 +22,10 @@ public interface ConsoleProjectService {
      * @param userId 用户ID
      * @param projectName 项目名称
      * @param message 生成代码的提示信息
+     * @param type 编程语言类型
      * @return 创建的项目，包含生成的代码
      */
-    ConsoleProject createCpProject(String userId, String projectName, String message);
+    ConsoleProject createCpProject(String userId, String projectName, String message, String type);
 
     /**
      * 在指定ID的项目中发起AI对话生成新的代码

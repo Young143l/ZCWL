@@ -45,9 +45,12 @@ public class CodeController {
             @RequestParam(value = "uId", required = false) String uId) {
         logger.debug("获取代码生成项目列表，用户ID: {}", uId);
         try {
-            List<SimpleFrontendProject> projects = simpleFrontendProjectService.getSfProjects(uId);
+            // 获取简单前端项目列表
+            List<SimpleFrontendProject> sfProjects = simpleFrontendProjectService.getSfProjects(uId);
+            // 获取控制台项目列表
+            List<ConsoleProject> cpProjects = consoleProjectService.getCpProjects(uId);
             // 转换为文档要求的格式
-            Map<String, Object> response = getStringObjectMap(uId, projects);
+            Map<String, Object> response = getStringObjectMap(uId, sfProjects, cpProjects);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("获取项目列表失败", e);
@@ -57,13 +60,24 @@ public class CodeController {
         }
     }
 
-    private static Map<String, Object> getStringObjectMap(String uId, List<SimpleFrontendProject> projects) {
+    private static Map<String, Object> getStringObjectMap(String uId, List<SimpleFrontendProject> sfProjects, List<ConsoleProject> cpProjects) {
         List<Map<String, String>> list = new ArrayList<>();
-        for (SimpleFrontendProject project : projects) {
+        
+        // 添加简单前端项目
+        for (SimpleFrontendProject project : sfProjects) {
             Map<String, String> item = new HashMap<>();
             item.put("name", project.getProjectName());
             item.put("id", project.getSfId());
-            item.put("type", "simple_frontend"); // 类型固定为simple_frontend
+            item.put("type", "sf"); // 类型为sf
+            list.add(item);
+        }
+        
+        // 添加控制台项目
+        for (ConsoleProject project : cpProjects) {
+            Map<String, String> item = new HashMap<>();
+            item.put("name", project.getProjectName());
+            item.put("id", project.getCpId());
+            item.put("type", "cp"); // 类型为cp
             list.add(item);
         }
 
@@ -468,8 +482,8 @@ public class CodeController {
      * 创建新的控制台项目
      * 接口：POST /code/cp
      * 请求头：Content-Type: application/json, Authorization: "Bearer token"
-     * 请求体：{"uId":"", "projectName":"", "message":""}
-     * 响应：成功(200 OK)：{"cpId":"", "code":""}
+     * 请求体：{"uId":"", "type":"", "projectName":"", "message":""}
+     * 响应：成功(200 OK)：{"cpId":"", "code":"", "type":""}
      */
     @PostMapping("/cp")
     public ResponseEntity<Map<String, Object>> createCpProject(
@@ -519,14 +533,16 @@ public class CodeController {
             
             String projectName = projectNameObj.toString();
             String message = messageObj.toString();
+            String type = request.containsKey("type") && request.get("type") != null ? request.get("type").toString().toLowerCase() : "python"; // 默认类型为python
             
             // 调用服务层创建项目
-            ConsoleProject createdProject = consoleProjectService.createCpProject(userId, projectName, message);
+            ConsoleProject createdProject = consoleProjectService.createCpProject(userId, projectName, message, type);
             
             // 构建响应
             Map<String, Object> response = new HashMap<>();
             response.put("cpId", createdProject.getCpId());
             response.put("code", createdProject.getCode() != null ? createdProject.getCode() : "");
+            response.put("type", createdProject.getType() != null ? createdProject.getType() : "");
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             logger.error("创建控制台项目失败: {}", e.getMessage());
@@ -607,7 +623,7 @@ public class CodeController {
      * 获取指定ID的控制台项目信息
      * 接口：GET /code/cp/:id
      * 请求头：Content-Type: application/json, Authorization: "Bearer token"
-     * 响应：成功(200 OK)：{"cpId":"", "name":"", "code":""}
+     * 响应：成功(200 OK)：{"cpId":"", "name":"", "type":"", "code":""}
      */
     @GetMapping("/cp/{id}")
     public ResponseEntity<Map<String, Object>> getCpProjectById(
@@ -627,6 +643,7 @@ public class CodeController {
                 Map<String, Object> response = new HashMap<>();
                 response.put("cpId", project.getCpId());
                 response.put("name", project.getProjectName());
+                response.put("type", project.getType() != null ? project.getType() : "");
                 response.put("code", project.getCode() != null ? project.getCode() : "");
                 return ResponseEntity.ok(response);
             } else {
