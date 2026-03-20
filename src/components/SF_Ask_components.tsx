@@ -162,6 +162,7 @@ const SF_Ask_components: FC<SF_Ask> = ({
                             onClick={() => {
                                 handleAsk();
                             }}
+                            disabled={userMessage.length===0}
                         >
                             <SendOutlined />
                             发送

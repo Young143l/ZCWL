@@ -1,4 +1,4 @@
-import { Input, Button, ConfigProvider, message, theme } from "antd";
+import { Input, Button, ConfigProvider, message, theme, Tag } from "antd";
 import { useState, type FC, useEffect, useRef } from "react";
 import {
     SendOutlined,
@@ -15,7 +15,8 @@ import { useNavigate } from "react-router-dom";
 const AIChatDoc_components: FC = () => {
     const [inputValue, setInputValue] = useState<string>("");
     const [asking, setAsking] = useState<boolean>(false);
-    const { setAns, have, chat, id, newChat, clear, addChat } = useAIChatDoc();
+    const { setAns, have, chat, id, newChat, clear, addChat, code, setCode } =
+        useAIChatDoc();
     const { isLogin, token, userId } = useLogin();
     const nav = useNavigate();
     const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -63,11 +64,16 @@ const AIChatDoc_components: FC = () => {
                 return;
             }
         }
-        const ask = inputValue;
+        const ask = "```\n" + code + "\n```\n" + inputValue;
         setInputValue("");
         addChat({ id: "", ask: ask, over: false, ans: "" });
 
-        const askRes = await getAsk(userId, currentId, inputValue, token);
+        const askRes = await getAsk(
+            userId,
+            currentId,
+            "```" + code + "```\n" + inputValue,
+            token,
+        );
         if (askRes.ok) {
             const t = chat.length;
             const reader = askRes.ans as ReadableStreamDefaultReader<
@@ -143,7 +149,7 @@ const AIChatDoc_components: FC = () => {
                 showCount
             />
             <div className="w-full pt-1 flex justify-end gap-2 mt-5">
-                <div className="w-full flex items-center">
+                <div className="w-full flex items-center gap-1">
                     {/* <Switch
                         checkedChildren="快速模式"
                         unCheckedChildren="详细模式"
@@ -154,6 +160,20 @@ const AIChatDoc_components: FC = () => {
                             newAsk();
                         }}
                     />
+                    {code ? (
+                        <Tag
+                            closeIcon
+                            onClose={() => {
+                                setCode(null);
+                            }}
+                            variant="filled"
+                            color={pColor}
+                        >
+                            Code Snippet
+                        </Tag>
+                    ) : (
+                        <></>
+                    )}
                 </div>
 
                 <Button

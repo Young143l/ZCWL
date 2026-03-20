@@ -9,21 +9,39 @@ export interface AIChatBody {
 }
 
 interface AIChatDocStatus {
+    isAIChatOpen: boolean;
+    setIsAIChatOpen: (i: boolean) => void;
     have: boolean;
     id: string;
     chat: AIChatBody[];
-    addChat:(i: AIChatBody)=>void;
-    newChat: (id: string) =>void;
+    code: string | null;
+    setCode: (code: string | null) => void;
+    addChat: (i: AIChatBody) => void;
+    newChat: (id: string) => void;
     clear: () => void;
-    setAns:(id:string,ans:string)=>void;
+    setAns: (id: string, ans: string) => void;
 }
 
 const useAIChatDoc = create<AIChatDocStatus>()(
     persist(
         (set) => ({
+            isAIChatOpen: false,
             have: false,
             id: "",
             chat: [],
+            code: null,
+            setIsAIChatOpen: (i: boolean) => {
+                set((s) => ({
+                    ...s,
+                    isAIChatOpen: i,
+                }));
+            },
+            setCode: (code: string | null) => {
+                set((s) => ({
+                    ...s,
+                    code: code,
+                }));
+            },
             addChat: (i: AIChatBody) => {
                 set((s) => ({
                     ...s,
@@ -36,6 +54,7 @@ const useAIChatDoc = create<AIChatDocStatus>()(
                     have: true,
                     id: id,
                     chat: [],
+                    code: null,
                 }));
             },
             clear: () => {
@@ -44,18 +63,19 @@ const useAIChatDoc = create<AIChatDocStatus>()(
                     have: false,
                     id: "",
                     chat: [],
+                    code: null,
                 }));
             },
-            setAns:(id:string,ans:string)=>{
+            setAns: (id: string, ans: string) => {
                 set((s) => ({
                     ...s,
-                    chat: s.chat.map((item, index) => 
-                        index === s.chat.length - 1 
-                            ? {...item, id, ans,over:true} 
-                            : item
+                    chat: s.chat.map((item, index) =>
+                        index === s.chat.length - 1
+                            ? { ...item, id, ans, over: true }
+                            : item,
                     ),
                 }));
-            }
+            },
         }),
         {
             name: "AIChatDocStatus",

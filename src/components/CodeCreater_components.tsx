@@ -9,7 +9,7 @@ import { SendOutlined } from "@ant-design/icons";
 const CodeCreater_components: FC = () => {
     const { token, userId, isLogin } = useLogin();
     const [message, setMessage] = useState<string>("");
-    const [appType, setAppType] = useState<CodeType>("simple_frontend");
+    const [appType, setAppType] = useState<CodeType>("sf");
     const [appName, setAppName] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -46,7 +46,7 @@ const CodeCreater_components: FC = () => {
             setLoading(false);
             setSuccess(true);
             setTimeout(() => {
-                nav(`/code/sf/${(res as { ok: boolean; cpId: string }).cpId}`);
+                nav(`/code/cp/${(res as { ok: boolean; cpId: string }).cpId}`);
             }, 300);
         });
     };
@@ -59,11 +59,11 @@ const CodeCreater_components: FC = () => {
         setIsOpen(true);
         setLoading(true);
         switch (appType) {
-            case "simple_frontend": {
+            case "sf": {
                 creatCodeSF();
                 break;
             }
-            case "console_project_py":{
+            case "cp_py":{
                 creatCodeCP("python")
                 break;
             }
@@ -118,11 +118,11 @@ const CodeCreater_components: FC = () => {
                         <Select
                             options={[
                                 {
-                                    value: "simple_frontend",
+                                    value: "sf",
                                     label: "html单页应用",
                                 },
                                 {
-                                    value:"console_project_py",
+                                    value:"cp_py",
                                     label:"Python控制台应用"
                                 }
                             ]}

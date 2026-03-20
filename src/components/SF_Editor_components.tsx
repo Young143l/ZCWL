@@ -1,18 +1,20 @@
-import { type Monaco, Editor } from "@monaco-editor/react";
+import { type Monaco, Editor, type OnMount } from "@monaco-editor/react";
 import { Menu, Button, Popover, Popconfirm, Modal, theme, message } from "antd";
-import { type FC, useEffect, useState } from "react";
+import { type FC, useEffect, useRef, useState } from "react";
 import { type SF } from "../pages/Code/CodeSF";
 import {
     SelectOutlined,
     CodeOutlined,
     DeleteOutlined,
     ReloadOutlined,
+    PlusOutlined,
 } from "@ant-design/icons";
 import github from "../../public/GitHub Light.json";
 import { Console } from "console-feed";
 import { delCodeSF } from "../api/Code_api";
 import useLogin from "../status/Login_status";
 import { useNavigate } from "react-router-dom";
+import useAIChatDoc from "../status/AIChatDoc_status";
 
 type Methods =
     | "log"
@@ -40,7 +42,7 @@ interface Message {
 const ItemsLable: FC<{
     text: "html" | "css" | "javascript";
     setCur: React.Dispatch<React.SetStateAction<"html" | "css" | "javascript">>;
-}> = ({ text, setCur}) => {
+}> = ({ text, setCur }) => {
     return (
         <div
             className="font-bold select-none"
@@ -59,8 +61,9 @@ const SF_Editor_components: FC<{
     isSelect: boolean;
     setIsSelect: React.Dispatch<React.SetStateAction<boolean>>;
     setReLoadKey: React.Dispatch<React.SetStateAction<number>>;
-}> = ({ sf, setSf, isSelect, setIsSelect,setReLoadKey }) => {
+}> = ({ sf, setSf, isSelect, setIsSelect, setReLoadKey }) => {
     // "use no memo";
+    const { setCode, setIsAIChatOpen } = useAIChatDoc();
     const { token } = useLogin();
     const [cur, setCur] = useState<"html" | "css" | "javascript">("html");
     const items = [
@@ -80,8 +83,32 @@ const SF_Editor_components: FC<{
     const nav = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
 
+    const editorRef = useRef<Parameters<OnMount>[1]>(null);
+
     const handleEditorWillMount = (monaco: Monaco) => {
         monaco.editor.defineTheme("github-light", github);
+    };
+    const handleEditorMount: OnMount = (editor) => {
+        editorRef.current = editor;
+    };
+    const getSelectedContent = () => {
+        const editor = editorRef.current;
+        // if (!editor) return;
+
+        const selection = editor.getSelection();
+        const selectedText = editor.getModel()?.getValueInRange(selection);
+        // console.log(selectedText);
+
+        if (selection.isEmpty()) {
+            messageApi.error("请选中部分代码");
+            return;
+        } else {
+            setCode(selectedText);
+            messageApi.success("添加成功");
+            setTimeout(() => {
+                setIsAIChatOpen(true);
+            }, 200);
+        }
     };
 
     const handleDel = () => {
@@ -163,7 +190,7 @@ const SF_Editor_components: FC<{
                         icon={<ReloadOutlined />}
                         variant="text"
                         onClick={() => {
-                           setReLoadKey((prev:number)=>prev+1)
+                            setReLoadKey((prev: number) => prev + 1);
                         }}
                     />
                     <Modal
@@ -226,6 +253,14 @@ const SF_Editor_components: FC<{
                             }}
                         />
                     </Popover>
+                    <Button
+                        color="primary"
+                        icon={<PlusOutlined />}
+                        variant="text"
+                        onClick={() => {
+                            getSelectedContent();
+                        }}
+                    />
                 </div>
                 <div
                     className="flex-1 border-2 rounded-xl overflow-hidden"
@@ -238,6 +273,7 @@ const SF_Editor_components: FC<{
                         theme="github-light"
                         beforeMount={handleEditorWillMount}
                         language={cur}
+                        onMount={handleEditorMount}
                         options={{
                             minimap: { enabled: false },
                             fixedOverflowWidgets: true,

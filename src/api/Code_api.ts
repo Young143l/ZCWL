@@ -7,7 +7,7 @@ export interface CodeProject {
     type: CodeType;
 }
 
-export type CodeType = "simple_frontend" | "console_project_py";
+export type CodeType = "sf" | "cp_py"|"cp";
 export type CPType = "python";
 
 export const getCodeList: (

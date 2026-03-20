@@ -31,7 +31,7 @@ const CodeCP: FC = () => {
     useEffect(() => {
         getCodeCP(token, cp_id as string).then((res) => {
             if (res.ok) {
-                // console.log(res.cp)
+                console.log(res.cp)
                 setCP(res.cp as CP);
             }
         });

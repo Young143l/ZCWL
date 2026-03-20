@@ -10,7 +10,11 @@ const AIChatBody_components: FC<AIChatBody> = ({ ask, ans, over }) => {
         <div className="w-full">
             <div className="flex justify-end gap-1.5">
                 <div className="border border-gray-300 rounded-xl p-2 whitespace-normal max-w-5/6">
-                    {ask}
+                    <div className="markdown-body">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {ask}
+                        </ReactMarkdown>
+                    </div>
                 </div>
                 <div>
                     <UserAvatar_components size={36} />
@@ -24,7 +28,9 @@ const AIChatBody_components: FC<AIChatBody> = ({ ask, ans, over }) => {
                 <div className="border border-gray-300 rounded-xl p-2 whitespace-normal max-w-5/6">
                     {over ? (
                         <div className="markdown-body">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{ans}</ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {ans}
+                            </ReactMarkdown>
                         </div>
                     ) : (
                         <Spin />

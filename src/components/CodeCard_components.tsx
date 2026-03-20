@@ -12,13 +12,13 @@ const CodeCard_components: FC<CodeProject> = ({ name, id, type }) => {
             <div
                 className= "rounded-xl bg-gray-50 hover:bg-gray-200 border-2   p-2 flex gap-2.5 "
                 onClick={() => {
-                    nav(`/code/${type == "simple_frontend" ? "sf" : ""}/${id}`);
+                    nav(`/code/${type == "sf" ? "sf" : (type=="cp"?"cp":"")}/${id}`);
                 }}
                 style={{
                     borderColor: pColor,
                 }}
             >
-                {type === "simple_frontend" ? (
+                {type === "sf" ? (
                     <SF className="shrink-0 w-10 h-10" />
                 ) : (
                     <SF className="shrink-0 w-10 h-10" />

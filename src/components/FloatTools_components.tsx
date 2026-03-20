@@ -1,18 +1,15 @@
 import { FloatButton, Modal } from "antd";
-import {
-    ArrowUpOutlined,
-    SyncOutlined,
-    HomeOutlined,
-} from "@ant-design/icons";
+import { ArrowUpOutlined, SyncOutlined, HomeOutlined } from "@ant-design/icons";
 import Icon from "@ant-design/icons";
-import { useState, type FC } from "react";
-import { useNavigate,useLocation } from "react-router-dom";
+import { type FC } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import AIChatDoc_components from "./AIChatDoc_components.tsx";
-import QwenIcon from '../../public/qwen.svg?react';
+import QwenIcon from "../../public/qwen.svg?react";
+import useAIChatDoc from "../status/AIChatDoc_status.ts";
 
 const FloatTools_components: FC = () => {
     const location = useLocation();
-    const [isAIChatOpen, setIsAIChatOpen] = useState<boolean>(false);
+    const {isAIChatOpen, setIsAIChatOpen} = useAIChatDoc();
     const nav = useNavigate();
     return (
         <>
@@ -26,11 +23,18 @@ const FloatTools_components: FC = () => {
             </Modal>
             <FloatButton.Group shape="square">
                 <FloatButton
-                    icon={<Icon component={QwenIcon}/>}
+                    icon={<Icon component={QwenIcon} />}
                     onClick={() => setIsAIChatOpen(true)}
                 />
-                {location.pathname==="/"?<></> :<FloatButton icon={<HomeOutlined />} onClick={() => nav("/")} />}
-                
+                {location.pathname === "/" ? (
+                    <></>
+                ) : (
+                    <FloatButton
+                        icon={<HomeOutlined />}
+                        onClick={() => nav("/")}
+                    />
+                )}
+
                 <FloatButton.BackTop icon={<ArrowUpOutlined />} />
                 <FloatButton
                     icon={<SyncOutlined />}
