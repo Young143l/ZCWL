@@ -173,7 +173,10 @@ public class ProjectServiceImpl implements ProjectService {
         String projectUrl = project.getUrl();
         if (projectUrl != null && !projectUrl.isEmpty()) {
             logger.info("开始克隆和上传项目: {}", project.getProjectName());
-            String cloudStorageId = cloneAndUploadProject(project.getProjectName(), projectUrl);
+            String projectName = project.getProjectName();
+            projectName = projectName.replace("/", "-");
+
+            String cloudStorageId = cloneAndUploadProject(projectName, projectUrl);
             
             if (cloudStorageId != null) {
                 logger.info("项目克隆上传成功，云存储ID: {}", cloudStorageId);
@@ -211,7 +214,23 @@ public class ProjectServiceImpl implements ProjectService {
             if (!project.getUserId().equals(userId)) {
                 throw new SecurityException("无删除权限");
             }
+            
+            // 先删除云端文件
+            String cloudStorageId = project.getCloudStorageId();
+            if (cloudStorageId != null && !cloudStorageId.isEmpty()) {
+                try {
+                    logger.info("开始删除云端项目文件，cloudStorageId: {}", cloudStorageId);
+                    qiniuUtil.deleteFilesByPrefix(cloudStorageId);
+                    logger.info("云端项目文件删除成功，cloudStorageId: {}", cloudStorageId);
+                } catch (Exception e) {
+                    logger.error("删除云端项目文件失败，cloudStorageId: {}", cloudStorageId, e);
+                    // 云端文件删除失败不影响数据库删除
+                }
+            }
+            
+            // 再删除数据库记录
             projectRepository.delete(project);
+            logger.info("项目删除成功，ID: {}", id);
             return true;
         }
         return false;
@@ -666,6 +685,98 @@ public class ProjectServiceImpl implements ProjectService {
                 }
             }
             Files.delete(directory.toPath());
+        }
+    }
+
+    @Override
+    public java.util.Map<String, Object> getProjectFileStructure(String cloudStorageId) {
+        logger.debug("获取项目文件结构，cloudStorageId: {}", cloudStorageId);
+        
+        if (cloudStorageId == null || cloudStorageId.isEmpty()) {
+            logger.warn("cloudStorageId为空，无法获取文件结构");
+            return null;
+        }
+        
+        try {
+            // 从七牛云获取文件列表
+            java.util.List<com.qiniu.storage.model.FileInfo> files = qiniuUtil.listFiles(cloudStorageId);
+            
+            if (files.isEmpty()) {
+                logger.warn("云端没有找到项目文件，cloudStorageId: {}", cloudStorageId);
+                return null;
+            }
+            
+            // 构建文件树结构
+            java.util.Map<String, Object> root = new java.util.HashMap<>();
+            root.put("name", cloudStorageId);
+            root.put("folders", new java.util.ArrayList<java.util.Map<String, Object>>());
+            root.put("files", new java.util.ArrayList<String>());
+            
+            for (com.qiniu.storage.model.FileInfo fileInfo : files) {
+                String key = fileInfo.key;
+                // 移除项目名前缀
+                String relativePath = key.substring(cloudStorageId.length());
+                if (relativePath.startsWith("/")) {
+                    relativePath = relativePath.substring(1);
+                }
+                
+                if (relativePath.isEmpty()) {
+                    continue;
+                }
+                
+                // 构建文件树
+                buildFileTree(root, relativePath, cloudStorageId);
+            }
+            
+            logger.info("项目文件结构构建完成，cloudStorageId: {}，文件数: {}", cloudStorageId, files.size());
+            return root;
+            
+        } catch (Exception e) {
+            logger.error("获取项目文件结构失败，cloudStorageId: {}", cloudStorageId, e);
+            return null;
+        }
+    }
+    
+    /**
+     * 构建文件树结构
+     * @param currentNode 当前节点
+     * @param relativePath 相对路径
+     * @param cloudStorageId 云存储ID
+     */
+    @SuppressWarnings("unchecked")
+    private void buildFileTree(java.util.Map<String, Object> currentNode, String relativePath, String cloudStorageId) {
+        String[] parts = relativePath.split("/");
+        
+        if (parts.length == 1) {
+            // 这是文件
+            java.util.List<String> files = (java.util.List<String>) currentNode.get("files");
+            files.add(parts[0]);
+        } else {
+            // 这是目录
+            String folderName = parts[0];
+            java.util.List<java.util.Map<String, Object>> folders = 
+                (java.util.List<java.util.Map<String, Object>>) currentNode.get("folders");
+            
+            // 查找或创建文件夹节点
+            java.util.Map<String, Object> folderNode = null;
+            for (java.util.Map<String, Object> folder : folders) {
+                if (folderName.equals(folder.get("name"))) {
+                    folderNode = folder;
+                    break;
+                }
+            }
+            
+            if (folderNode == null) {
+                folderNode = new java.util.HashMap<>();
+                folderNode.put("name", folderName);
+                folderNode.put("folders", new java.util.ArrayList<java.util.Map<String, Object>>());
+                folderNode.put("files", new java.util.ArrayList<String>());
+                folders.add(folderNode);
+            }
+            
+            // 递归处理剩余路径
+            String remainingPath = relativePath.substring(folderName.length() + 1);
+            buildFileTree(folderNode, remainingPath, cloudStorageId);
         }
     }
 }

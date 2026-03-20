@@ -1,20 +1,28 @@
 package com.example.zcwl.utils;
 
+import com.qiniu.storage.BucketManager;
 import com.qiniu.storage.Configuration;
 import com.qiniu.storage.Region;
 import com.qiniu.storage.UploadManager;
+import com.qiniu.storage.model.FileInfo;
+import com.qiniu.storage.model.FileListing;
 import com.qiniu.util.Auth;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 七牛云工具类
  */
 @Component
 public class QiniuUtil {
+
+    private static final Logger logger = LoggerFactory.getLogger(QiniuUtil.class);
 
     @Value("${qiniu.access-key}")
     private String accessKey;
@@ -101,5 +109,102 @@ public class QiniuUtil {
      */
     public String getPublicUrl(String fileName) {
         return domain + "/" + fileName;
+    }
+
+    /**
+     * 列出指定前缀的文件列表
+     * @param prefix 文件前缀（项目路径）
+     * @return 文件信息列表
+     */
+    public List<FileInfo> listFiles(String prefix) {
+        return listFiles(prefix, 1000);
+    }
+
+    /**
+     * 列出指定前缀的文件列表
+     * @param prefix 文件前缀（项目路径）
+     * @param limit 每次查询的最大数量
+     * @return 文件信息列表
+     */
+    public List<FileInfo> listFiles(String prefix, int limit) {
+        List<FileInfo> allFiles = new ArrayList<>();
+        Configuration cfg = new Configuration(getRegion());
+        Auth auth = Auth.create(accessKey, secretKey);
+        BucketManager bucketManager = new BucketManager(auth, cfg);
+        
+        String marker = null;
+        try {
+            do {
+                FileListing fileListing = bucketManager.listFiles(bucketName, prefix, marker, limit, null);
+                if (fileListing.items != null) {
+                    for (FileInfo fileInfo : fileListing.items) {
+                        allFiles.add(fileInfo);
+                    }
+                }
+                marker = fileListing.marker;
+            } while (marker != null && !marker.isEmpty());
+        } catch (Exception e) {
+            throw new RuntimeException("获取文件列表失败", e);
+        }
+        
+        return allFiles;
+    }
+
+    /**
+     * 删除单个文件
+     * @param fileName 文件名
+     */
+    public void deleteFile(String fileName) {
+        Configuration cfg = new Configuration(getRegion());
+        Auth auth = Auth.create(accessKey, secretKey);
+        BucketManager bucketManager = new BucketManager(auth, cfg);
+        
+        try {
+            bucketManager.delete(bucketName, fileName);
+        } catch (Exception e) {
+            throw new RuntimeException("删除文件失败", e);
+        }
+    }
+
+    /**
+     * 批量删除文件
+     * @param fileNames 文件名列表
+     */
+    public void deleteFiles(List<String> fileNames) {
+        if (fileNames == null || fileNames.isEmpty()) {
+            return;
+        }
+        
+        Configuration cfg = new Configuration(getRegion());
+        Auth auth = Auth.create(accessKey, secretKey);
+        BucketManager bucketManager = new BucketManager(auth, cfg);
+        
+        try {
+            for (String fileName : fileNames) {
+                try {
+                    bucketManager.delete(bucketName, fileName);
+                } catch (Exception e) {
+                    // 记录单个文件删除失败，但继续删除其他文件
+                    logger.error("删除文件失败: {}", fileName, e);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("批量删除文件失败", e);
+        }
+    }
+
+    /**
+     * 删除指定前缀的所有文件（用于删除整个项目）
+     * @param prefix 文件前缀（项目路径）
+     */
+    public void deleteFilesByPrefix(String prefix) {
+        List<FileInfo> files = listFiles(prefix);
+        List<String> fileNames = new ArrayList<>();
+        
+        for (FileInfo fileInfo : files) {
+            fileNames.add(fileInfo.key);
+        }
+        
+        deleteFiles(fileNames);
     }
 }

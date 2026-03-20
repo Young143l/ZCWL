@@ -88,10 +88,34 @@ public class ProjectController {
                 return ResponseEntity.badRequest().body(errorResponse);
             }
             
+            // 验证项目名称和URL格式
+            String projectName = (String) request.get("projectName");
+            String url = (String) request.get("url");
+            
+            // 验证项目名称格式（xxx/xxx）
+            if (!projectName.matches("^[^/]+/[^/]+$") && !projectName.matches("^[^/]+$") ) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目名称格式错误，应为xxx/xxx或xxx格式");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 验证项目名称与URL后半段是否匹配
+            if (projectName.contains("/")) {
+                // 从URL中提取项目路径
+                String urlPath = url.replaceAll("^https?://[^/]+/", "");
+                if (!projectName.equals(urlPath)) {
+                    Map<String, Object> errorResponse = new HashMap<>();
+                    errorResponse.put("error", "项目名称与URL路径不匹配");
+                    return ResponseEntity.badRequest().body(errorResponse);
+                }
+                // 将项目名称中的'/'替换为'-'
+                //projectName = projectName.replace("/", "--");
+            }
+            
             // 创建项目实体
             Project project = new Project();
-            project.setProjectName((String) request.get("projectName"));
-            project.setUrl((String) request.get("url"));
+            project.setProjectName(projectName);
+            project.setUrl(url);
             project.setUserId(userId);
             
             // 调用服务层创建项目
@@ -120,10 +144,10 @@ public class ProjectController {
     }
 
     /**
-     * 获取指定ID的项目信息
+     * 获取指定ID的项目信息（包含云端文件结构）
      * 接口：GET /project/{id}
      * @param id 项目ID
-     * @return 项目信息
+     * @return 项目信息（包含path字段，表示文件结构）
      */
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getProjectById(
@@ -135,12 +159,27 @@ public class ProjectController {
                 Project project = projectOptional.get();
                 Map<String, Object> response = new HashMap<>();
                 response.put("id", project.getId());
-                response.put("projectName", project.getProjectName());
+                response.put("name", project.getProjectName());
                 response.put("description", project.getDescription());
                 response.put("userId", project.getUserId());
                 response.put("createdAt", project.getCreatedAt());
                 response.put("updatedAt", project.getUpdatedAt());
                 response.put("status", project.getStatus());
+                response.put("cloudStorageId", project.getCloudStorageId());
+                
+                // 从云端获取文件结构
+                Map<String, Object> path = projectService.getProjectFileStructure(project.getCloudStorageId());
+                if (path != null) {
+                    response.put("path", path);
+                } else {
+                    // 如果云端没有文件，返回空结构
+                    Map<String, Object> emptyPath = new HashMap<>();
+                    emptyPath.put("name", project.getProjectName());
+                    emptyPath.put("folders", new java.util.ArrayList<>());
+                    emptyPath.put("files", new java.util.ArrayList<>());
+                    response.put("path", emptyPath);
+                }
+                
                 return ResponseEntity.ok(response);
             } else {
                 Map<String, Object> errorResponse = new HashMap<>();

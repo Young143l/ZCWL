@@ -76,4 +76,11 @@ public interface ProjectService {
      * @return 云存储ID（项目名称）
      */
     String cloneAndUploadProject(String projectName, String projectUrl);
+
+    /**
+     * 获取项目的文件结构（从云端）
+     * @param cloudStorageId 云存储ID（项目名称）
+     * @return 文件结构树
+     */
+    java.util.Map<String, Object> getProjectFileStructure(String cloudStorageId);
 }
