@@ -236,6 +236,59 @@ public class ProjectController {
     }
 
     /**
+     * 获取指定ID项目的指定文件
+     * 接口：POST /project/{id}/
+     * @param id 项目ID
+     * @param request 请求参数（包含fileName）
+     * @param authentication 认证信息
+     * @return 文件URL
+     */
+    @PostMapping("/{id}/")
+    public ResponseEntity<Map<String, Object>> getProjectFile(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request,
+            Authentication authentication) {
+        logger.debug("获取项目 {} 的文件: {}", id, request);
+        try {
+            // 验证请求参数
+            if (!request.containsKey("fileName")) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "fileName是必填项");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            String fileName = request.get("fileName");
+            // 获取当前用户ID
+            String userId = authentication.getName();
+            
+            // 获取文件URL
+            String fileUrl = projectService.getProjectFileUrl(id, fileName, userId);
+            
+            // 构建响应
+            Map<String, Object> response = new HashMap<>();
+            response.put("fileName", fileName);
+            response.put("file", fileUrl);
+            
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            logger.error("获取项目文件失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        } catch (SecurityException e) {
+            logger.error("获取项目文件失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("获取项目文件失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "获取项目文件失败");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
      * 询问该项目相关
      * 接口：POST /project/ask/{id}
      * @param id 项目ID

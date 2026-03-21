@@ -83,4 +83,13 @@ public interface ProjectService {
      * @return 文件结构树
      */
     java.util.Map<String, Object> getProjectFileStructure(String cloudStorageId);
+
+    /**
+     * 获取项目中指定文件的临时访问URL
+     * @param projectId 项目ID
+     * @param fileName 文件路径
+     * @param userId 用户ID（用于权限验证）
+     * @return 带签名的临时文件URL
+     */
+    String getProjectFileUrl(Long projectId, String fileName, String userId);
 }

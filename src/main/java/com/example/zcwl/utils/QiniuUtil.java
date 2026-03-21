@@ -98,8 +98,21 @@ public class QiniuUtil {
      */
     public String getDownloadUrl(String fileName, long expires) {
         Auth auth = Auth.create(accessKey, secretKey);
-        String baseUrl = domain + "/" + fileName;
-        return auth.privateDownloadUrl(baseUrl, expires);
+        
+        // 确保domain包含协议头
+        String baseUrl = domain;
+        if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+            baseUrl = "https://" + baseUrl;
+        }
+        
+        // 构建完整URL
+        baseUrl = baseUrl + "/" + fileName;
+        
+        String downloadUrl = auth.privateDownloadUrl(baseUrl, expires);
+        
+        logger.debug("生成下载URL - baseUrl: {}, expires: {}秒, downloadUrl: {}", baseUrl, expires, downloadUrl);
+        
+        return downloadUrl;
     }
 
     /**
@@ -206,5 +219,25 @@ public class QiniuUtil {
         }
         
         deleteFiles(fileNames);
+    }
+
+    /**
+     * 检查文件是否存在
+     * @param fileName 文件名
+     * @return 是否存在
+     */
+    public boolean fileExists(String fileName) {
+        try {
+            List<FileInfo> files = listFiles(fileName);
+            for (FileInfo fileInfo : files) {
+                if (fileInfo.key.equals(fileName)) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            logger.error("检查文件是否存在失败: {}", fileName, e);
+            return false;
+        }
     }
 }

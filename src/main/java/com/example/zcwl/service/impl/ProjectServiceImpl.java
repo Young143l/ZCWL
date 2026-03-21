@@ -779,4 +779,65 @@ public class ProjectServiceImpl implements ProjectService {
             buildFileTree(folderNode, remainingPath, cloudStorageId);
         }
     }
+
+    @Override
+    public String getProjectFileUrl(Long projectId, String fileName, String userId) {
+        logger.debug("获取项目文件URL，项目ID: {}, 文件路径: {}, 用户ID: {}", projectId, fileName, userId);
+        
+        // 验证参数
+        if (projectId == null || fileName == null || fileName.isEmpty()) {
+            throw new IllegalArgumentException("项目ID和文件路径不能为空");
+        }
+        
+        // 获取项目信息
+        Optional<Project> projectOptional = projectRepository.findById(projectId);
+        if (projectOptional.isEmpty()) {
+            throw new IllegalArgumentException("项目不存在");
+        }
+        
+        Project project = projectOptional.get();
+        
+        // 获取云存储ID
+        String cloudStorageId = project.getCloudStorageId();
+        if (cloudStorageId == null || cloudStorageId.isEmpty()) {
+            throw new RuntimeException("项目未上传到云端");
+        }
+        
+        // 构建完整的文件路径
+        // 确保fileName不以/开头
+        String normalizedFileName = fileName;
+        if (normalizedFileName.startsWith("/")) {
+            normalizedFileName = normalizedFileName.substring(1);
+        }
+        
+        // 构建完整路径: cloudStorageId/fileName
+        String filePath = cloudStorageId + "/" + normalizedFileName;
+        
+        logger.info("构建文件路径: cloudStorageId={}, fileName={}, 完整路径={}", 
+                    cloudStorageId, normalizedFileName, filePath);
+        
+        // 检查文件是否存在
+        boolean exists = qiniuUtil.fileExists(filePath);
+        logger.info("文件是否存在: {}", exists);
+        
+        if (!exists) {
+            // 尝试列出该前缀下的文件，帮助调试
+            logger.warn("文件不存在，尝试列出前缀 '{}' 下的文件", cloudStorageId);
+            java.util.List<com.qiniu.storage.model.FileInfo> files = qiniuUtil.listFiles(cloudStorageId);
+            logger.info("前缀 '{}' 下找到 {} 个文件", cloudStorageId, files.size());
+            for (com.qiniu.storage.model.FileInfo fileInfo : files) {
+                logger.info("  - 文件: {}", fileInfo.key);
+            }
+            throw new IllegalArgumentException("文件不存在: " + fileName);
+        }
+        
+        // 生成带签名的临时URL，设置2小时过期
+        long expires = 2 * 60 * 60; // 2小时
+        String fileUrl = qiniuUtil.getDownloadUrl(filePath, expires);
+        
+        logger.info("生成临时文件URL成功，项目ID: {}, 文件路径: {}, URL: {}", 
+                    projectId, fileName, fileUrl);
+        
+        return fileUrl;
+    }
 }
