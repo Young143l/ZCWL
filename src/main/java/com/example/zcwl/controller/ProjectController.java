@@ -243,7 +243,7 @@ public class ProjectController {
      * @param authentication 认证信息
      * @return 文件URL
      */
-    @PostMapping("/{id}/")
+    @PostMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getProjectFile(
             @PathVariable Long id,
             @RequestBody Map<String, String> request,
