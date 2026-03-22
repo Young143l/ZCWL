@@ -278,7 +278,8 @@ public class ConsoleProjectServiceImpl implements ConsoleProjectService {
                "* **目标编程语言**：`" + type + "`\n" +
                "\n" +
                "## Output Format\n" +
-               "直接输出完整的控制台应用代码，不需要任何解释或标记。";
+               "直接输出完整的控制台应用代码，不需要任何解释或标记。\n" +
+               "注意：请不要包含shebang行（如#!/usr/bin/env python3）、编码声明（如# -*- coding: utf-8 -*-）或文档字符串等头部信息，直接输出核心代码。";
     }
 
     /**
@@ -322,7 +323,8 @@ public class ConsoleProjectServiceImpl implements ConsoleProjectService {
                "* **目标编程语言**：`" + type + "`\n" +
                "\n" +
                "## Output Format\n" +
-               "直接输出完整的控制台应用代码，不需要任何解释或标记。";
+               "直接输出完整的控制台应用代码，不需要任何解释或标记。\n" +
+               "注意：请不要包含shebang行（如#!/usr/bin/env python3）、编码声明（如# -*- coding: utf-8 -*-）或文档字符串等头部信息，直接输出核心代码。";
     }
 
     /**
