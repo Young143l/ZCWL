@@ -76,8 +76,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/users/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                        // 允许code相关路径
+                        // 允许 code 相关路径
                         .requestMatchers("/code/**").permitAll()
+                        // 允许 project 相关路径
+                        .requestMatchers("/project/**").permitAll()
                         // GET /users/:id 需要认证
                         // DELETE /users/** 需要认证
                         .requestMatchers("/doc/**").permitAll()
@@ -87,9 +89,11 @@ public class SecurityConfig {
                         // 允许 RAG 相关 API 路径（包括内部调用）
                         .requestMatchers("/api/rag/**").permitAll()
                         .requestMatchers("/rag/**").permitAll()
-                        // 允许所有OPTIONS请求
+                        // 允许静态资源
+                        .requestMatchers("/*.html", "/*.css", "/*.js", "/static/**", "/public/**").permitAll()
+                        // 允许所有 OPTIONS 请求
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // 允许Swagger相关路径
+                        // 允许 Swagger 相关路径
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
                         // 其他路径需要认证
                         .anyRequest().authenticated())

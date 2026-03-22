@@ -34,20 +34,20 @@ public class ProjectController {
 
     /**
      * 获取项目列表
-     * 接口：GET /project/?u_id=
-     * @param uId 用户ID（可选）
+     * 接口：GET /project?uId=
+     * @param uId 用户 ID（可选）
      * @return 项目列表
      */
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<Map<String, Object>> getProjectsByUserId(
-            @RequestParam(value = "u_id", required = false) String uId) {
+            @RequestParam(value = "uId", required = false) String uId) {
         logger.debug("获取项目列表，用户ID: {}", uId);
         try {
             List<Project> projects = projectService.getProjects(uId);
             Map<String, Object> response = new HashMap<>();
             response.put("projects", projects);
             if (uId != null) {
-                response.put("u_id", uId);
+                response.put("uId", uId);
             }
             return ResponseEntity.ok(response);
         } catch (Exception e) {
