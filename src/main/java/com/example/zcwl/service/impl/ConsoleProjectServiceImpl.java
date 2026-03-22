@@ -328,7 +328,14 @@ public class ConsoleProjectServiceImpl implements ConsoleProjectService {
                 if (!choices.isEmpty()) {
                     Map<String, Object> choice = choices.getFirst();
                     Map<String, Object> message = (Map<String, Object>) choice.get("message");
-                    return (String) message.get("content");
+                    String content = (String) message.get("content");
+                    
+                    // 清理Markdown代码块标记
+                    content = content.replaceAll("^```[\\w\\s]*\\n", "");
+                    content = content.replaceAll("\\n```$", "");
+                    content = content.trim();
+                    
+                    return content;
                 }
             }
         }

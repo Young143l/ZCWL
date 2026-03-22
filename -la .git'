@@ -1,0 +1,386 @@
+[1mdiff --git "a/API\346\216\245\345\217\243.pdf" "b/API\346\216\245\345\217\243.pdf"[m
+[1mdeleted file mode 100644[m
+[1mindex 7cade4f..0000000[m
+[1m--- "a/API\346\216\245\345\217\243.pdf"[m
+[1m+++ /dev/null[m
+[36m@@ -1,407 +0,0 @@[m
+[31m-/users[m
+[31m-[m
+[31m-POST /users/login[m
+[31m-[m
+[31m-功能[m
+[31m-[m
+[31m-登录使用接口[m
+[31m-[m
+[31m-接口[m
+[31m-[m
+[31m-1 POST /users/login[m
+[31m-[m
+[31m-2 "Content-Type": "application/json"[m
+[31m-[m
+[31m-3[m
+[31m-[m
+[31m-4{[m
+[31m-[m
+[31m-5   userId: "userId",[m
+[31m-[m
+[31m-6   password: "password"[m
+[31m-[m
+[31m-7}[m
+[31m-[m
+[31m-响应[m
+[31m-[m
+[31m-         成功（200 OK）[m
+[31m-[m
+[31m-    1{  userName: "name",[m
+[31m-    2   userId: "id",[m
+[31m-    3   token: "token"[m
+[31m-    4[m
+[31m-    5}[m
+[31m-[m
+[31m-   失败（401 Unauthorized）[m
+[31m-[m
+[31m-    1{[m
+[31m-    2}[m
+[31m-[m
+[31m-GET /users/:id[m
+[31m-[m
+[31m-功能[m
+[31m-[m
+[31m-获取用户信息接口[m
+[31m-[m
+[31m-接口[m
+[31m-[m
+[31m-1 GET /users/:id[m
+[31m-2 "Content-Type": "application/json"[m
+[31m-3 "Authorization": "Bearer token"[m
+[31m-响应[m
+[31m-[m
+[31m-         成功（200 OK)[m
+[31m-[m
+[31m-1{    "name":"name",[m
+[31m-2     "avatar":"https://...",[m
+[31m-3     "email":"email"[m
+[31m-4[m
+[31m-5}[m
+[31m-[m
+[31m-         验证失败（401 Unauthorized）[m
+[31m-         信息不存在（404 Not Found）[m
+[31m-[m
+[31m-/doc[m
+[31m-[m
+[31m-GET /doc[m
+[31m-[m
+[31m-接口[m
+[31m-[m
+[31m-1 GET /doc[m
+[31m-2 "Content-Type": "application/json"[m
+[31m-[m
+[31m-响应[m
+[31m-[m
+[31m-         成功（200 OK）[m
+[31m-[m
+[31m- 1{   "docList":[[m
+[31m- 2           {[m
+[31m- 3                  "id":" id",[m
+[31m- 4                  "name": "name",[m
+[31m- 5                  "summary": "sum",[m
+[31m- 6                  "img": "https:....."[m
+[31m- 7           }[m
+[31m- 8[m
+[31m- 9    ][m
+[31m-10 }[m
+[31m-[m
+[31m-         失败（404 Not Found）[m
+[31m-[m
+[31m-GET /doc/:d_id[m
+[31m-[m
+[31m-接口[m
+[31m-[m
+[31m-1 GET /doc/:d_id[m
+[31m-2 "Content-Type": "application/json"[m
+[31m-响应[m
+[31m-[m
+[31m-         成功（200 OK）[m
+[31m-[m
+[31m- 1{   "docInfo":{[m
+[31m- 2           "id":" id",[m
+[31m- 3           "name": "name",[m
+[31m- 4           "summary": "sum",[m
+[31m- 5           "img": "https:....."[m
+[31m- 6[m
+[31m- 7    },[m
+[31m- 8    "docDir":[[m
+[31m- 9[m
+[31m-10           {[m
+[31m-11                  "id":"id",[m
+[31m-12                  "name":"name"[m
+[31m-13[m
+[31m-14 }         },[m
+[31m-      ][m
+[31m-[m
+[31m-         失败（404 Not Found）[m
+[31m-[m
+[31m-GET /doc/:d_id/:c_id[m
+[31m-[m
+[31m-接口[m
+[31m-[m
+[31m-1 GET /doc/:d_id/:c_id[m
+[31m-2 "Content-Type": "application/json"[m
+[31m-[m
+[31m-响应[m
+[31m-[m
+[31m-         成功（200 OK）[m
+[31m-[m
+[31m-1{    "d_id":"id",[m
+[31m-2     "c_id":"id",[m
+[31m-3     "title":"titile",[m
+[31m-4     "content":"content[m
+[31m-5[m
+[31m-6}[m
+[31m-[m
+[31m-/aichatdoc[m
+[31m-[m
+[31m-GET /aichatdoc/:id[m
+[31m-[m
+[31m-接口[m
+[31m-[m
+[31m-   1 GET //aichatdoc/:id[m
+[31m-   2 "Authorization": "Bearer token"[m
+[31m-响应[m
+[31m-[m
+[31m-         成功（200 OK）[m
+[31m-[m
+[31m- 1{   "id":"",[m
+[31m- 2    "chat":[[m
+[31m- 3[m
+[31m- 4           {[m
+[31m- 5                  "id":"",[m
+[31m- 6                  "ask":"",[m
+[31m- 7                  "ans":"",[m
+[31m- 8[m
+[31m- 9           }[m
+[31m-10 }  ][m
+[31m-[m
+[31m-GET /aichatdoc/?u_id=[m
+[31m-[m
+[31m-接口[m
+[31m-[m
+[31m-1 GET //aichatdoc/?:u_id=[m
+[31m-2 "Authorization": "Bearer token"[m
+[31m-[m
+[31m-响应[m
+[31m-[m
+[31m-         成功（200 OK）[m
+[31m-[m
+[31m- 1{   "id":"",[m
+[31m- 2    "u_id":"",[m
+[31m- 3    "chat":[[m
+[31m- 4[m
+[31m- 5           {[m
+[31m- 6                  "id":"",[m
+[31m- 7                  "ask":"",[m
+[31m- 8                  "ans":"",[m
+[31m- 9[m
+[31m-10           }[m
+[31m-11 }  ][m
+[31m-[m
+[31m-POST /aichatdoc/:id[m
+[31m-[m
+[31m-描述[m
+[31m-[m
+[31m-在指定id的对话创建询问[m
+[31m-接口[m
+[31m-[m
+[31m-1 POST /aichatdoc/:id[m
+[31m-[m
+[31m-2 "Content-Type": "application/json"[m
+[31m-[m
+[31m-3 "Authorization": "Bearer token"[m
+[31m-[m
+[31m-4[m
+[31m-[m
+[31m-5{[m
+[31m-[m
+[31m-6   “ask":"",[m
+[31m-[m
+[31m-7   “u_id":""[m
+[31m-[m
+[31m-8}[m
+[31m-[m
+[31m-响应[m
+[31m-[m
+[31m-         成功（200 OK)[m
+[31m-         流式返回[m
+[31m-[m
+[31m-POST /aichatdoc/new[m
+[31m-[m
+[31m-描述[m
+[31m-[m
+[31m-创建一个新的对话[m
+[31m-[m
+[31m-接口[m
+[31m-[m
+[31m-1 POST /aichatdoc/[m
+[31m-[m
+[31m-2 "Content-Type": "application/json"[m
+[31m-[m
+[31m-3 "Authorization": "Bearer token"[m
+[31m-[m
+[31m-4[m
+[31m-[m
+[31m-5{[m
+[31m-[m
+[31m-6   “u_id":""[m
+[31m-[m
+[31m-7}[m
+[31m-[m
+[31m-响应[m
+[31m-[m
+[31m-         成功（200 OK)[m
+[31m-[m
+[31m-    1{  id=""，[m
+[31m-    2[m
+[31m-    3}[m
+[31m-[m
+[31m-/project[m
+[31m-[m
+[31m-GET /project/?u_id=-[m
+[31m-[m
+[31m-描述[m
+[31m-[m
+[31m-获取项目列表（可加筛选条件，指定用户）。[m
+[31m-POST /project/[m
+[31m-[m
+[31m-描述[m
+[31m-[m
+[31m-创建新项目[m
+[31m-[m
+[31m-GET /project/:id[m
+[31m-[m
+[31m-描述[m
+[31m-[m
+[31m-获取指定id项目的信息[m
+[31m-[m
+[31m-GET /project/delet/:id[m
+[31m-[m
+[31m-描述[m
+[31m-[m
+[31m-删除指定id的项目[m
+[31m-[m
+[31m-POST /project/ask/:id[m
+[31m-[m
+[31m-描述[m
+[31m-[m
+[31m-询问该项目相关[m
+[31m-[m
+[31m-GET /project/doc/:id[m
+[31m-[m
+[31m-描述[m
+[31m-[m
+[31m-生成该项目相关的学习分析文档[m
+[31m-[m
+[31m-/code[m
+[31m-[m
+[31m-GET /code/?u_id=”uid”[m
+[31m-[m
+[31m-描述[m
+[31m-[m
+[31m-获取全部的代码生成项目的列表,可指定用户[m
+[31m-[m
+[31m-接口[m
+[31m-[m
+[31m-   1 GET /code/[m
+[31m-   2 "Content-Type": "application/json[m
+[31m-   3 "Authorization": "Bearer token"[m
+[31m-[m
+[31m-响应[m
+[31m-[m
+[31m-         成功（200 OK）[m
+[31m-     1{   "u_id":"", //如果有[m
+[31m-     2    "list":[[m
+[31m-     3[m
+[31m-     4           {[m
+[31m-     5                  "name":"",[m
+[31m-     6                  "id":"",[m
+[31m-     7                  "type":"",[m
+[31m-     8[m
+[31m-     9           }[m
+[31m-    10    ][m
+[31m-    11 }[m
+[31m-[m
+[31m-/code/sf[m
+[31m-[m
+[31m-POST /code/sf[m
+[31m-[m
+[31m-描述[m
+[31m-创建新的简单前端代码生成项目[m
+[31m-接口[m
+[31m-[m
+[31m-1 POST /code/sf[m
+[31m-[m
+[31m-2 "Content-Type": "application/json"[m
+[31m-[m
+[31m-3 "Authorization": "Bearer token"[m
+[31m-[m
+[31m-4[m
+[31m-[m
+[31m-5{[m
+[31m-[m
+[31m-6   "u_id":"",[m
+[31m-[m
+[31m-7   "projectName":"",[m
+[31m-[m
+[31m-8   "message":""[m
+[31m-[m
+[31m-9}[m
+[31m-[m
+[31m-响应[m
+[31m-         成功（200 OK)[m
+[31m-[m
+[31m-    1{    sf_id:"",[m
+[31m-    2     "code":{[m
+[31m-    3[m
+[31m-    4            "html":"",[m
+[31m-    5            "css":"",[m
+[31m-    6            "javascript":""[m
+[31m-    7     }[m
+[31m-    8}[m
+[31m-POST /code/sf/:id[m
+[31m-[m
+[31m-描述[m
+[31m-在id的项目中发起ai对话生成新的代码[m
+[31m-接口[m
+[31m-[m
+[31m-1 POST /code/sf/:id[m
+[31m-[m
+[31m-2 "Content-Type": "application/json"[m
+[31m-[m
+[31m-3 "Authorization": "Bearer token"[m
+[31m-[m
+[31m-4[m
+[31m-[m
+[31m-5{[m
+[31m-[m
+[31m-6     "code":{[m
+[31m-[m
+[31m-7         "html":"",[m
+[31m-[m
+[31m-8         "css":"",[m
+[31m-[m
+[31m-9         "js":""[m
+[31m-[m
+[31m-10    }[m
+[31m-[m
+[31m-11    "message":"",[m
+[31m-[m
+[31m-12    "selectId":["",""][m
+[31m-[m
+[31m-13 }[m
+[31m-[m
+[31m-响应[m
+[31m-         成功（200 OK）[m
+[31m-[m
+[31m-      1{  sf_id:"",[m
+[31m-      2   "code":{[m
+[31m-    

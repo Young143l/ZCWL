@@ -17,12 +17,20 @@ LOGIN_DATA = {
     "password": "test123456"
 }
 
-# 测试用的控制台项目数据
-TEST_PROJECT = {
+# 测试用的控制台项目数据 - Python
+TEST_PROJECT_PYTHON = {
     "uId": "testuser1234",
     "type": "python",
-    "projectName": "测试控制台项目",
+    "projectName": "测试Python控制台项目",
     "message": "创建一个简单的Python控制台应用，输出Hello World"
+}
+
+# 测试用的控制台项目数据 - C++
+TEST_PROJECT_CPP = {
+    "uId": "testuser1234",
+    "type": "cpp",
+    "projectName": "测试C++控制台项目",
+    "message": "创建一个简单的C++控制台应用，输出Hello World"
 }
 
 # 测试用的代码生成数据
@@ -212,6 +220,31 @@ class CPAPITest:
             print(f"❌ 请求异常: {str(e)}")
             return False
     
+    def test_create_cp_project_with_type(self, project_data):
+        """测试创建控制台项目（带类型）"""
+        print(f"\n=== 测试 POST /code/cp (类型: {project_data.get('type')})===")
+        try:
+            response = requests.post(
+                f"{BASE_URL}/code/cp",
+                headers=self.get_headers(),
+                json=project_data
+            )
+            if response.status_code == 200:
+                data = response.json()
+                cp_id = data.get("cpId")
+                print(f"✅ 创建控制台项目成功")
+                print(f"项目ID: {cp_id}")
+                print(f"项目类型: {data.get('type')}")
+                print(f"生成的代码: {data.get('code')[:100]}...")
+                return cp_id
+            else:
+                print(f"❌ 创建控制台项目失败，状态码: {response.status_code}")
+                print(f"响应内容: {response.text}")
+                return None
+        except Exception as e:
+            print(f"❌ 请求异常: {str(e)}")
+            return None
+    
     def run_all_tests(self):
         """运行所有测试"""
         print("开始测试 /code/cp 相关接口...")
@@ -226,27 +259,44 @@ class CPAPITest:
             print("❌ 登录失败，无法继续测试")
             return
         
-        # 2. 获取所有项目列表
+        # 2. 获取所有项目列表（初始状态）
         self.test_get_all_projects()
         
-        # 3. 创建控制台项目
-        if not self.test_create_cp_project():
-            print("❌ 创建项目失败，无法继续后续测试")
-            return
+        # 3. 测试创建 Python 控制台项目
+        python_project_id = self.test_create_cp_project_with_type(TEST_PROJECT_PYTHON)
+        if python_project_id:
+            # 4. 获取所有项目列表（验证项目已创建）
+            print("\n=== 测试 GET /code（创建项目后）===")
+            self.test_get_all_projects()
+            
+            # 5. 获取 Python 控制台项目信息
+            self.test_cp_id = python_project_id
+            self.test_get_cp_project()
+            
+            # 6. 更新 Python 控制台项目代码
+            self.test_update_cp_project()
+            
+            # 7. 再次获取 Python 项目信息验证更新
+            self.test_get_cp_project()
+            
+            # 8. 删除 Python 控制台项目
+            self.test_delete_cp_project()
         
-        # 4. 获取控制台项目信息
-        self.test_get_cp_project()
+        # 9. 测试创建 C++ 控制台项目
+        cpp_project_id = self.test_create_cp_project_with_type(TEST_PROJECT_CPP)
+        if cpp_project_id:
+            # 10. 获取所有项目列表（验证项目已创建）
+            print("\n=== 测试 GET /code（创建C++项目后）===")
+            self.test_get_all_projects()
+            
+            # 11. 获取 C++ 控制台项目信息
+            self.test_cp_id = cpp_project_id
+            self.test_get_cp_project()
+            
+            # 12. 删除 C++ 控制台项目
+            self.test_delete_cp_project()
         
-        # 5. 更新控制台项目代码
-        self.test_update_cp_project()
-        
-        # 6. 再次获取项目信息验证更新
-        self.test_get_cp_project()
-        
-        # 7. 删除控制台项目
-        self.test_delete_cp_project()
-        
-        # 8. 再次获取所有项目列表验证删除
+        # 13. 再次获取所有项目列表验证删除
         self.test_get_all_projects()
         
         print("\n=== 所有测试完成 ===")
