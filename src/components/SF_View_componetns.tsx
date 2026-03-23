@@ -7,17 +7,16 @@ interface View {
         css: string;
         javascript: string;
     };
-    isSelect: boolean
-    reLoadKey:number
+    isSelect: boolean;
+    reLoadKey: number;
 }
 
-const SF_View_componetns: FC<View> = ({ code, isSelect,reLoadKey}) => {
+const SF_View_componetns: FC<View> = ({ code, isSelect, reLoadKey}) => {
     const debounceTimer = useRef<number | null>(null);
     const [htmlsrc, setHtmlSrc] = useState<string>("");
     const [messageApi, contextHolder] = message.useMessage();
-    // const view = useRef<HTMLIFrameElement>(null);
-    const pColor = theme.useToken().token.colorPrimaryBorder;
     const view = useRef<HTMLIFrameElement>(null);
+    const pColor = theme.useToken().token.colorPrimaryBorder;
     useEffect(() => {
         const handleMessage = (e: MessageEvent) => {
             if (e.data.type === "timeout") {
@@ -36,15 +35,15 @@ const SF_View_componetns: FC<View> = ({ code, isSelect,reLoadKey}) => {
 
         debounceTimer.current = setTimeout(() => {
             const transformCode = (userJs: string) => {
-                return userJs
-                    // .replace(
-                    //     /(for|while)\s*\(([\s\S]*?)\)\s*\{/g,
-                    //     "$1 ($2) { window.__LOOP_PROTECT__.check(); ",
-                    // )
-                    // .replace(
-                    //     /do\s*\{/g,
-                    //     "do { window.__LOOP_PROTECT__.check(); ",
-                    // );
+                return userJs;
+                // .replace(
+                //     /(for|while)\s*\(([\s\S]*?)\)\s*\{/g,
+                //     "$1 ($2) { window.__LOOP_PROTECT__.check(); ",
+                // )
+                // .replace(
+                //     /do\s*\{/g,
+                //     "do { window.__LOOP_PROTECT__.check(); ",
+                // );
             };
 
             const htmlContent = code.html;

@@ -117,14 +117,15 @@ const SF_Editor_components: FC<{
                 delCodeSF(sf.sfId, token).then((res) => {
                     if (!res.ok) {
                         messageApi.error("删除失败");
+                        resolve(null);
                     } else {
                         messageApi.success("删除成功");
                         setTimeout(() => {
                             nav("/code");
                         }, 500);
+                        resolve(null);
                     }
                 });
-                resolve(null);
             }, 1000);
         });
     };
@@ -175,7 +176,6 @@ const SF_Editor_components: FC<{
                         title="删除此项目"
                         description={`您确定要删除${sf.name}吗？`}
                         onConfirm={handleDel}
-                        onOpenChange={() => console.log("open change")}
                         okText="删除"
                         cancelText="取消"
                     >

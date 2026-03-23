@@ -5,6 +5,7 @@ import MessageIcon from "../../public/message.svg?react";
 import TimeIcon from "../../public/time.svg?react";
 import WebIcon from "../../public/web.svg?react";
 import FileIcon from "../../public/file.svg?react";
+import { cdn, isCdn } from "../config/cdn";
 
 interface HS {
     AllCmd: string;
@@ -111,9 +112,9 @@ const Hello_Sum_components: FC<HS> = ({ AllCmd, title }) => {
                                 autoPlay
                                 loop
                                 muted
-                                poster={`../../public/${title.toLowerCase()}.jpg`}
+                                poster={(isCdn?cdn:"../../public/")+`${title.toLowerCase()}.jpg`}
                             >
-                                <source src={`../../public/${title.toLowerCase()}.mp4`} type="video/mp4" />
+                                <source src={(isCdn?cdn:"../../public/")+`${title.toLowerCase()}.mp4`} type="video/mp4" />
                             </video>
                         </div>
 

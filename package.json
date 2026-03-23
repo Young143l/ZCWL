@@ -16,6 +16,7 @@
     "antd": "^6.2.1",
     "console-feed": "^3.8.0",
     "github-markdown-css": "^5.8.1",
+    "jsmind": "^0.9.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",

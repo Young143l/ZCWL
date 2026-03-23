@@ -230,3 +230,73 @@ export const getCodeCP = async (token: string, cpId: string) => {
         return { ok: false, message: e };
     }
 };
+
+export const askCodeCP: (
+    token: string,
+    code: string,
+    message: string,
+    cpId: string,
+) => Promise<
+    { ok: boolean; message: unknown } | { ok: boolean; code: string }
+> = async (
+    token: string,
+    code: string,
+    message: string,
+    cpId: string,
+) => {
+    try {
+        const res = await fetch(
+            import.meta.env.VITE_BACK_END + `/code/cp/${cpId}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    code: code,
+                    message: message,
+                }),
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json: { cpId: string; code: string } = await res.json();
+        return { ok: true, code: json.code };
+    } catch (e: unknown) {
+        return { ok: false, message: e };
+    }
+};
+
+export const delCodeCP: (
+    cpId: string,
+    token: string,
+) => Promise<{ ok: boolean } | { ok: boolean; message: unknown }> = async (
+    cpId: string,
+    token: string,
+) => {
+    try {
+        const res = await fetch(
+            import.meta.env.VITE_BACK_END + `/code/cp/delete/${cpId}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json: { id: string } = await res.json();
+        if (json.id == cpId) {
+            return { ok: true };
+        } else {
+            throw new Error("Delete error!");
+        }
+    } catch (e: unknown) {
+        return { ok: false, message: e };
+    }
+};

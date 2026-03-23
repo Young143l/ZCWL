@@ -44,7 +44,8 @@ const CodeSF: FC = () => {
     const { sf_id } = useParams();
     const { token } = useLogin();
     const [loading, setLoading] = useState<boolean>(true);
-    const [reLoadKey,setReLoadKey] = useState<number>(0);
+    const [reLoadKey, setReLoadKey] = useState<number>(0);
+
     useEffect(() => {
         getCodeSF(token, sf_id as string).then((res) => {
             if (res.ok) {

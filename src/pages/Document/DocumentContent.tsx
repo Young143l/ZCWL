@@ -26,6 +26,8 @@ import remarkGfm from "remark-gfm";
 import { LoadingOutlined, SendOutlined } from "@ant-design/icons";
 import DocComment_compents from "../../components/DocComment_compents";
 import { type Comment } from "../../components/DocComment_compents";
+import { getComments, postComment, type CommentRequest } from "../../api/DocComment.api";
+import useLogin from "../../status/Login_status";
 const DocumentContent: FC = () => {
     const { d_id, c_id } = useParams();
     const [items, setItems] = useState<MenuItem[]>([]);
@@ -39,23 +41,44 @@ const DocumentContent: FC = () => {
         name: "",
         fa: "-1",
     });
-    const [comments, setComments] = useState<Comment[]>([
-        // {
-        //                         id: "comment-123",
-        //                         uId: "user-456",
-        //                         email: "2563043887@qq.com",
-        //                         content:
-        //                             "这是一",
-        //                         children: [
-        //                             {
-        //                                 id: "child-comment-789",
-        //                                 uId: "user-789",
-        //                                 email: "child@example.com",
-        //                                 content: "这是子评论内容",
-        //                             },
-        //                         ],
-        //                     }
-    ]);
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [commentContent, setCommentContent] = useState<string>("");
+    const { isLogin, userId, token } = useLogin();
+
+    // 获取评论列表
+    const fetchComments = async () => {
+        if (d_id && c_id) {
+            const res = await getComments(d_id, c_id);
+            if (res.ok) {
+                setComments(res.comments);
+            }
+        }
+    };
+
+    // 提交评论
+    const handleSubmitComment = async () => {
+        if (!isLogin) {
+            // 未登录提示
+            return;
+        }
+        if (!commentContent.trim() || !d_id || !c_id) {
+            return;
+        }
+        
+        const commentRequest: CommentRequest = {
+            uId: userId,
+            email: "", // 从登录状态获取或后端处理
+            content: commentContent,
+            fa: at.fa,
+        };
+        
+        const res = await postComment(d_id, c_id, commentRequest, token);
+        if (res.ok) {
+            setCommentContent("");
+            setAt({ name: "", fa: "-1" });
+            fetchComments(); // 刷新评论列表
+        }
+    };
 
     useEffect(() => {
         getDoc(d_id as string).then((res) => {
@@ -104,6 +127,18 @@ const DocumentContent: FC = () => {
                 );
             }
         });
+    }, [d_id, c_id]);
+
+    useEffect(() => {
+        const loadComments = async () => {
+            if (d_id && c_id) {
+                const res = await getComments(d_id, c_id);
+                if (res.ok) {
+                    setComments(res.comments);
+                }
+            }
+        };
+        loadComments();
     }, [d_id, c_id]);
 
     return (
@@ -163,9 +198,10 @@ const DocumentContent: FC = () => {
                             <textarea
                                 className="w-full focus:outline-none border-none resize-none grow min-h-12"
                                 placeholder="此处输入您的评论。"
-                                // onChange={(e) => {
-                                //     setUserMessage(e.target.value);
-                                // }}
+                                value={commentContent}
+                                onChange={(e) => {
+                                    setCommentContent(e.target.value);
+                                }}
                             ></textarea>
                             <div className="flex justify-between items-center">
                                 <div className="h-full flex items-center justify-center">
@@ -184,7 +220,7 @@ const DocumentContent: FC = () => {
                                         <></>
                                     )}
                                 </div>
-                                <Button onClick={() => {}}>
+                                <Button onClick={handleSubmitComment}>
                                     <SendOutlined />
                                     发送
                                 </Button>

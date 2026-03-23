@@ -16,8 +16,8 @@ export interface DocContent {
     content: string;
 }
 
-export const getDoc: (d_id: string) => Promise<{ ok: boolean,message:unknown }|{
-    ok: boolean;
+export const getDoc: (d_id: string) => Promise<{ ok: false,message:unknown }|{
+    ok: true;
     docInfo: DocInfo;
     docDir: DocDir[];
 }> = async (d_id: string) => {
@@ -50,8 +50,8 @@ export const getDoc: (d_id: string) => Promise<{ ok: boolean,message:unknown }|{
     }
 };
 
-export const getDocList: () => Promise<{ok:boolean,message:unknown}|{
-    ok: boolean;
+export const getDocList: () => Promise<{ok:false,message:unknown}|{
+    ok: true;
     docList: DocInfo[];
 }> = async () => {
     try {

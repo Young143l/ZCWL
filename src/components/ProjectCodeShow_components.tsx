@@ -1,56 +1,68 @@
 import { useMemo, type FC } from "react";
 import github from "../../public/GitHub Light.json";
 import { Editor, type Monaco } from "@monaco-editor/react";
-import { Button, Empty, theme } from "antd";
-import { CloseOutlined } from "@ant-design/icons";
+import { Button, Empty, theme, Spin } from "antd";
+import { CloseOutlined, LoadingOutlined } from "@ant-design/icons";
 export interface PCSProps {
     filePath: string | "NOFILE";
     setFilePath: React.Dispatch<React.SetStateAction<string>>;
     code: string;
+    loading?: boolean;
 }
 
 const ProjectCodeShow_components: FC<PCSProps> = ({
     filePath,
     code,
     setFilePath,
+    loading = false,
 }) => {
     const handleEditorWillMount = (monaco: Monaco) => {
         monaco.editor.defineTheme("github-light", github);
     };
     const pColor = theme.useToken().token.colorPrimaryBorder;
 
-    const fileType: string = useMemo<string>(() => {
-        switch ((filePath.split(".").pop() as string).toLowerCase()) {
-            case "js":
-                return "javascript";
-            case "jsx":
-                return "javascript";
-            case "ts":
-                return "typescript";
-            case "tsx":
-                return "typescript";
-            case "cpp":
-                return "cpp";
-            case "c":
-                return "c";
-            case "py":
-                return "pyhton";
-            case "md":
-                return "markdown";
-            case "java":
-                return "java";
-            case "json":
-                return "json";
-            case "css":
-                return "css";
-            case "html":
-                return "html";
-            default:
-                return "";
-        }
+    const fileType = useMemo(() => {
+        const ext = filePath.split(".").pop()?.toLowerCase() || "";
+        const typeMap: Record<string, string> = {
+            js: "javascript",
+            jsx: "javascript",
+            ts: "typescript",
+            tsx: "typescript",
+            hpp: "cpp",
+            h: "c",
+            cpp: "cpp",
+            c: "c",
+            py: "python",
+            md: "markdown",
+            java: "java",
+            json: "json",
+            css: "css",
+            html: "html",
+            xml: "xml",
+            yaml: "yaml",
+            yml: "yaml",
+            sql: "sql",
+            sh: "shell",
+            bash: "shell",
+            zsh: "shell",
+            ps1: "powershell",
+            go: "go",
+            rs: "rust",
+            rb: "ruby",
+            php: "php",
+            swift: "swift",
+            kt: "kotlin",
+            scala: "scala",
+            r: "r",
+            dart: "dart",
+            lua: "lua",
+            perl: "perl",
+            dockerfile: "dockerfile",
+        };
+        return typeMap[ext] || "";
     }, [filePath]);
 
-
+    // console.log(fileType)
     return (
         <div className="p-1 h-full">
             <div
@@ -75,22 +87,32 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
                             />
                         </div>
 
-                        <Editor
-                            height="100%"
-                            theme="github-light"
-                            beforeMount={handleEditorWillMount}
-                            language={fileType}
-                            options={{
-                                readOnly: true,
-                                minimap: { enabled: false },
-                                fixedOverflowWidgets: true,
-                                fontSize: 14,
-                                scrollBeyondLastLine: false,
-                                renderLineHighlight: "all",
-                                wordWrap: "on",
-                            }}
-                            value={code}
-                        />
+                        <div className="relative h-full">
+                            {loading && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                                    <Spin
+                                        indicator={<LoadingOutlined spin />}
+                                        size="large"
+                                    />
+                                </div>
+                            )}
+                            <Editor
+                                height="100%"
+                                theme="github-light"
+                                beforeMount={handleEditorWillMount}
+                                language={fileType}
+                                options={{
+                                    readOnly: true,
+                                    minimap: { enabled: false },
+                                    fixedOverflowWidgets: true,
+                                    fontSize: 14,
+                                    scrollBeyondLastLine: false,
+                                    renderLineHighlight: "all",
+                                    wordWrap: "on",
+                                }}
+                                value={code}
+                            />
+                        </div>
                     </>
                 ) : (
                     <div className="h-full w-full flex justify-center items-center">

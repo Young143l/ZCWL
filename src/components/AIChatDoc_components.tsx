@@ -1,4 +1,12 @@
-import { Input, Button, ConfigProvider, message, theme, Tag } from "antd";
+import {
+    Input,
+    Button,
+    ConfigProvider,
+    message,
+    theme,
+    Tag,
+    Popover,
+} from "antd";
 import { useState, type FC, useEffect, useRef } from "react";
 import {
     SendOutlined,
@@ -11,6 +19,7 @@ import useAIChatDoc from "../status/AIChatDoc_status";
 import { getNewChat, getAsk } from "../api/AIChatDoc_api";
 import useLogin from "../status/Login_status";
 import { useNavigate } from "react-router-dom";
+import { flushSync } from "react-dom";
 
 const AIChatDoc_components: FC = () => {
     const [inputValue, setInputValue] = useState<string>("");
@@ -64,16 +73,14 @@ const AIChatDoc_components: FC = () => {
                 return;
             }
         }
-        const ask = "```\n" + code + "\n```\n" + inputValue;
+        const ask =
+            (code !== null ? "```\n" + code + "\n```\n" : "") + inputValue;
         setInputValue("");
+        setCode(null);
+
         addChat({ id: "", ask: ask, over: false, ans: "" });
 
-        const askRes = await getAsk(
-            userId,
-            currentId,
-            "```" + code + "```\n" + inputValue,
-            token,
-        );
+        const askRes = await getAsk(userId, currentId, ask, token);
         if (askRes.ok) {
             const t = chat.length;
             const reader = askRes.ans as ReadableStreamDefaultReader<
@@ -88,7 +95,9 @@ const AIChatDoc_components: FC = () => {
                     break;
                 }
                 buffer += decoder.decode(value, { stream: true });
-                setAns(t.toString(), buffer);
+                flushSync(() => {
+                    setAns(t.toString(), buffer);
+                });
             }
         } else {
             messageApi.open({
@@ -161,16 +170,24 @@ const AIChatDoc_components: FC = () => {
                         }}
                     />
                     {code ? (
-                        <Tag
-                            closeIcon
-                            onClose={() => {
-                                setCode(null);
-                            }}
-                            variant="filled"
-                            color={pColor}
+                        <Popover
+                            content={
+                                <div className="w-60 h-60 bg-gray-100 rounded-xl p-2 flex justify-center whitespace-pre-wrap break-all overflow-y-scroll">
+                                    {code}
+                                </div>
+                            }
                         >
-                            Code Snippet
-                        </Tag>
+                            <Tag
+                                closeIcon
+                                onClose={() => {
+                                    setCode(null);
+                                }}
+                                variant="filled"
+                                color={pColor}
+                            >
+                                Code Snippet
+                            </Tag>
+                        </Popover>
                     ) : (
                         <></>
                     )}
@@ -179,6 +196,7 @@ const AIChatDoc_components: FC = () => {
                 <Button
                     onClick={() => {
                         setInputValue("");
+                        setCode(null);
                     }}
                 >
                     <ClearOutlined />

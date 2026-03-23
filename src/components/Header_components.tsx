@@ -13,6 +13,7 @@ import useLogin from "../status/Login_status";
 import UserAvatar_components from "./UserAvatar_components";
 type MenuItem = Required<MenuProps>["items"][number];
 import useAIChatDoc from "../status/AIChatDoc_status";
+import { cdn, isCdn} from "../config/cdn";
 const items: MenuItem[] = [
     {
         label: (
@@ -118,7 +119,7 @@ const Header_components: FC = () => {
                 {/* Logo */}
                 <Link to={"/"}>
                     <img
-                        src="/public/logo.svg"
+                        src={(isCdn?cdn:"/public/")+"logo.svg"}
                         alt="Logo"
                         className="h-8 w-24 object-contain"
                     />

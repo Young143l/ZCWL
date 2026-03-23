@@ -4,13 +4,13 @@ export const getProjectList: (
     uId: string,
     token: string,
 ) => Promise<
-    | { ok: true; list: { name: string; id: string }[] }
+    | { ok: true; list: { projectName: string; id: string }[] }
     | { ok: false; message: unknown }
 > = async (uId: string, token: string) => {
     try {
         const uIds: string = `/?uId=${uId}`;
         const res = await fetch(
-            import.meta.env.VITE_BACK_END + `project${uId ? uIds : ""}`,
+            import.meta.env.VITE_BACK_END + `/project${uId ? uIds : ""}`,
             {
                 method: "GET",
                 headers: {
@@ -20,10 +20,15 @@ export const getProjectList: (
             },
         );
         if (!res.ok) {
+            const json =await res.json();
+            console.log(json)
             throw new Error(`HTTP error! status: ${res.status}`);
         }
-        const json: { list: { name: string; id: string }[] } = await res.json();
-        return { ok: true, list: json.list };
+        const json: { projects: { projectName: string; id: string }[] } =
+            await res.json();
+        console.log(json);
+
+        return { ok: true, list: json.projects };
     } catch (e: unknown) {
         return { ok: false, message: e };
     }
@@ -49,11 +54,13 @@ export const newProject: (
             },
             body: JSON.stringify({
                 uId: uId,
-                name: name,
+                projectName: name,
                 url: url,
             }),
         });
         if (!res.ok) {
+        const json = await res.json();
+console.log(json)
             throw new Error(`HTTP error! status: ${res.status}`);
         }
         const json: { id: string } = await res.json();
@@ -115,7 +122,13 @@ export const getProjectFile: (
             throw new Error(`HTTP error! status: ${res.status}`);
         }
         const json: { file: string; fileName: string } = await res.json();
-        return { ok: true, file: json.file };
+        const fileres = await fetch(json.file);
+        if (!fileres.ok) {
+            throw new Error(`HTTP error! status: ${fileres.status}`);
+        }
+        const file = await fileres.text();
+        console.log(file);
+        return { ok: true, file: file };
     } catch (e: unknown) {
         return { ok: false, message: e };
     }
