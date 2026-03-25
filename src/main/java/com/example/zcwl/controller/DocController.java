@@ -2,12 +2,15 @@ package com.example.zcwl.controller;
 
 import com.example.zcwl.entity.Doc;
 import com.example.zcwl.entity.DocContents;
+import com.example.zcwl.entity.DocComment;
 import com.example.zcwl.service.DocService;
 import com.example.zcwl.service.DocContentsService;
+import com.example.zcwl.service.DocCommentService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -15,6 +18,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.HashMap;
 
 /**
  * 文档控制器类
@@ -43,6 +47,7 @@ public class DocController {
     // 注意：这里使用final关键字和构造函数注入，是Spring推荐的依赖注入方式
     private final DocService docService;
     private final DocContentsService docContentsService;
+    private final DocCommentService docCommentService;
 
     /**
      * 构造函数
@@ -50,13 +55,15 @@ public class DocController {
      * 这个构造函数用于将文档服务对象和文档内容服务对象注入到控制器中
      * @param docService 文档服务对象，由Spring容器自动注入
      * @param docContentsService 文档内容服务对象，由Spring容器自动注入
+     * @param docCommentService 文档评论服务对象，由Spring容器自动注入
      */
     // @Autowired：Spring注解，用于自动注入依赖
     // 作用：告诉Spring容器，当创建DocController对象时，自动将DocService和DocContentsService的实例传递给这个构造函数
     @Autowired
-    public DocController(DocService docService, DocContentsService docContentsService) {
+    public DocController(DocService docService, DocContentsService docContentsService, DocCommentService docCommentService) {
         this.docService = docService;
         this.docContentsService = docContentsService;
+        this.docCommentService = docCommentService;
     }
 
     /**
@@ -354,6 +361,85 @@ public class DocController {
         } catch (Exception e) {
             // 失败时返回404状态码
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * 获取指定文档章节的评论
+     * 接口：GET /doc/comment/:d_id/:c_id
+     * @param dId 文档ID
+     * @param cId 章节ID
+     * @return 评论列表
+     */
+    @GetMapping("/comment/{dId}/{cId}")
+    public ResponseEntity<Map<String, Object>> getComments(
+            @PathVariable Long dId,
+            @PathVariable Long cId) {
+        try {
+            List<Map<String, Object>> comments = docCommentService.getComments(dId, cId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("comments", comments);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "获取评论失败");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 提交评论
+     * 接口：POST /doc/comment/:d_id/:c_id
+     * @param dId 文档ID
+     * @param cId 章节ID
+     * @param request 请求参数
+     * @param authentication 认证信息
+     * @return 评论ID
+     */
+    @PostMapping("/comment/{dId}/{cId}")
+    public ResponseEntity<Map<String, Object>> submitComment(
+            @PathVariable Long dId,
+            @PathVariable Long cId,
+            @RequestBody Map<String, Object> request,
+            Authentication authentication) {
+        try {
+            // 从token中获取当前用户ID
+            String userId = authentication.getName();
+            
+            // 验证请求参数
+            if (!request.containsKey("email") || !request.containsKey("content")) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "email和content是必填项");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+
+            // 构建评论对象
+            DocComment comment = new DocComment();
+            comment.setDId(dId);
+            comment.setCId(cId);
+            comment.setUId(userId);  // 使用token中的用户ID
+            comment.setEmail((String) request.get("email"));
+            comment.setComment((String) request.get("content"));
+            
+            // 设置父评论ID，默认为-1（一级评论）
+            Long fa = request.containsKey("fa") ? Long.parseLong(request.get("fa").toString()) : -1;
+            comment.setFa(fa);
+
+            // 保存评论
+            DocComment savedComment = docCommentService.saveComment(comment);
+            
+            // 构建响应
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", savedComment.getId());
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "提交评论失败");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 

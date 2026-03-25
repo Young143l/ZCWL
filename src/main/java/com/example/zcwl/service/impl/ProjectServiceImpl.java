@@ -601,7 +601,7 @@ public class ProjectServiceImpl implements ProjectService {
      * @return 上传是否成功
      */
     private boolean uploadDirectoryToQiniu(File directory, String basePath) {
-        logger.info("开始上传目录: {} 到路径: {}", directory.getName(), basePath);
+        //logger.info("开始上传目录: {} 到路径: {}", directory.getName(), basePath);
         
         if (!directory.exists() || !directory.isDirectory()) {
             logger.error("目录不存在或不是目录: {}", directory.getAbsolutePath());
@@ -632,11 +632,11 @@ public class ProjectServiceImpl implements ProjectService {
                     // 上传文件，构建完整的文件路径
                     String qiniuPath = basePath + "/" + file.getName();
                     
-                    logger.info("上传文件: {} -> {}", file.getName(), qiniuPath);
+                    //logger.info("上传文件: {} -> {}", file.getName(), qiniuPath);
                     
                     try (FileInputStream fis = new FileInputStream(file)) {
                         String fileUrl = qiniuUtil.uploadFile(fis, qiniuPath);
-                        logger.info("文件上传成功: {} -> {}", file.getName(), fileUrl);
+                        //logger.info("文件上传成功: {} -> {}", file.getName(), fileUrl);
                         successCount++;
                     }
                 }
@@ -646,7 +646,7 @@ public class ProjectServiceImpl implements ProjectService {
             }
         }
         
-        logger.info("目录上传完成，成功: {}, 失败: {}", successCount, failCount);
+        //logger.info("目录上传完成，成功: {}, 失败: {}", successCount, failCount);
         return failCount == 0;
     }
     
