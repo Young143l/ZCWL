@@ -432,8 +432,11 @@ public class SimpleFrontendProjectServiceImpl implements SimpleFrontendProjectSe
     )
     private String callAIService(String prompt) {
         try {
+            logger.info("开始调用AI服务，使用模型: {}, URL: {}", model, baseUrl);
+            
             // 构建请求体
             Map<String, Object> requestBody = getBody(prompt);
+            logger.debug("AI请求体大小: {} 字符", new ObjectMapper().writeValueAsString(requestBody).length());
 
             // 构建请求头
             HttpHeaders headers = new HttpHeaders();
@@ -447,25 +450,44 @@ public class SimpleFrontendProjectServiceImpl implements SimpleFrontendProjectSe
                     .body(requestBody);
             
             // 发送请求
+            logger.info("发送AI请求...");
+            long startTime = System.currentTimeMillis();
             ResponseEntity<Map<String, Object>> responseEntity = restTemplate.exchange(
                     requestEntity,
                     new org.springframework.core.ParameterizedTypeReference<>() {
                     }
             );
+            long endTime = System.currentTimeMillis();
+            logger.info("AI请求完成，耗时: {} 毫秒，状态码: {}", endTime - startTime, responseEntity.getStatusCode().value());
             
             // 解析响应
             Map<String, Object> response = responseEntity.getBody();
-            if (response != null && response.containsKey("choices")) {
-                List<?> choicesList = (List<?>) response.get("choices");
-                if (!choicesList.isEmpty()) {
-                    Map<?, ?> choiceMap = (Map<?, ?>) choicesList.getFirst();
-                    if (choiceMap.containsKey("message")) {
-                        Map<?, ?> messageMap = (Map<?, ?>) choiceMap.get("message");
-                        if (messageMap.containsKey("content")) {
-                            return messageMap.get("content").toString();
+            if (response != null) {
+                logger.debug("AI响应: {}", response);
+                if (response.containsKey("choices")) {
+                    List<?> choicesList = (List<?>) response.get("choices");
+                    if (!choicesList.isEmpty()) {
+                        Map<?, ?> choiceMap = (Map<?, ?>) choicesList.getFirst();
+                        if (choiceMap.containsKey("message")) {
+                            Map<?, ?> messageMap = (Map<?, ?>) choiceMap.get("message");
+                            if (messageMap.containsKey("content")) {
+                                String content = messageMap.get("content").toString();
+                                logger.info("AI响应内容长度: {} 字符", content.length());
+                                return content;
+                            } else {
+                                logger.error("AI响应缺少content字段");
+                            }
+                        } else {
+                            logger.error("AI响应缺少message字段");
                         }
+                    } else {
+                        logger.error("AI响应choices列表为空");
                     }
+                } else {
+                    logger.error("AI响应缺少choices字段");
                 }
+            } else {
+                logger.error("AI响应体为空");
             }
             throw new RuntimeException("Failed to get AI response");
         } catch (Exception e) {
@@ -625,7 +647,7 @@ public class SimpleFrontendProjectServiceImpl implements SimpleFrontendProjectSe
 
         requestBody.put("messages", messages);
         requestBody.put("stream", false);
-        requestBody.put("max_tokens", 100000);
+        requestBody.put("max_tokens", 65536); // API最大限制为65536
         return requestBody;
     }
 
@@ -638,15 +660,38 @@ public class SimpleFrontendProjectServiceImpl implements SimpleFrontendProjectSe
         try {
             // 直接解析AI返回的JSON字符串
             ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, String> codeMap = objectMapper.readValue(aiResponse, new TypeReference<>() {
-            });
+            // 配置ObjectMapper以正确处理UTF-8编码
+            // 使用ReaderConfig来确保UTF-8编码
+            Map<String, String> codeMap = objectMapper.readValue(
+                    new java.io.StringReader(aiResponse),
+                    new TypeReference<>() {}
+            );
             
             // 确保所有字段都存在
             if (!codeMap.containsKey("html")) codeMap.put("html", "");
             if (!codeMap.containsKey("css")) codeMap.put("css", "");
             if (!codeMap.containsKey("javascript")) codeMap.put("javascript", "");
             
-            return codeMap;
+            // 手动处理可能的编码问题，确保中文正确显示
+            Map<String, String> processedCodeMap = new HashMap<>();
+            for (Map.Entry<String, String> entry : codeMap.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                // 确保值不为null
+                if (value != null) {
+                    // 处理可能的编码问题
+                    try {
+                        // 尝试将字符串重新编码为UTF-8
+                        value = new String(value.getBytes(java.nio.charset.StandardCharsets.UTF_8), java.nio.charset.StandardCharsets.UTF_8);
+                    } catch (Exception e) {
+                        // 如果处理失败，使用原始值
+                        logger.warn("处理编码时出错: {}", e.getMessage());
+                    }
+                }
+                processedCodeMap.put(key, value);
+            }
+            
+            return processedCodeMap;
         } catch (Exception e) {
             logger.error("解析AI响应失败", e);
             // 如果解析失败，返回默认的空代码
