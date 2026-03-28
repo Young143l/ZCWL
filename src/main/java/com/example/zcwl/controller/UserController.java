@@ -138,7 +138,7 @@ public class UserController {
     
     // ResponseEntity：Spring用于封装HTTP响应的对象
     // 可以包含响应体、HTTP状态码、响应头等信息
-    public ResponseEntity<User> createUser(
+    public ResponseEntity<?> createUser(
             // @Valid：JSR-303校验注解，用于验证请求体数据的合法性
             // 作用：如果userDTO对象不符合验证规则（例如必填字段为空），会自动返回400错误
             @Valid 
@@ -146,13 +146,28 @@ public class UserController {
             // @RequestBody：Spring注解，用于将HTTP请求体转换为Java对象
             // 作用：自动将前端发送的JSON数据转换为UserDTO对象
             @RequestBody UserDTO userDTO) {
-        
-        // 调用服务层的方法创建用户记录
-        User user = userService.createUser(userDTO);
-        
-        // 返回创建成功的用户数据和201状态码
-        // HttpStatus.CREATED表示资源创建成功
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        try {
+            // 调用服务层的方法创建用户记录
+            User user = userService.createUser(userDTO);
+            
+            // 返回创建成功的用户数据和201状态码
+            // HttpStatus.CREATED表示资源创建成功
+            return new ResponseEntity<>(user, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            // 处理业务逻辑错误，返回400状态码
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("message", "服务器内部错误");
+            response.put("error", e.getMessage());
+            response.put("status", 400);
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            // 处理其他错误，返回500状态码
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("message", "服务器内部错误");
+            response.put("error", e.getMessage());
+            response.put("status", 500);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     /**
@@ -290,6 +305,149 @@ public class UserController {
         
         // 返回204状态码，表示删除成功且没有内容返回
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 更新用户信息
+     * <p>
+     * 前端调用方式：
+     * - 请求类型：POST
+     * - 请求URL：http://localhost:8080/users/{id}
+     *   例如：http://localhost:8080/users/user001
+     * - 请求头：
+     *   - Content-Type: application/json
+     *   - Authorization: Bearer token
+     * - 请求体：JSON格式的更新数据，例如：
+     *   {
+     *     "name": "张三",
+     *     "email": "zhangsan@example.com"
+     *   }
+     * - 响应：更新成功返回200状态码和更新后的用户信息；验证失败返回401状态码；无权限返回403状态码；找不到返回404状态码
+     *
+     * @param id 用户ID，从URL路径中获取
+     * @param requestBody 请求体，包含name和email字段
+     * @return 包含更新后用户信息的ResponseEntity对象
+     */
+    // @PostMapping：Spring注解，处理POST请求
+    // 作用：当前端发送POST请求到/users/{id}时，会调用这个方法
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/{id}")
+
+    public ResponseEntity<?> updateUserInfo(
+            // @PathVariable：从URL路径中获取用户ID
+            @PathVariable String id,
+            // @RequestBody：将请求体JSON转换为Map对象
+            @RequestBody java.util.Map<String, String> requestBody) {
+        try {
+            // 获取当前认证用户
+            org.springframework.security.core.Authentication authentication = 
+                    org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            String currentUserId = authentication.getName();
+            
+            // 检查是否有权限修改该用户信息
+            if (!currentUserId.equals(id)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            
+            // 获取请求参数
+            String name = requestBody.get("name");
+            String email = requestBody.get("email");
+            
+            // 验证参数
+            if (name == null || name.isEmpty() || email == null || email.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            
+            // 调用服务层方法，更新用户信息
+            User user = userService.updateUserInfo(id, name, email);
+            
+            // 构建响应对象
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("name", user.getName());
+            response.put("email", user.getEmail());
+            
+            // 返回更新后的用户信息和200状态码
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            if (e.getMessage().startsWith("User not found")) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * 更新用户密码
+     * <p>
+     * 前端调用方式：
+     * - 请求类型：POST
+     * - 请求URL：http://localhost:8080/users/password/{id}
+     *   例如：http://localhost:8080/users/password/user001
+     * - 请求头：
+     *   - Content-Type: application/json
+     *   - Authorization: Bearer token
+     * - 请求体：JSON格式的更新数据，例如：
+     *   {
+     *     "password": "currentPassword",
+     *     "newPassword": "newPassword123!"
+     *   }
+     * - 响应：更新成功返回200状态码和空密码字段；验证失败返回401状态码；无权限返回403状态码；找不到返回404状态码
+     *
+     * @param id 用户ID，从URL路径中获取
+     * @param requestBody 请求体，包含password和newPassword字段
+     * @return 包含响应信息的ResponseEntity对象
+     */
+    // @PostMapping：Spring注解，处理POST请求
+    // 作用：当前端发送POST请求到/users/password/{id}时，会调用这个方法
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/password/{id}")
+
+    public ResponseEntity<?> updatePassword(
+            // @PathVariable：从URL路径中获取用户ID
+            @PathVariable String id,
+            // @RequestBody：将请求体JSON转换为Map对象
+            @RequestBody java.util.Map<String, String> requestBody) {
+        try {
+            // 获取当前认证用户
+            org.springframework.security.core.Authentication authentication = 
+                    org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            String currentUserId = authentication.getName();
+            
+            // 检查是否有权限修改该用户密码
+            if (!currentUserId.equals(id)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            
+            // 获取请求参数
+            String oldPassword = requestBody.get("password");
+            String newPassword = requestBody.get("newPassword");
+            
+            // 验证参数
+            if (oldPassword == null || oldPassword.isEmpty() || newPassword == null || newPassword.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            
+            // 调用服务层方法，更新密码
+            userService.updatePassword(id, oldPassword, newPassword);
+            
+            // 构建响应对象
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("password", "");
+            
+            // 返回成功响应和200状态码
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            if (e.getMessage().startsWith("User not found")) {
+                return ResponseEntity.notFound().build();
+            } else if (e.getMessage().equals("原密码错误，请重新输入")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(java.util.Map.of("message", e.getMessage()));
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 }

@@ -35,8 +35,18 @@ public class TagsServiceImpl implements TagsService {
      */
     @Override
     public Tags createTag(Tags tags) {
+        System.out.println("Creating tag with name: " + tags.getName());
+        // 检查标签名称是否已存在
+        Tags existingTag = tagsRepository.findByName(tags.getName());
+        System.out.println("Existing tag: " + existingTag);
+        if (existingTag != null) {
+            System.out.println("Tag already exists: " + tags.getName());
+            throw new RuntimeException("标签名称已存在");
+        }
         // 调用Repository的save方法保存标签实体
-        return tagsRepository.save(tags);
+        Tags savedTag = tagsRepository.save(tags);
+        System.out.println("Tag created successfully: " + savedTag.getName());
+        return savedTag;
     }
 
     /**

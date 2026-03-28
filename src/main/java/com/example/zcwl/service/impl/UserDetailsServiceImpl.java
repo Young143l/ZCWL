@@ -49,7 +49,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // 创建UserDetails对象，用于Spring Security认证
         return new org.springframework.security.core.userdetails.User(
-                user.getName(),
+                user.getUId(),
                 user.getPassword(),
                 new ArrayList<>() // 权限列表，暂时为空
         );
@@ -88,7 +88,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // 创建UserDetails对象，用于Spring Security认证
         return new org.springframework.security.core.userdetails.User(
-                user.getName(),
+                user.getUId(),
                 user.getPassword(),
                 new ArrayList<>() // 权限列表，暂时为空
         );

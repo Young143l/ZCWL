@@ -31,7 +31,7 @@ public class LoginRequestDTO implements Serializable {
      */
     @NotBlank(message = "用户ID不能为空")
     @Size(min = 6, max = 20, message = "用户ID长度必须在6-20个字符之间")
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "用户ID只能包含字母、数字和下划线")
+    @Pattern(regexp = "^[a-zA-Z0-9_\u4e00-\u9fa5]+$", message = "用户ID只能包含字母、数字、下划线和中文字符")
     private String userId;
 
     /**

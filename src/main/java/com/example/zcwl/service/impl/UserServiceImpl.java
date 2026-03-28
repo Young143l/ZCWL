@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
         user.setName(userDTO.getUserName());
         // 设置邮箱
         user.setEmail(userDTO.getEmail());
-        // 使用明文存储密码，便于前期维护
+        // 加密存储密码
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         // 调用Repository的save方法保存用户实体
         User savedUser = userRepository.save(user);
@@ -178,6 +178,106 @@ public class UserServiceImpl implements UserService {
         // 调用Repository的deleteById方法根据ID删除
         userRepository.deleteById(id);
         logger.info("User deleted successfully: {}", id);
+    }
+
+    /**
+     * 更新用户信息
+     * @param id 用户ID
+     * @param name 用户名
+     * @param email 邮箱
+     * @return 更新后的用户实体对象
+     */
+    @Override
+    public User updateUserInfo(String id, String name, String email) {
+        logger.info("Updating user info: {}", id);
+        // 先根据ID查询现有用户
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isPresent()) {
+            // 如果存在，更新字段值
+            User user = optionalUser.get();
+            
+            // 验证用户名长度
+            if (name == null || name.length() < 6 || name.length() > 20) {
+                logger.warn("Username length invalid: {}", name);
+                throw new RuntimeException("用户名长度必须在6-20个字符之间");
+            }
+            
+            // 验证邮箱长度
+            if (email == null || email.length() > 20) {
+                logger.warn("Email length invalid: {}", email);
+                throw new RuntimeException("邮箱长度不能超过20个字符");
+            }
+            
+            // 检查用户名是否已存在（排除当前用户）
+            User existingUserByName = userRepository.findByName(name);
+            if (existingUserByName != null && !existingUserByName.getUId().equals(id)) {
+                logger.warn("Username already exists: {}", name);
+                throw new RuntimeException("用户名已存在");
+            }
+            
+            // 检查邮箱是否已存在（排除当前用户）
+            User existingUserByEmail = userRepository.findByEmail(email);
+            if (existingUserByEmail != null && !existingUserByEmail.getUId().equals(id)) {
+                logger.warn("Email already exists: {}", email);
+                throw new RuntimeException("邮箱已存在");
+            }
+            
+            // 更新字段
+            user.setName(name);
+            user.setEmail(email);
+            
+            // 保存更新后的实体
+            User updatedUser = userRepository.save(user);
+            logger.info("User info updated successfully: {}", updatedUser.getUId());
+            return updatedUser;
+        }
+        // 如果不存在，抛出运行时异常
+        logger.warn("User not found for update: {}", id);
+        throw new RuntimeException("User not found with id: " + id);
+    }
+
+    /**
+     * 更新用户密码
+     * @param id 用户ID
+     * @param oldPassword 原密码
+     * @param newPassword 新密码
+     * @return 更新后的用户实体对象
+     */
+    @Override
+    public User updatePassword(String id, String oldPassword, String newPassword) {
+        logger.info("Updating password for user: {}", id);
+        // 先根据ID查询现有用户
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isPresent()) {
+            // 如果存在，验证原密码
+            User user = optionalUser.get();
+            
+            // 验证原密码是否正确
+            if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+                logger.warn("Old password incorrect for user: {}", id);
+                throw new RuntimeException("原密码错误，请重新输入");
+            }
+            
+            // 验证新密码强度
+            validatePasswordStrength(newPassword);
+            
+            // 检查新密码是否与用户名相同
+            if (newPassword.equals(user.getName())) {
+                logger.warn("New password cannot be the same as username for user: {}", id);
+                throw new RuntimeException("密码不能与用户名相同");
+            }
+            
+            // 更新密码
+            user.setPassword(passwordEncoder.encode(newPassword));
+            
+            // 保存更新后的实体
+            User updatedUser = userRepository.save(user);
+            logger.info("Password updated successfully for user: {}", updatedUser.getUId());
+            return updatedUser;
+        }
+        // 如果不存在，抛出运行时异常
+        logger.warn("User not found for password update: {}", id);
+        throw new RuntimeException("User not found with id: " + id);
     }
 
     /**

@@ -91,7 +91,7 @@ public class DocController {
     
     // ResponseEntity：Spring用于封装HTTP响应的对象
     // 可以包含响应体、HTTP状态码、响应头等信息
-    public ResponseEntity<Doc> createDoc(
+    public ResponseEntity<?> createDoc(
             // @Valid：JSR-303校验注解，用于验证请求体数据的合法性
             // 作用：如果doc对象不符合验证规则（例如必填字段为空），会自动返回400错误
             @Valid 
@@ -99,13 +99,31 @@ public class DocController {
             // @RequestBody：Spring注解，用于将HTTP请求体转换为Java对象
             // 作用：自动将前端发送的JSON数据转换为Doc对象
             @RequestBody Doc doc) {
-        
-        // 调用服务层的方法创建文档记录
-        Doc createdDoc = docService.createDoc(doc);
-        
-        // 返回创建成功的文档实体和201状态码
-        // HttpStatus.CREATED表示资源创建成功
-        return new ResponseEntity<>(createdDoc, HttpStatus.CREATED);
+        try {
+            // 检查文档名称是否已存在
+            if (docService.getDocByDocName(doc.getDocName()) != null) {
+                // 文档名称已存在，返回400错误
+                java.util.Map<String, Object> response = new java.util.HashMap<>();
+                response.put("message", "服务器内部错误");
+                response.put("error", "文档名称已存在");
+                response.put("status", 400);
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            // 调用服务层的方法创建文档记录
+            Doc createdDoc = docService.createDoc(doc);
+            
+            // 返回创建成功的文档实体和201状态码
+            // HttpStatus.CREATED表示资源创建成功
+            return new ResponseEntity<>(createdDoc, HttpStatus.CREATED);
+        } catch (Exception e) {
+            // 处理其他错误，返回500状态码
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("message", "服务器内部错误");
+            response.put("error", e.getMessage());
+            response.put("status", 500);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     /**

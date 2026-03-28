@@ -76,14 +76,16 @@ public class AuthServiceImpl implements AuthService {
             System.out.println("Found user: name=" + user.getName() + ", uId=" + user.getUId() + ", password=" + user.getPassword());
             
             // 验证密码
-            if (!user.getPassword().equals(loginRequestDTO.getPassword())) {
+            boolean passwordMatch = passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword());
+            System.out.println("Password match result: " + passwordMatch);
+            
+            if (!passwordMatch) {
                 System.out.println("Password mismatch for user: " + user.getName());
-                System.out.println("Expected password: " + user.getPassword() + ", Actual password: " + loginRequestDTO.getPassword());
                 throw new RuntimeException("Invalid userId or password");
             }
             
             // 加载用户详情
-            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getName());
+            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUId());
             System.out.println("User details loaded successfully: " + userDetails.getUsername());
             
             // 生成JWT token
@@ -102,6 +104,7 @@ public class AuthServiceImpl implements AuthService {
             return response;
         } catch (Exception e) {
             System.out.println("Login error: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Invalid userId or password");
         }
     }
@@ -133,6 +136,27 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("密码不能与用户名相同");
         }
 
+        // 验证密码强度
+        String password = userDTO.getPassword();
+        if (password.length() < 8) {
+            throw new RuntimeException("密码长度不能少于8个字符");
+        }
+        if (password.length() > 20) {
+            throw new RuntimeException("密码长度不能超过20个字符");
+        }
+        if (!password.matches(".*[A-Z].*")) {
+            throw new RuntimeException("密码必须包含至少一个大写字母");
+        }
+        if (!password.matches(".*[a-z].*")) {
+            throw new RuntimeException("密码必须包含至少一个小写字母");
+        }
+        if (!password.matches(".*\\d.*")) {
+            throw new RuntimeException("密码必须包含至少一个数字");
+        }
+        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"|,.<>/?].*")) {
+            throw new RuntimeException("密码必须包含至少一个特殊字符");
+        }
+
         // 检查用户名是否已存在
         if (userRepository.findByName(userDTO.getUserName()) != null) {
             throw new RuntimeException("Username already exists");
@@ -158,8 +182,8 @@ public class AuthServiceImpl implements AuthService {
         user.setName(userDTO.getUserName());
         // 设置邮箱
         user.setEmail(userDTO.getEmail());
-        // 直接存储明文密码，便于前期维护
-        user.setPassword(userDTO.getPassword());
+        // 加密存储密码
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 
         // 保存用户
         return userRepository.save(user);
