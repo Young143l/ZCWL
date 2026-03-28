@@ -50,9 +50,8 @@ public class SecurityConfig {
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-        authProvider.setPasswordEncoder(plainTextPasswordEncoder());
-        return authProvider;
+        // 使用构造器参数创建DaoAuthenticationProvider
+        return new DaoAuthenticationProvider(userDetailsService);
     }
 
     /**
@@ -132,26 +131,14 @@ public class SecurityConfig {
     }
 
     /**
-     * 明文密码编码器
-     * 自定义实现，直接比较明文密码，便于前期维护
+     * 密码编码器
+     * 使用BCryptPasswordEncoder进行密码加密和验证
      * @return 密码编码器
      */
     @Bean
-    public PasswordEncoder plainTextPasswordEncoder() {
-        // 自定义PasswordEncoder实现，直接比较明文密码
-        return new PasswordEncoder() {
-            @Override
-            public String encode(CharSequence rawPassword) {
-                // 直接返回明文密码
-                return rawPassword.toString();
-            }
-
-            @Override
-            public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                // 直接比较明文密码
-                return rawPassword.toString().equals(encodedPassword);
-            }
-        };
+    public PasswordEncoder passwordEncoder() {
+        // 使用BCryptPasswordEncoder进行密码加密和验证
+        return new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
     }
 
     /**

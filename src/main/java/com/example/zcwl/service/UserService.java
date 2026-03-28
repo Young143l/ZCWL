@@ -48,4 +48,22 @@ public interface UserService {
      */
     void deleteUser(String id);
 
+    /**
+     * 更新用户信息
+     * @param id 用户ID
+     * @param name 用户名
+     * @param email 邮箱
+     * @return 更新后的用户实体对象
+     */
+    User updateUserInfo(String id, String name, String email);
+
+    /**
+     * 更新用户密码
+     * @param id 用户ID
+     * @param oldPassword 原密码
+     * @param newPassword 新密码
+     * @return 更新后的用户实体对象
+     */
+    User updatePassword(String id, String oldPassword, String newPassword);
+
 }

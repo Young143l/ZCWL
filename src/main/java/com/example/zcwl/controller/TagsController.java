@@ -77,7 +77,7 @@ public class TagsController {
     
     // ResponseEntity：Spring用于封装HTTP响应的对象
     // 可以包含响应体、HTTP状态码、响应头等信息
-    public ResponseEntity<Tags> createTag(
+    public ResponseEntity<?> createTag(
             // @Valid：JSR-303校验注解，用于验证请求体数据的合法性
             // 作用：如果tags对象不符合验证规则（例如必填字段为空），会自动返回400错误
             @Valid 
@@ -85,13 +85,19 @@ public class TagsController {
             // @RequestBody：Spring注解，用于将HTTP请求体转换为Java对象
             // 作用：自动将前端发送的JSON数据转换为Tags对象
             @RequestBody Tags tags) {
-        
-        // 调用服务层的方法创建标签记录
-        Tags createdTag = tagsService.createTag(tags);
-        
-        // 返回创建成功的标签实体和201状态码
-        // HttpStatus.CREATED表示资源创建成功
-        return new ResponseEntity<>(createdTag, HttpStatus.CREATED);
+        try {
+            // 调用服务层的方法创建标签记录
+            Tags createdTag = tagsService.createTag(tags);
+            
+            // 返回创建成功的标签实体和201状态码
+            // HttpStatus.CREATED表示资源创建成功
+            return new ResponseEntity<>(createdTag, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            // 捕获运行时异常，返回400状态码和错误信息
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("message", e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
     }
 
     /**

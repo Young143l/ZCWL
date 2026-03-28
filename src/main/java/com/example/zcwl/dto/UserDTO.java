@@ -42,7 +42,7 @@ public class UserDTO implements Serializable {  // 实现Serializable接口，�
      */
     @NotBlank(message = "用户名不能为空")  // 数据校验，确保用户名不为空
     @Size(min = 6, max = 20, message = "用户名长度必须在6-20个字符之间")
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "用户名只能包含字母、数字和下划线")
+    @Pattern(regexp = "^[a-zA-Z0-9_\u4e00-\u9fa5]+$", message = "用户名只能包含字母、数字、下划线和中文字符")
     private String userName;
 
     /**
