@@ -10,10 +10,9 @@ export interface CommentRequest {
 export const getComments: (
     d_id: string,
     c_id: string,
-) => Promise<{ ok: false; message: unknown } | { ok: true; comments: Comment[] }> = async (
-    d_id: string,
-    c_id: string,
-) => {
+) => Promise<
+    { ok: false; message: unknown } | { ok: true; comments: Comment[] }
+> = async (d_id: string, c_id: string) => {
     try {
         const res: Response = await fetch(
             import.meta.env.VITE_BACK_END + `/doc/comment/${d_id}/${c_id}`,
@@ -29,6 +28,8 @@ export const getComments: (
         }
         const json: { comments: Comment[] } = await res.json();
         if (json) {
+            console.log(json);
+
             return { ok: true, comments: json.comments };
         }
         throw Error("Response Error!");
@@ -42,7 +43,9 @@ export const postComment: (
     c_id: string,
     comment: CommentRequest,
     token: string,
-) => Promise<{ ok: false; message: unknown } | { ok: true; id: string }> = async (
+) => Promise<
+    { ok: false; message: unknown } | { ok: true; id: string }
+> = async (
     d_id: string,
     c_id: string,
     comment: CommentRequest,
@@ -61,6 +64,7 @@ export const postComment: (
             },
         );
         if (!res.ok) {
+            // const json = await res.json();
             throw new Error(`HTTP error! status: ${res.status}`);
         }
         const json: { id: string } = await res.json();

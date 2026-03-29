@@ -98,6 +98,7 @@ const Project: FC = () => {
                                 code={code}
                                 setFilePath={setFilePath}
                                 loading={fileLoading}
+                                pName={name}
                             />
                         </Splitter.Panel>
                     </Splitter>

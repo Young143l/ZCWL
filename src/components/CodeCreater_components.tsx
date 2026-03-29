@@ -1,7 +1,12 @@
 import { Select, Button, theme } from "antd";
 import { useState, type FC } from "react";
 import LoadingWindow_components from "./AILoadingWindow_components";
-import { newCodeCP, newCodeSF, type CodeType, type CPType } from "../api/Code_api";
+import {
+    newCodeCP,
+    newCodeSF,
+    type CodeType,
+    type CPType,
+} from "../api/Code_api";
 import useLogin from "../status/Login_status";
 import { useNavigate } from "react-router-dom";
 import { SendOutlined } from "@ant-design/icons";
@@ -16,6 +21,8 @@ const CodeCreater_components: FC = () => {
     const [success, setSuccess] = useState<boolean>(false);
     const nav = useNavigate();
     const pColor = theme.useToken().token.colorPrimaryBorder;
+    const mpColor = theme.useToken().token.colorPrimary;
+
     const creatCodeSF = () => {
         newCodeSF(message, userId, appName, token).then((res) => {
             if (!res.ok) {
@@ -33,8 +40,8 @@ const CodeCreater_components: FC = () => {
             }, 300);
         });
     };
-    const creatCodeCP = (type:CPType) => {
-        newCodeCP( userId,type, message,appName, token).then((res) => {
+    const creatCodeCP = (type: CPType) => {
+        newCodeCP(userId, type, message, appName, token).then((res) => {
             if (!res.ok) {
                 setLoading(false);
                 setSuccess(false);
@@ -63,8 +70,8 @@ const CodeCreater_components: FC = () => {
                 creatCodeSF();
                 break;
             }
-            case "cp_py":{
-                creatCodeCP("python")
+            case "cp_py": {
+                creatCodeCP("python");
                 break;
             }
         }
@@ -80,7 +87,7 @@ const CodeCreater_components: FC = () => {
                 <h1
                     className="text-xl border-l-4 pl-1"
                     style={{
-                        borderColor: pColor,
+                        borderColor: mpColor,
                     }}
                 >
                     项目应用创建
@@ -122,9 +129,9 @@ const CodeCreater_components: FC = () => {
                                     label: "html单页应用",
                                 },
                                 {
-                                    value:"cp_py",
-                                    label:"Python控制台应用"
-                                }
+                                    value: "cp_py",
+                                    label: "Python控制台应用",
+                                },
                             ]}
                             className="w-[120]"
                             value={appType}

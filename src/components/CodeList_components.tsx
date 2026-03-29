@@ -10,10 +10,10 @@ import { SearchOutlined } from "@ant-design/icons";
 const CodeList_components: FC = () => {
     const [codeList, setCodeList] = useState<CodeProject[] | null>(null);
     const [nowCodeList, setNowCodeList] = useState<CodeProject[] | null>(null);
-    const pColor = theme.useToken().token.colorPrimaryBorder;
     const [waiting, setWaiting] = useState<boolean>(true);
     const { token, userId, isLogin } = useLogin();
     const nav = useNavigate();
+    const mpColor = theme.useToken().token.colorPrimary;
 
 
 
@@ -74,7 +74,7 @@ const CodeList_components: FC = () => {
                 <h1
                     className="text-xl border-l-4 pl-1 "
                     style={{
-                        borderColor: pColor,
+                        borderColor: mpColor,
                     }}
                 >
                     已创建项目列表

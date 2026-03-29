@@ -14,6 +14,7 @@ export const login: (
         userId: string,
         token: string,
         avatar: string,
+        email:string
     ) => void,
 ) => Promise<{ success: boolean; userName: string }> = async (
     userId: string,
@@ -23,6 +24,7 @@ export const login: (
         userId: string,
         token: string,
         avatar: string,
+        email:string
     ) => void,
 ) => {
     try {
@@ -53,6 +55,7 @@ export const login: (
                 json.userId,
                 json.token,
                 `https://cravatar.cn/avatar/${Md5.hashStr(json.email)}`,
+                json.email
             );
             // console.log(json);
             return { success: true, userName: json.userName };
@@ -97,5 +100,79 @@ export const SigninUser = async (
     } catch (error: unknown) {
         console.error("Login error:", error);
         return { success: false, message: error };
+    }
+};
+
+export const updateUserInfo = async (
+    userId: string,
+    token: string,
+    name: string,
+    email: string
+): Promise<{ success: boolean; data?: { name: string; email: string }; message?: string }> => {
+    try {
+        const res: Response = await fetch(
+            `${import.meta.env.VITE_BACK_END}/users/${userId}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                }),
+            }
+        );
+
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || `HTTP error! status: ${res.status}`);
+        }
+
+        const json = await res.json();
+        return { success: true, data: json };
+    } catch (error: unknown) {
+        console.error("Update user info error:", error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        return { success: false, message: errorMessage };
+    }
+};
+
+export const updatePassword = async (
+    userId: string,
+    token: string,
+    password: string,
+    newPassword: string
+): Promise<{ success: boolean; message?: string }> => {
+    try {
+        const res: Response = await fetch(
+            `${import.meta.env.VITE_BACK_END}/users/password/${userId}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    password: password,
+                    newPassword: newPassword,
+                }),
+            }
+        );
+
+        const json = await res.json();
+
+        if (!res.ok) {
+            // 失败时返回后端提供的错误消息
+            return { success: false, message: json.message || `HTTP error! status: ${res.status}` };
+        }
+
+        // 成功时根据文档返回格式，虽然文档示例有点奇怪（返回原密码），这里主要关注 success 状态
+        return { success: true };
+    } catch (error: unknown) {
+        console.error("Update password error:", error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        return { success: false, message: errorMessage };
     }
 };

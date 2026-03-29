@@ -10,6 +10,7 @@ import useLogin from "../../status/Login_status";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import CP_Ask_components from "../../components/CP_Ask_components";
 import useAIChatDoc from "../../status/AIChatDoc_status";
+import useIsDark from "../../status/IsDark_status";
 
 export type CodeType = "python";
 
@@ -34,7 +35,7 @@ const CodeCP: FC = () => {
     const [messageApi, contextHolder] = message.useMessage();
     const { setCode: setAIChatCode, setIsAIChatOpen } = useAIChatDoc();
     const editorRef = useRef<Parameters<OnMount>[1] | null>(null);
-
+    const { isDark } = useIsDark();
     useEffect(() => {
         getCodeCP(token, cp_id as string).then((res) => {
             if (res.ok) {
@@ -162,7 +163,11 @@ const CodeCP: FC = () => {
                                                 </div>
                                             </div>
                                             <Editor
-                                                theme="github-light"
+                                                theme={
+                                                    isDark
+                                                        ? "vs-dark"
+                                                        : "github-light"
+                                                }
                                                 beforeMount={
                                                     handleEditorWillMount
                                                 }

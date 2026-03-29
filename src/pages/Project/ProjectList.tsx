@@ -8,6 +8,7 @@ import useLogin from "../../status/Login_status";
 import { useNavigate } from "react-router-dom";
 import { PlusOutlined, GithubOutlined } from "@ant-design/icons";
 import LoadingWindow_components from "../../components/PullLoadingWindow_components";
+import useIsDark from "../../status/IsDark_status";
 
 interface ProjectItem {
     id: string;
@@ -16,6 +17,7 @@ interface ProjectItem {
 
 const ProjectList: FC = () => {
     const pColor = theme.useToken().token.colorPrimaryBorder;
+    const mpColor = theme.useToken().token.colorPrimary;
     const { token, userId, isLogin } = useLogin();
     const nav = useNavigate();
     const [projectList, setProjectList] = useState<ProjectItem[]>([]);
@@ -28,6 +30,8 @@ const ProjectList: FC = () => {
     const [createSuccess, setCreateSuccess] = useState<boolean>(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
     const [messageApi, contextHolder] = message.useMessage();
+        const {isDark}=useIsDark()
+
 
     useEffect(() => {
         let time: number | null = null;
@@ -172,7 +176,7 @@ const ProjectList: FC = () => {
                         <h1
                             className="text-xl border-l-4 pl-1"
                             style={{
-                                borderColor: pColor,
+                                borderColor: mpColor,
                             }}
                         >
                             拉取新仓库
@@ -202,7 +206,7 @@ const ProjectList: FC = () => {
                         <h1
                             className="text-xl border-l-4 pl-1"
                             style={{
-                                borderColor: pColor,
+                                borderColor: mpColor,
                             }}
                         >
                             已拉取仓库列表
@@ -256,7 +260,7 @@ const ProjectList: FC = () => {
                             {nowProjectList.map((project) => (
                                 <div
                                     key={project.id}
-                                    className="rounded-xl bg-gray-50 hover:bg-gray-200 border-2 p-2 flex items-center justify-between group cursor-pointer"
+                                    className={`rounded-xl bg-${isDark?"bg-gray-600":"gray-50"} ${isDark?"hover:bg-gray-300":"hover:bg-gray-200"}  border-2 p-2 flex items-center justify-between group cursor-pointer`}
                                     style={{
                                         borderColor: pColor,
                                     }}

@@ -6,13 +6,17 @@ import DocInfoCard_components from "../../components/DocInfoCard_components";
 import { Skeleton } from "antd";
 import Template_Page from "../Template_Page";
 import DocBreadcrumb_components from "../../components/DocBreadcrumb_components";
+import useIsDark from "../../status/IsDark_status";
 
 // 骨架屏组件
 const DocDirectorySkeleton: FC = () => {
+    const { isDark } = useIsDark();
     return (
         <div className="space-y-4">
             {/* 文档信息卡片骨架 */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden p-5">
+            <div
+                className={`bg-${isDark ? "black" : "white"} rounded-xl border border-${isDark?"gray-700":"gray-200"} overflow-hidden p-5`}
+            >
                 <div className="flex gap-4 h-full">
                     {/* 图片骨架 */}
                     <Skeleton.Image
@@ -35,11 +39,13 @@ const DocDirectorySkeleton: FC = () => {
                 </div>
             </div>
             {/* 章节列表骨架 */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div
+                className={`bg-${isDark ? "black" : "white"} rounded-xl border border-${isDark?"gray-700":"gray-200"} overflow-hidden`}
+            >
                 {[1, 2, 3, 4, 5].map((i) => (
                     <div
                         key={i}
-                        className="px-6 py-4 flex items-center justify-between gap-4 border-b border-gray-100 last:border-b-0"
+                        className={`px-6 py-4 flex items-center justify-between gap-4 border-b border-${isDark?"gray-700":"gray-200"} last:border-b-0`}
                     >
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                             <Skeleton.Input

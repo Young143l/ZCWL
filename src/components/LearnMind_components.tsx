@@ -1,58 +1,64 @@
 import jsMind from "jsmind";
-import { LoadingOutlined } from "@ant-design/icons";
+import {
+    LoadingOutlined,
+    PlusOutlined,
+    MinusOutlined,
+} from "@ant-design/icons";
 import "jsmind/style/jsmind.css";
 import { useEffect, useRef, useState, type FC } from "react";
 import { getDoc, getDocList } from "../api/Doc_api";
-import { Spin, theme } from "antd";
+import { Spin, theme, Button, Space } from "antd";
 import { useNavigate } from "react-router-dom";
+import { isMobile } from "react-device-detect";
+import useIsDark from "../status/IsDark_status"; // 导入深色模式状态
 
 // 自定义主题样式
-const getCustomThemeStyles = (pColor: string) => `
+const getCustomThemeStyles = (pColor: string, isDarkMode: boolean) => `
   /* 优化后的主题 - 与网站风格一致 */
   jmnodes.theme-cfww jmnode {
-    background: #ffffff;
-    color: #1f1f1f;
+    background: ${isDarkMode ? '#1f1f1f' : '#ffffff'};
+    color: ${isDarkMode ? '#f5f5f5' : '#1f1f1f'};
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 3px ${isDarkMode ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)'};
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     font-size: 13px;
     line-height: 1.4;
     padding: 8px 12px;
-    border: 2px solid #f0f0f0;
+    border: 2px solid ${isDarkMode ? '#303030' : '#f0f0f0'};
     transition: all 0.2s ease;
     backdrop-filter: blur(4px);
   }
   
   jmnodes.theme-cfww jmnode:hover {
-    background: #f9f9f9;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    border-color: ${pColor}40;
+    background: ${isDarkMode ? '#2a2a2a' : '#f9f9f9'};
+    box-shadow: 0 2px 6px ${isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'};
+    border-color: ${isDarkMode ? `${pColor}80` : `${pColor}40`};
     transform: translateY(-1px);
   }
   
   jmnodes.theme-cfww jmnode.selected {
-    background: ${pColor}10;
-    color: #141414;
-    box-shadow: 0 2px 8px ${pColor}20;
-    border-color: ${pColor}60;
+    background: ${isDarkMode ? `${pColor}30` : `${pColor}10`};
+    color: ${isDarkMode ? '#ffffff' : '#141414'};
+    box-shadow: 0 2px 8px ${isDarkMode ? `${pColor}40` : `${pColor}20`};
+    border-color: ${isDarkMode ? `${pColor}80` : `${pColor}60`};
     transform: translateY(-1px);
   }
   
   jmnodes.theme-cfww jmnode.root {
     font-size: 18px;
     font-weight: 600;
-    background: ${pColor}08;
+    background: ${isDarkMode ? `${pColor}20` : `${pColor}08`};
     padding: 12px 16px;
     border-radius: 10px;
-    border: 1px solid ${pColor}30;
-    box-shadow: 0 2px 6px ${pColor}15;
+    border: 1px solid ${isDarkMode ? `${pColor}50` : `${pColor}30`};
+    box-shadow: 0 2px 6px ${isDarkMode ? `${pColor}30` : `${pColor}15`};
     backdrop-filter: blur(8px);
   }
   
   jmnodes.theme-cfww jmexpander {
-    background: ${pColor}20;
+    background: ${isDarkMode ? `${pColor}30` : `${pColor}20`};
     border: none;
-    color: ${pColor};
+    color: ${isDarkMode ? 'white' : pColor};
     font-weight: 600;
     font-size: 10px;
     width: 16px;
@@ -70,14 +76,14 @@ const getCustomThemeStyles = (pColor: string) => `
   }
   
   jmnodes.theme-cfww jmexpander:hover {
-    background: ${pColor}40;
-    color: white;
+    background: ${isDarkMode ? `${pColor}60` : `${pColor}40`};
+    color: ${isDarkMode ? 'black' : 'white'};
     transform: scale(1.1);
   }
   
   /* 连接线样式 */
   .theme-cfww path.jmnode-link {
-    stroke: #e8e8e8;
+    stroke: ${isDarkMode ? '#4a4a4a' : '#e8e8e8'};
     stroke-width: 1.2;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -85,18 +91,18 @@ const getCustomThemeStyles = (pColor: string) => `
   
   /* 左右分支使用相同颜色 */
   .theme-cfww path.jmnode-link-left {
-    stroke: #e8e8e8;
+    stroke: ${isDarkMode ? '#4a4a4a' : '#e8e8e8'};
   }
   
   .theme-cfww path.jmnode-link-right {
-    stroke: #e8e8e8;
+    stroke: ${isDarkMode ? '#4a4a4a' : '#e8e8e8'};
   }
   
   /* 容器样式 */
   .mindmap-container {
-    background: #ffffff;
+    background: ${isDarkMode ? '#141414' : '#ffffff'};
     border-radius: 12px;
-    border: 1px solid #f5f5f5;
+    border: 1px solid ${isDarkMode ? '#2a2a2a' : '#f5f5f5'};
     overflow: hidden;
     // box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     backdrop-filter: blur(4px);
@@ -142,7 +148,7 @@ const options = {
     view: {
         engine: "svg" as "canvas" | "svg" | undefined,
         draggable: true,
-        hide_scrollbars_when_draggable: true,
+        hide_scrollbars_when_draggable: !isMobile,
         zoom: {
             min: 0.5,
             max: 2.0,
@@ -153,19 +159,21 @@ const options = {
 
 const LearnMind_components: FC = () => {
     const jmRef = useRef<HTMLDivElement>(null);
+    const jmInstance = useRef<jsMind | null>(null);
+    const { isDark } = useIsDark(); // 使用深色模式状态
     const pColor = theme.useToken().token.colorPrimaryBorder;
     const nav = useNavigate();
     const [loading, setLoading] = useState<boolean>(true);
     // 注入自定义样式
     useEffect(() => {
         const style = document.createElement("style");
-        style.textContent = getCustomThemeStyles(pColor);
+        style.textContent = getCustomThemeStyles(pColor, isDark);
         document.head.appendChild(style);
 
         return () => {
             document.head.removeChild(style);
         };
-    }, [pColor]);
+    }, [pColor, isDark]);
 
     const buildMindMap = async (jm: jsMind) => {
         const res = await getDocList();
@@ -224,6 +232,7 @@ const LearnMind_components: FC = () => {
 
     useEffect(() => {
         const jm = new jsMind(options);
+        jmInstance.current = jm;
         const handleWheel = (e: WheelEvent) => {
             e.preventDefault();
             if (e.deltaY < 0) {
@@ -250,8 +259,21 @@ const LearnMind_components: FC = () => {
                 containerNode.removeEventListener("wheel", handleWheel);
                 containerNode.innerHTML = "";
             }
+            jmInstance.current = null;
         };
     }, [nav]);
+
+    const handleZoomIn = () => {
+        if (jmInstance.current) {
+            jmInstance.current.view.zoom_in();
+        }
+    };
+
+    const handleZoomOut = () => {
+        if (jmInstance.current) {
+            jmInstance.current.view.zoom_out();
+        }
+    };
 
     return (
         <>
@@ -260,7 +282,9 @@ const LearnMind_components: FC = () => {
             >
                 <Spin indicator={<LoadingOutlined spin />} size="large" />
             </div>
-            <div className={`w-full h-full ${loading ? "hidden" : ""}`}>
+            <div
+                className={`w-full h-full relative ${loading ? "hidden" : ""}`}
+            >
                 <div
                     ref={jmRef}
                     id="jsmind_container"
@@ -271,6 +295,29 @@ const LearnMind_components: FC = () => {
                         overflow: "hidden",
                     }}
                 ></div>
+                {/* 缩放按钮 */}
+                <Space
+                    orientation="horizontal"
+                    style={{
+                        position: "absolute",
+                        bottom: "20px",
+                        left: "20px",
+                        zIndex: 10,
+                    }}
+                >
+                    <Button
+                        // type="primary"
+                        icon={<MinusOutlined />}
+                        onClick={handleZoomOut}
+                        size="large"
+                    />
+                    <Button
+                        // type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={handleZoomIn}
+                        size="large"
+                    />
+                </Space>
             </div>
         </>
     );

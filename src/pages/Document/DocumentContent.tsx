@@ -7,6 +7,7 @@ import {
     Divider,
     Empty,
     Menu,
+    message,
     Spin,
     Tag,
     theme,
@@ -21,14 +22,20 @@ import {
 } from "../../api/Doc_api";
 import DocBreadcrumb_components from "../../components/DocBreadcrumb_components";
 type MenuItem = Required<MenuProps>["items"][number];
-import "github-markdown-css/github-markdown.css";
+
 import remarkGfm from "remark-gfm";
 import { LoadingOutlined, SendOutlined } from "@ant-design/icons";
 import DocComment_compents from "../../components/DocComment_compents";
 import { type Comment } from "../../components/DocComment_compents";
-import { getComments, postComment, type CommentRequest } from "../../api/DocComment.api";
+import {
+    getComments,
+    postComment,
+    type CommentRequest,
+} from "../../api/DocComment.api";
 import useLogin from "../../status/Login_status";
+import useIsDark from "../../status/IsDark_status";
 const DocumentContent: FC = () => {
+    const [messageApi, contextHolder] = message.useMessage();
     const { d_id, c_id } = useParams();
     const [items, setItems] = useState<MenuItem[]>([]);
     const [docContent, setDocContent] = useState<DocContent | undefined>(
@@ -43,7 +50,8 @@ const DocumentContent: FC = () => {
     });
     const [comments, setComments] = useState<Comment[]>([]);
     const [commentContent, setCommentContent] = useState<string>("");
-    const { isLogin, userId, token } = useLogin();
+    const { isLogin, userId, token, email } = useLogin();
+    const { isDark } = useIsDark();
 
     // 获取评论列表
     const fetchComments = async () => {
@@ -64,19 +72,30 @@ const DocumentContent: FC = () => {
         if (!commentContent.trim() || !d_id || !c_id) {
             return;
         }
-        
+        messageApi.loading({
+            content: "提交中 ",
+            duration: 0,
+        });
         const commentRequest: CommentRequest = {
             uId: userId,
-            email: "", // 从登录状态获取或后端处理
-            content: commentContent,
+            email: email, // 从登录状态获取或后端处理
+            content: (at.fa != "-1" ? `**@${at.name}** ` : "") + commentContent,
             fa: at.fa,
         };
-        
+
         const res = await postComment(d_id, c_id, commentRequest, token);
+        messageApi.destroy();
         if (res.ok) {
             setCommentContent("");
             setAt({ name: "", fa: "-1" });
             fetchComments(); // 刷新评论列表
+            messageApi.success({
+                content: "提交成功",
+            });
+        } else {
+            messageApi.error({
+                content: "提交失败",
+            });
         }
     };
 
@@ -143,6 +162,7 @@ const DocumentContent: FC = () => {
 
     return (
         <>
+            {contextHolder}
             <Spin
                 indicator={<LoadingOutlined spin />}
                 spinning={loading}
@@ -158,7 +178,7 @@ const DocumentContent: FC = () => {
             <div className="flex flex-col gap-4">
                 <Template_Page
                     children={
-                        <div className="markdown-body p-3">
+                        <div className={`${isDark?"markdown-body-dark":"markdown-body"} p-3`}>
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {docContent?.content}
                             </ReactMarkdown>

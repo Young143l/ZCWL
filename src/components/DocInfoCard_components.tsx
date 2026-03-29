@@ -1,13 +1,14 @@
 import type { FC } from "react";
 import type { DocInfo } from "../api/Doc_api";
 import { theme } from "antd";
+import useIsDark from "../status/IsDark_status";
 
 const DocInfoCard_components: FC<DocInfo> = ({ name, summary, img }) => {
     const pColor = theme.useToken().token.colorPrimaryBorder;
-
+    const {isDark}=useIsDark()
     return (
         <div
-            className="bg-white rounded-xl  border overflow-hidden"
+            className={`bg-${isDark?"black":"white"} rounded-xl  border overflow-hidden`}
             style={{
                 borderColor: pColor,
             }}
@@ -32,7 +33,7 @@ const DocInfoCard_components: FC<DocInfo> = ({ name, summary, img }) => {
                         {name}
                     </h3>
 
-                    <p className="text-base text-gray-600 leading-relaxed line-clamp-3">
+                    <p className={`text-base text-${isDark?"gray-50":"gray-600"} leading-relaxed line-clamp-3`}>
                         {summary}
                     </p>
                 </div>

@@ -1,4 +1,5 @@
 import type { Dir } from "../components/FileTree_components";
+import type { CodeSnap } from "../components/ProjectCodeShow_components";
 
 export const getProjectList: (
     uId: string,
@@ -20,8 +21,8 @@ export const getProjectList: (
             },
         );
         if (!res.ok) {
-            const json =await res.json();
-            console.log(json)
+            // const json =await res.json();
+            // // console.log(json)
             throw new Error(`HTTP error! status: ${res.status}`);
         }
         const json: { projects: { projectName: string; id: string }[] } =
@@ -127,7 +128,7 @@ export const getProjectFile: (
             throw new Error(`HTTP error! status: ${fileres.status}`);
         }
         const file = await fileres.text();
-        console.log(file);
+        // console.log(file);
         return { ok: true, file: file };
     } catch (e: unknown) {
         return { ok: false, message: e };
@@ -158,6 +159,70 @@ export const delProject: (
         const json: { id: string } = await res.json();
         if (json.id == id) return { ok: true };
         else throw new Error("delete error!");
+    } catch (e: unknown) {
+        return { ok: false, message: e };
+    }
+};
+
+export const askProject: (
+    id: string,
+    ask: string,
+    codeSnap: { fileName: string; lineStart: number; lineEnd: number }[],
+
+) => Promise<{ ok: true; ans: string } | { ok: false; message: unknown }> = async (
+    id: string,
+    ask: string,
+    codeSnap: CodeSnap[],
+
+) => {
+    try {
+        const res = await fetch(
+            import.meta.env.VITE_MCP_SERVER + `/ask/${id}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    // Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    ask: ask,
+                    codeSnap: codeSnap,
+                }),
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json: { ans: string } = await res.json();
+        return { ok: true, ans: json.ans };
+    } catch (e: unknown) {
+        return { ok: false, message: e };
+    }
+};
+
+
+
+export const getProjectDoc: (
+    id: string,
+) => Promise<
+    | { ok: true; doc: string }
+    | { ok: false; message: unknown }
+> = async (id: string) => {
+    try {
+        const res = await fetch(
+            import.meta.env.VITE_MCP_SERVER + `/doc/${id}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json: { doc: string } = await res.json();
+        return { ok: true, doc: json.doc };
     } catch (e: unknown) {
         return { ok: false, message: e };
     }

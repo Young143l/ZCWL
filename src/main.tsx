@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode} from "react";
 import { createRoot } from "react-dom/client";
 import {
     createBrowserRouter,
@@ -20,6 +20,11 @@ import Code from "./pages/Code/Code.tsx";
 import CodeCP from "./pages/Code/CodeCP.tsx";
 import Project from "./pages/Project/Project.tsx";
 import Signin from "./pages/Signin.tsx";
+import User from "./pages/User.tsx";
+import { loader } from "@monaco-editor/react";
+import * as monaco from "monaco-editor";
+
+
 const router = createBrowserRouter([
     {
         element: (
@@ -58,12 +63,16 @@ const router = createBrowserRouter([
                 element: <CodeSF />,
             },
             {
-                path:"/code/cp/:cp_id",
-                element:<CodeCP/>
+                path: "/code/cp/:cp_id",
+                element: <CodeCP />,
             },
             {
                 path: "/code",
-                element: <Code/>,
+                element: <Code />,
+            },
+            {
+                path: "/user",
+                element: <User />,
             },
             {
                 path: "*",
@@ -76,10 +85,15 @@ const router = createBrowserRouter([
         element: <Login />,
     },
     {
-        path:"/signin",
-        element:<Signin/>
-    }
+        path: "/signin",
+        element: <Signin />,
+    },
 ]);
+
+loader.config({
+    monaco,
+});
+
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
@@ -91,7 +105,7 @@ createRoot(document.getElementById("root")!).render(
                 },
             }}
         >
-            <RouterProvider router={router} />
+                <RouterProvider router={router} />
         </ConfigProvider>
     </StrictMode>,
 );

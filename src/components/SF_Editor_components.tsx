@@ -15,6 +15,7 @@ import { delCodeSF } from "../api/Code_api";
 import useLogin from "../status/Login_status";
 import { useNavigate } from "react-router-dom";
 import useAIChatDoc from "../status/AIChatDoc_status";
+import useIsDark from "../status/IsDark_status";
 
 type Methods =
     | "log"
@@ -82,7 +83,7 @@ const SF_Editor_components: FC<{
     ];
     const nav = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
-
+    const { isDark } = useIsDark();
     const editorRef = useRef<Parameters<OnMount>[1]>(null);
 
     const handleEditorWillMount = (monaco: Monaco) => {
@@ -200,13 +201,20 @@ const SF_Editor_components: FC<{
                         footer={null}
                     >
                         <div
-                            className="w-full h-80 border-2 overflow-auto rounded-2xl bg-gray-50"
+                            className={`w-full h-80 border-2 overflow-auto rounded-2xl bg-${isDark ? "gray-800" : "gray-50"}`}
                             style={{
                                 borderColor: pColor,
                             }}
                         >
-                            <div className="flex justify-between items-center p-2 bg-white border-b border-gray-200 rounded-t-2xl">
-                                <span className="text-sm font-medium text-gray-700">
+                            <div
+                                className={`flex justify-between items-center p-2 bg-${isDark ? "black" : "white"} border-b rounded-t-2xl`}
+                                style={{
+                                    borderColor: pColor,
+                                }}
+                            >
+                                <span
+                                    className={`text-sm font-medium text-${isDark ? "gray-50" : "gray-700"}`}
+                                >
                                     可显示部分控制台输出
                                 </span>
                                 <Button
@@ -270,7 +278,7 @@ const SF_Editor_components: FC<{
                 >
                     <Editor
                         height="100%"
-                        theme="github-light"
+                        theme={isDark ? "vs-dark" : "github-light"}
                         beforeMount={handleEditorWillMount}
                         language={cur}
                         onMount={handleEditorMount}
@@ -294,6 +302,7 @@ const SF_Editor_components: FC<{
                                 }));
                                 setIsSelect(false);
                             }
+                            // console.log(editorRef.current.getPosition())
                         }}
                     />
                 </div>

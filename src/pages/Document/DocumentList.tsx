@@ -9,7 +9,8 @@ const DocumentList = () => {
     const [docList, setDocList] = useState<DocInfo[]>([]);
     const [nowDocList, setNowDocList] = useState<DocInfo[]>([]);
     const [load, setLoad] = useState<boolean>(true);
-    const pColor = theme.useToken().token.colorPrimaryBorder;
+    const mpColor = theme.useToken().token.colorPrimary;
+
     useEffect(() => {
         getDocList().then((res) => {
             if (res.ok) {
@@ -49,7 +50,7 @@ const DocumentList = () => {
                     <h1
                         className={`text-xl border-l-4 pl-1 `}
                         style={{
-                            borderColor: pColor,
+                            borderColor: mpColor,
                         }}
                     >
                         学习文档

@@ -1,13 +1,46 @@
-import { useMemo, type FC } from "react";
+import { useMemo, useRef, useState, type FC } from "react";
 import github from "../../public/GitHub Light.json";
-import { Editor, type Monaco } from "@monaco-editor/react";
-import { Button, Empty, theme, Spin } from "antd";
-import { CloseOutlined, LoadingOutlined } from "@ant-design/icons";
+import { Editor, type Monaco, type OnMount } from "@monaco-editor/react";
+import {
+    Button,
+    Empty,
+    theme,
+    Spin,
+    Splitter,
+    Input,
+    message,
+    Tag,
+    Divider,
+} from "antd";
+import {
+    AppstoreOutlined,
+    ClearOutlined,
+    CloseOutlined,
+    DeleteOutlined,
+    LoadingOutlined,
+    PlusOutlined,
+    SendOutlined,
+} from "@ant-design/icons";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+// import "github-markdown-css/github-markdown-light.css"
+// import "github-markdown-css/github-markdown.css";
+
+import { askProject } from "../api/Project_api";
+import ProjectDocument_components from "./ProjectDocument_components";
+import useIsDark from "../status/IsDark_status";
 export interface PCSProps {
     filePath: string | "NOFILE";
     setFilePath: React.Dispatch<React.SetStateAction<string>>;
     code: string;
     loading?: boolean;
+    pName: string;
+}
+
+export interface CodeSnap {
+    fileName: string;
+    lineStart: number;
+    lineEnd: number;
 }
 
 const ProjectCodeShow_components: FC<PCSProps> = ({
@@ -15,6 +48,7 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
     code,
     setFilePath,
     loading = false,
+    pName,
 }) => {
     const handleEditorWillMount = (monaco: Monaco) => {
         monaco.editor.defineTheme("github-light", github);
@@ -61,64 +95,293 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
         };
         return typeMap[ext] || "";
     }, [filePath]);
+    const [currentAsk, setCurrentAsk] = useState<string>("");
+    const [askOver, setAskOver] = useState<boolean>(true);
+    const [ans, setAns] = useState<string>("");
+    const [inputValue, setInputValue] = useState<string>("");
+    const [messageApi, contextHolder] = message.useMessage();
+    const editorRef = useRef<Parameters<OnMount>[1]>(null);
+    const [codeSnap, setCodeSnap] = useState<CodeSnap[]>([]);
+    const { isDark } = useIsDark();
+    const handleEditorMount: OnMount = (editor) => {
+        editorRef.current = editor;
+    };
 
-    // console.log(fileType)
+    const handleAsk = async () => {
+        setAskOver(false);
+        setCurrentAsk(inputValue);
+        console.log(codeSnap);
+        const res = await askProject(pName, currentAsk, codeSnap);
+        if (res.ok) {
+            setAns(res.ans);
+            setAskOver(true);
+            setInputValue("");
+            setCodeSnap([]);
+        } else {
+            messageApi.error({
+                content: "未知错误",
+            });
+        }
+    };
+    const getSelectedContent = () => {
+        const editor = editorRef.current;
+        // if (!editor) return;
+
+        const selection = editor.getSelection();
+
+        if (selection.isEmpty()) {
+            messageApi.error("请选中部分代码");
+            return;
+        } else {
+            messageApi.success("添加成功");
+            setCodeSnap((prev) => [
+                ...prev,
+                {
+                    fileName: filePath,
+                    lineStart: selection.startLineNumber,
+                    lineEnd: selection.endLineNumber,
+                },
+            ]);
+            console.log(selection);
+        }
+    };
+
     return (
         <div className="p-1 h-full">
+            {contextHolder}
             <div
                 className=" border-2 rounded-2xl p-1 overflow-hidden h-full"
                 style={{
                     borderColor: pColor,
                 }}
             >
-                {filePath != "NOFILE" ? (
-                    <>
-                        <div className="flex h-8 items-center justify-between bg-gray-100 rounded-t-lg p-5">
-                            <span className="ml-2 text-sm font-mono truncate ">
-                                {filePath}
-                            </span>
-                            <Button
-                                color="primary"
-                                icon={<CloseOutlined />}
-                                variant="text"
-                                onClick={() => {
-                                    setFilePath("NOFILE");
-                                }}
-                            />
-                        </div>
+                <Splitter>
+                    <Splitter.Panel defaultSize="60%" min="40%" max="100%">
+                        {filePath != "NOFILE" ? (
+                            <>
+                                <div className={`flex h-8 items-center justify-between ${isDark ? 'bg-gray-700' : 'bg-gray-100'} rounded-t-lg p-5 mr-1 outline-1 ${isDark ? 'outline-gray-700' : 'outline-gray-100'} outline-2`}>
+                                    <span className={`ml-2 text-sm font-mono truncate ${isDark ? 'text-gray-200' : ''}`}>
+                                        {filePath}
+                                    </span>
+                                    <div>
+                                        <Button
+                                            color="primary"
+                                            icon={<PlusOutlined />}
+                                            variant="text"
+                                            onClick={() => {
+                                                getSelectedContent();
+                                            }}
+                                        />
+                                        <Button
+                                            color="primary"
+                                            icon={<CloseOutlined />}
+                                            variant="text"
+                                            onClick={() => {
+                                                setFilePath("NOFILE");
+                                            }}
+                                        />
+                                    </div>
+                                </div>
 
-                        <div className="relative h-full">
-                            {loading && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-                                    <Spin
-                                        indicator={<LoadingOutlined spin />}
-                                        size="large"
+                                <div className={`relative h-[calc(100%-42px)] mr-1 ${isDark ? 'outline-gray-700' : 'outline-gray-100'} rounded-b-lg overflow-auto outline-2`}>
+                                    {loading && (
+                                        <div className={`absolute inset-0 flex items-center justify-center bg-${isDark?"black":"white"}/80 z-10`}>
+                                            <Spin
+                                                indicator={
+                                                    <LoadingOutlined spin />
+                                                }
+                                                size="large"
+                                            />
+                                        </div>
+                                    )}
+                                    <Editor
+                                        height="100%"
+                                        theme={
+                                            isDark ? "vs-dark" : "github-light"
+                                        }
+                                        beforeMount={handleEditorWillMount}
+                                        onMount={handleEditorMount}
+                                        language={fileType}
+                                        options={{
+                                            readOnly: true,
+                                            minimap: { enabled: false },
+                                            fixedOverflowWidgets: true,
+                                            fontSize: 14,
+                                            scrollBeyondLastLine: false,
+                                            renderLineHighlight: "all",
+                                            wordWrap: "on",
+                                        }}
+                                        value={code}
                                     />
                                 </div>
-                            )}
-                            <Editor
-                                height="100%"
-                                theme="github-light"
-                                beforeMount={handleEditorWillMount}
-                                language={fileType}
-                                options={{
-                                    readOnly: true,
-                                    minimap: { enabled: false },
-                                    fixedOverflowWidgets: true,
-                                    fontSize: 14,
-                                    scrollBeyondLastLine: false,
-                                    renderLineHighlight: "all",
-                                    wordWrap: "on",
-                                }}
-                                value={code}
-                            />
+                            </>
+                        ) : (
+                            <div className="h-full w-full flex justify-center items-center">
+                                <Empty
+                                    description={<div>请选择一个文件</div>}
+                                />
+                            </div>
+                        )}
+                    </Splitter.Panel>
+                    <Splitter.Panel
+                        collapsible={{
+                            start: true,
+                            end: true,
+                        }}
+                    >
+                        <div className={`rounded-lg overflow-auto  h-full border-2 border-${isDark?"gray-700":"gray-100"} ml-1 flex flex-col justify-between p-2 gap-2`}>
+                            <div className="flex-1 overflow-auto">
+                                {currentAsk != "" ? (
+                                    <div className="p-1">
+                                        <div className="w-full flex justify-end mb-2 pl-4 ">
+                                            <div className="rounded-xl rounded-br-none border-2 border-gray-300 overflow-hidden p-2">
+                                                <div
+                                                    className={`${isDark ? "markdown-body-dark" : "markdown-body"}`}
+                                                >
+                                                    <ReactMarkdown
+                                                        remarkPlugins={[
+                                                            remarkGfm,
+                                                        ]}
+                                                    >
+                                                        {currentAsk}
+                                                    </ReactMarkdown>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="w-full flex justify-start mb-2 pr-4">
+                                            <div className="rounded-xl rounded-bl-none border-2 border-gray-300 overflow-hidden p-2">
+                                                {askOver ? (
+                                                    <div
+                                                        className={`${isDark ? "markdown-body-dark" : "markdown-body"}`}
+                                                    >
+                                                        <ReactMarkdown
+                                                            remarkPlugins={[
+                                                                remarkGfm,
+                                                            ]}
+                                                        >
+                                                            {ans}
+                                                        </ReactMarkdown>
+                                                    </div>
+                                                ) : (
+                                                    <Spin />
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="w-full h-full flex justify-center items-center">
+                                        <span className="font-medium text-gray-400">
+                                            输入问题询问项目相关内容吧！
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                            <Divider size="small" />
+
+                            <div>
+                                {codeSnap.length ? (
+                                    <div className="flex flex-wrap gap-0.5">
+                                        {codeSnap.map((i: CodeSnap) => (
+                                            <Tag
+                                                closeIcon
+                                                key={
+                                                    i.fileName +
+                                                    ":" +
+                                                    i.lineStart +
+                                                    "-" +
+                                                    i.lineEnd
+                                                }
+                                                icon={<AppstoreOutlined />}
+                                                onClose={(e) => {
+                                                    e.preventDefault();
+                                                    setCodeSnap(
+                                                        (prevStatus) => {
+                                                            return prevStatus.filter(
+                                                                (j) => {
+                                                                    return (
+                                                                        j !== i
+                                                                    );
+                                                                },
+                                                            );
+                                                        },
+                                                    );
+                                                }}
+                                            >
+                                                {i.fileName +
+                                                    ":" +
+                                                    i.lineStart +
+                                                    "-" +
+                                                    i.lineEnd}
+                                            </Tag>
+                                        ))}
+                                        <Tag
+                                            onClick={() => {
+                                                setCodeSnap([]);
+                                            }}
+                                            className="cursor-pointer"
+                                        >
+                                            <DeleteOutlined />
+                                        </Tag>
+                                    </div>
+                                ) : (
+                                    // <div className="flex justify-start gap-0.5">
+                                    //     <Tag
+                                    //         onClick={() => {
+                                    //             setIsSelect(!isSelect);
+                                    //         }}
+                                    //         className="cursor-pointer"
+                                    //     >
+                                    //         <PlusOutlined />
+                                    //     </Tag>
+                                    //     <div
+                                    //         className="
+                                    //             overflow-hidden text-ellipsis whitespace-nowrap text-gray-400"
+                                    //     >
+                                    //         此处添加需更改组件
+                                    //     </div>
+                                    // </div>
+                                    <></>
+                                )}
+                            </div>
+
+                            <div>
+                                <Input.TextArea
+                                    rows={3}
+                                    value={inputValue}
+                                    onChange={(e) =>
+                                        setInputValue(e.target.value)
+                                    }
+                                    placeholder="请输入关于项目的问题"
+                                    maxLength={2000}
+                                />
+                                <div className="w-full pt-1 flex justify-between mt-1">
+                                    <ProjectDocument_components pName={pName} />
+                                    <div className="flex gap-2">
+                                        <Button
+                                            onClick={() => {
+                                                setInputValue("");
+                                            }}
+                                        >
+                                            <ClearOutlined />
+                                            清空
+                                        </Button>
+                                        <Button
+                                            onClick={() => {
+                                                handleAsk();
+                                            }}
+                                            disabled={
+                                                !askOver || inputValue == ""
+                                            }
+                                        >
+                                            <SendOutlined />
+                                            发送
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </>
-                ) : (
-                    <div className="h-full w-full flex justify-center items-center">
-                        <Empty description={<div>请选择一个文件</div>} />
-                    </div>
-                )}
+                    </Splitter.Panel>
+                </Splitter>
             </div>
         </div>
     );

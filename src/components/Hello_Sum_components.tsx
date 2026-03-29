@@ -6,6 +6,7 @@ import TimeIcon from "../../public/time.svg?react";
 import WebIcon from "../../public/web.svg?react";
 import FileIcon from "../../public/file.svg?react";
 import { cdn, isCdn } from "../config/cdn";
+import useIsDark from "../status/IsDark_status";
 
 interface HS {
     AllCmd: string;
@@ -35,6 +36,7 @@ const Hello_Sum_components: FC<HS> = ({ AllCmd, title }) => {
         return aWords[Math.floor(Math.random() * 10)];
     }, []);
     const [show, setShow] = useState<boolean>(false);
+    const {isDark}=useIsDark()
     useEffect(() => {
         // 每秒更新一次时间
         const timer = setInterval(() => {
@@ -88,13 +90,13 @@ const Hello_Sum_components: FC<HS> = ({ AllCmd, title }) => {
 
     return (
         <div className="w-full h-[calc(100vh-64px-40px)] mb-8 rounded-xl select-none">
-            <div className="flex flex-col bg-[#F8F8F875] rounded-xl border-4 border-white overflow-hidden h-full backdrop-blur-sm">
-                <div className="bg-white px-4 py-3 flex items-center">
+            <div className={`flex flex-col bg-[${isDark?"1E1E1E75":"#F8F8F875"}] rounded-xl border-4 border-${isDark?"black":"white"} overflow-hidden h-full backdrop-blur-sm`}>
+                <div className={`bg-${isDark?"black":"white"} px-4 py-3 flex items-center`}>
                     <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
                     <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
                     <div className="w-3 h-3 rounded-full bg-green-500"></div>
                 </div>
-                <div className="font-mono text-2xl p-4">
+                <div className={`font-mono text-2xl p-4 ${isDark?"text-white":"text-black"}`}>
                     {`${isLogin ? userName : "Tourists"}@Cfww:~$ ` +
                         cmd +
                         ((cmd.length + (AllCmd.length % 2)) % 2 == 0
@@ -107,7 +109,7 @@ const Hello_Sum_components: FC<HS> = ({ AllCmd, title }) => {
                     <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start w-full max-w-5xl p-2">
                         <div className="w-full md:w-auto flex justify-center md:justify-start shrink-0">
                             <video
-                                className="w-48 h-48 md:w-64 md:h-64 object-cover rounded-xl  border border-white"
+                                className={`w-48 h-48 md:w-64 md:h-64 object-cover rounded-xl  border ${isDark?"border-black":"border-white"}`}
                                 // controls
                                 autoPlay
                                 loop

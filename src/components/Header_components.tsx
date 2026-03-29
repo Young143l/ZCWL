@@ -8,12 +8,16 @@ import {
     FolderOutlined,
     CodeOutlined,
     MenuOutlined,
+    UserOutlined,
+    LoginOutlined,
+    LogoutOutlined,
 } from "@ant-design/icons";
 import useLogin from "../status/Login_status";
 import UserAvatar_components from "./UserAvatar_components";
 type MenuItem = Required<MenuProps>["items"][number];
 import useAIChatDoc from "../status/AIChatDoc_status";
-import { cdn, isCdn} from "../config/cdn";
+import { cdn, isCdn } from "../config/cdn";
+import useIsDark from "../status/IsDark_status";
 const items: MenuItem[] = [
     {
         label: (
@@ -58,6 +62,7 @@ const Header_components: FC = () => {
     const location = useLocation();
     const { isLogin, userName, clearLoginStatus } = useLogin();
     const { clear } = useAIChatDoc();
+    const {isDark}=useIsDark()
     // 计算当前激活的菜单项，而不是使用状态
     const getCurrentKey = (pathname: string): string => {
         if (pathname === "/") {
@@ -69,7 +74,7 @@ const Header_components: FC = () => {
         } else if (pathname.startsWith("/code")) {
             return "code";
         }
-        return "home";
+        return "";
     };
 
     // 直接从当前路径计算当前选中的key
@@ -77,18 +82,22 @@ const Header_components: FC = () => {
     const unLoginContent = (
         <div className="flex justify-center items-center">
             <Link to={"/login"}>
-                <Button>登录</Button>
+                <Button icon={<LoginOutlined />}>登录</Button>
             </Link>
         </div>
     );
 
     const LoginContent = (
-        <div className="flex justify-center items-center">
+        <div className="flex justify-center gap-2 items-center">
+            <Link to={"/user"}>
+                <Button icon={<UserOutlined />}>我的</Button>
+            </Link>
             <Button
                 onClick={() => {
                     clearLoginStatus();
                     clear();
                 }}
+                icon={<LogoutOutlined />}
             >
                 登出
             </Button>
@@ -119,7 +128,7 @@ const Header_components: FC = () => {
                 {/* Logo */}
                 <Link to={"/"}>
                     <img
-                        src={(isCdn?cdn:"/public/")+"logo.svg"}
+                        src={(isCdn ? cdn : "/public/") + (isDark?"logodark.svg":"logo.svg")}
                         alt="Logo"
                         className="h-8 w-24 object-contain"
                     />
@@ -176,13 +185,21 @@ const Header_components: FC = () => {
                                 <p className="text-xl text-center text-black">
                                     {userName}
                                 </p>
-                                <Button
-                                    onClick={() => {
-                                        clearLoginStatus();
-                                    }}
-                                >
-                                    登出
-                                </Button>
+                                <div className="flex justify-center gap-2">
+                                    <Link to={"/user"}>
+                                        <Button icon={<UserOutlined />}>
+                                            我的
+                                        </Button>
+                                    </Link>
+                                    <Button
+                                        onClick={() => {
+                                            clearLoginStatus();
+                                        }}
+                                        icon={<LogoutOutlined />}
+                                    >
+                                        登出
+                                    </Button>
+                                </div>
                             </>
                         ) : (
                             <Link to={"/login"}>
@@ -190,6 +207,7 @@ const Header_components: FC = () => {
                                     onClick={() => {
                                         clearLoginStatus();
                                     }}
+                                    icon={<LoginOutlined />}
                                 >
                                     登录
                                 </Button>

@@ -4,7 +4,9 @@ import { UserOutlined } from "@ant-design/icons";
 import { Md5 } from "ts-md5";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import "github-markdown-css/github-markdown.css";
+import useIsDark from "../status/IsDark_status";
+// import "github-markdown-css/github-markdown-light.css"
+// import "github-markdown-css/github-markdown.css";
 
 export interface Comment {
     id: string;
@@ -33,7 +35,7 @@ export interface CommentProps {
 
 const DocComment_compents: FC<CommentProps> = ({ comment, setAt }) => {
     const pColor = theme.useToken().token.colorPrimaryBorder;
-
+    const { isDark } = useIsDark();
     return (
         <>
             <div className="flex gap-2 items-start">
@@ -65,7 +67,9 @@ const DocComment_compents: FC<CommentProps> = ({ comment, setAt }) => {
                         </Button>
                     </div>
                     {/* <div className="text-xl break-all text-gray-800"> */}
-                    <div className="markdown-body  break-all">
+                    <div
+                        className={`${isDark ? "markdown-body-dark" : "markdown-body"}  break-all`}
+                    >
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {comment.content}
                         </ReactMarkdown>
@@ -106,7 +110,9 @@ const DocComment_compents: FC<CommentProps> = ({ comment, setAt }) => {
                                                 </Button>
                                             </div>
                                             {/* <div className="text-xl break-all text-gray-800"> */}
-                                            <div className="markdown-body   break-all">
+                                            <div
+                                                className={`${isDark ? "markdown-body-dark" : "markdown-body"}   break-all`}
+                                            >
                                                 <ReactMarkdown
                                                     remarkPlugins={[remarkGfm]}
                                                 >
