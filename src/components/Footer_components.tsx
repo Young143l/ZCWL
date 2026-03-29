@@ -5,7 +5,7 @@ import useIsDark from "../status/IsDark_status";
 const Footer_components: FC = () => {
     const {isDark}=useIsDark();
     return (
-        <div className="flex justify-center">
+        <div className="flex justify-center items-center">
             <img
                     src={(isCdn?cdn:"/public/")+(isDark?"logodark.svg":"logo.svg")}
                     alt="Logo"

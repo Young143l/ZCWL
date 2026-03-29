@@ -7,9 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preinstall": "npx only-allow pnpm"
+  },
+  "engines": {
+    "pnpm": ">=8"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.1.1",
     "@monaco-editor/react": "^4.7.0",
     "@svgr/core": "^8.1.0",
     "@tailwindcss/vite": "^4.1.18",

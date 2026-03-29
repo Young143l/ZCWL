@@ -135,6 +135,7 @@ const FileTree_components: FC<FTProps> = ({ dir, onSelect, name, id }) => {
                             onSelect={onSelect}
                             height={dirHeight - 12}
                             treeData={tree as TreeDataNode[]}
+                            className="bg-[#00000000]!"
                         />
                     </div>
                 </div>

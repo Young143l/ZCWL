@@ -12,10 +12,13 @@ const Chaper_componenents: FC<Chapter> = ({ id, name }) => {
     const nav = useNavigate();
     const location = useLocation();
     const pColor = theme.useToken().token.colorPrimaryBorder;
-    const {isDark}=useIsDark()
+    const { isDark } = useIsDark();
     return (
         <div className="w-full">
-            <div className={`px-6 py-4 flex items-center justify-between gap-4 hover:bg-${isDark?"gray-300":"gray-50"} rounded-lg transition-colors duration-200`}>
+            <div
+                className={`px-6 py-4 flex items-center justify-between gap-4 rounded-lg transition-colors duration-200`}
+                // hover:bg-${isDark ? "gray-300" : "gray-50"} 
+            >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span
                         className="text-lg font-bold whitespace-nowrap"
@@ -25,7 +28,9 @@ const Chaper_componenents: FC<Chapter> = ({ id, name }) => {
                     >
                         #{id}
                     </span>
-                    <span className={`text-${isDark?"gray-50":"gray-700"} text-base font-medium truncate`}>
+                    <span
+                        className={`text-${isDark ? "gray-50" : "gray-700"} text-base font-medium truncate`}
+                    >
                         {name}
                     </span>
                 </div>

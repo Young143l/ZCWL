@@ -15,7 +15,7 @@ const DocDirectorySkeleton: FC = () => {
         <div className="space-y-4">
             {/* 文档信息卡片骨架 */}
             <div
-                className={`bg-${isDark ? "black" : "white"} rounded-xl border border-${isDark?"gray-700":"gray-200"} overflow-hidden p-5`}
+                className={`bg-${isDark ? "black" : "white"} rounded-xl border ${isDark?"border-gray-700":"border-gray-200"} overflow-hidden p-5`}
             >
                 <div className="flex gap-4 h-full">
                     {/* 图片骨架 */}
@@ -40,7 +40,7 @@ const DocDirectorySkeleton: FC = () => {
             </div>
             {/* 章节列表骨架 */}
             <div
-                className={`bg-${isDark ? "black" : "white"} rounded-xl border border-${isDark?"gray-700":"gray-200"} overflow-hidden`}
+                className={`bg-${isDark ? "black" : "white"} rounded-xl border ${isDark?"border-gray-700":"border-gray-200"} overflow-hidden`}
             >
                 {[1, 2, 3, 4, 5].map((i) => (
                     <div

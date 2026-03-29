@@ -33,6 +33,7 @@ const User: FC = () => {
         }
     }, [nav, isLogin, userName, avatar, email]);
 
+    const [infoForm] = Form.useForm();
     const handleChangeInfo = async () => {
         if (newEMail === "" && newName === "") {
             messageApi.warning({
@@ -63,6 +64,7 @@ const User: FC = () => {
                 `https://cravatar.cn/avatar/${Md5.hashStr(res.data?.email as string)}`,
                 res.data?.email as string,
             );
+            infoForm.resetFields();
         } else {
             messageApi.error({
                 content: "修改失败",
@@ -170,10 +172,11 @@ const User: FC = () => {
                             onFinish={() => {
                                 handleChangeInfo();
                             }}
+                            form={infoForm}
                         >
                             <Form.Item
                                 label="邮箱："
-                                // name="eMail"
+                                name="eMail"
                                 rules={[
                                     {
                                         max: 20,
@@ -192,13 +195,12 @@ const User: FC = () => {
                                     value={newEMail}
                                     onChange={(e) => {
                                         setNewEMail(e.target.value);
-
                                     }}
                                 ></Input>
                             </Form.Item>
                             <Form.Item
                                 label="昵称："
-                                // name="Name"
+                                name="Name"
                                 rules={[
                                     {
                                         min: 6,

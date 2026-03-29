@@ -171,6 +171,7 @@ const SF_Editor_components: FC<{
                             mode="horizontal"
                             items={items}
                             selectedKeys={[cur]}
+                            className="bg-[#00000000]!"
                         />
                     </div>
                     <Popconfirm

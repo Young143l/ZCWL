@@ -229,7 +229,7 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
                             end: true,
                         }}
                     >
-                        <div className={`rounded-lg overflow-auto  h-full border-2 border-${isDark?"gray-700":"gray-100"} ml-1 flex flex-col justify-between p-2 gap-2`}>
+                        <div className={`rounded-lg overflow-auto  h-full border-2 ${isDark?"border-gray-700":"border-gray-100"} ml-1 flex flex-col justify-between p-2 gap-2`}>
                             <div className="flex-1 overflow-auto">
                                 {currentAsk != "" ? (
                                     <div className="p-1">

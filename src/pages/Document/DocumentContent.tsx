@@ -178,7 +178,9 @@ const DocumentContent: FC = () => {
             <div className="flex flex-col gap-4">
                 <Template_Page
                     children={
-                        <div className={`${isDark?"markdown-body-dark":"markdown-body"} p-3`}>
+                        <div
+                            className={`${isDark ? "markdown-body-dark" : "markdown-body"} p-3`}
+                        >
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {docContent?.content}
                             </ReactMarkdown>
@@ -240,7 +242,10 @@ const DocumentContent: FC = () => {
                                         <></>
                                     )}
                                 </div>
-                                <Button onClick={handleSubmitComment}>
+                                <Button
+                                    onClick={handleSubmitComment}
+                                    disabled={commentContent === ""}
+                                >
                                     <SendOutlined />
                                     发送
                                 </Button>

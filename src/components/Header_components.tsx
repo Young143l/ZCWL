@@ -62,7 +62,7 @@ const Header_components: FC = () => {
     const location = useLocation();
     const { isLogin, userName, clearLoginStatus } = useLogin();
     const { clear } = useAIChatDoc();
-    const {isDark}=useIsDark()
+    const { isDark } = useIsDark();
     // 计算当前激活的菜单项，而不是使用状态
     const getCurrentKey = (pathname: string): string => {
         if (pathname === "/") {
@@ -128,7 +128,10 @@ const Header_components: FC = () => {
                 {/* Logo */}
                 <Link to={"/"}>
                     <img
-                        src={(isCdn ? cdn : "/public/") + (isDark?"logodark.svg":"logo.svg")}
+                        src={
+                            (isCdn ? cdn : "/public/") +
+                            (isDark ? "logodark.svg" : "logo.svg")
+                        }
                         alt="Logo"
                         className="h-8 w-24 object-contain"
                     />
@@ -142,32 +145,37 @@ const Header_components: FC = () => {
                         selectedKeys={[current]}
                         mode="horizontal"
                         items={items}
-                        className="flex justify-center"
+                        className="flex justify-center border-0!"
                     />
                 </div>
-                {/* 桌面端登陆状态 */}
-                <div className="hidden md:block">
-                    <Popover
-                        title={
-                            isLogin ? (
-                                <div className="text-center">{userName}</div>
-                            ) : (
-                                <div className="text-center">未登录</div>
-                            )
-                        }
-                        content={isLogin ? LoginContent : unLoginContent}
+                <div className="flex gap-2 items-center">
+                   {/* <div>
+
+                   </div> */}
+                    <div className="hidden md:block">
+                        <Popover
+                            title={
+                                isLogin ? (
+                                    <div className="text-center">
+                                        {userName}
+                                    </div>
+                                ) : (
+                                    <div className="text-center">未登录</div>
+                                )
+                            }
+                            content={isLogin ? LoginContent : unLoginContent}
+                        >
+                            <div>
+                                <UserAvatar_components size={"large"} />
+                            </div>
+                        </Popover>
+                    </div>
+                    <div
+                        className={`block md:hidden text-xl ${isDark ? "text-white" : "text-black"}`}
+                        onClick={toggleMobileMenu}
                     >
-                        <div>
-                            <UserAvatar_components size={"large"} />
-                        </div>
-                    </Popover>
-                </div>
-                {/* 手机端开抽屉关 */}
-                <div
-                    className="block md:hidden text-xl text-black"
-                    onClick={toggleMobileMenu}
-                >
-                    <MenuOutlined />
+                        <MenuOutlined />
+                    </div>
                 </div>
                 {/* 抽屉 */}
                 <Drawer
@@ -187,7 +195,10 @@ const Header_components: FC = () => {
                                 </p>
                                 <div className="flex justify-center gap-2">
                                     <Link to={"/user"}>
-                                        <Button icon={<UserOutlined />}>
+                                        <Button
+                                            icon={<UserOutlined />}
+                                            onClick={closeMobileMenu}
+                                        >
                                             我的
                                         </Button>
                                     </Link>
