@@ -12,3 +12,43 @@
     border-top-color: #13c2c2;
     border-left-color: #13c2c2;
 }
+
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: #333;
+}
+
+html.dark-mode ::-webkit-scrollbar-track {
+    background: #2d2d2d;
+}
+
+html.dark-mode ::-webkit-scrollbar-thumb {
+    background: #666;
+}
+
+html.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+
+html.dark-mode ::-webkit-scrollbar-thumb:active {
+    background: #aaa;
+}

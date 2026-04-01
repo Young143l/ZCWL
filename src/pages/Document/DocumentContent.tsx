@@ -234,7 +234,6 @@ const DocumentContent: FC = () => {
                                                 setAt({ name: "", fa: "-1" });
                                             }}
                                             variant="filled"
-                                            color="#108ee9"
                                         >
                                             {"@" + at.name}
                                         </Tag>

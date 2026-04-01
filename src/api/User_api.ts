@@ -1,8 +1,14 @@
 import { Md5 } from "ts-md5";
+
 interface LoginResponse {
     userName: string;
     userId: string;
     token: string;
+    email: string;
+}
+
+interface GetUserInfoResponse {
+    name: string;
     email: string;
 }
 
@@ -172,6 +178,42 @@ export const updatePassword = async (
         return { success: true };
     } catch (error: unknown) {
         console.error("Update password error:", error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        return { success: false, message: errorMessage };
+    }
+};
+
+/**
+ * 获取用户信息
+ * @param userId - 用户ID
+ * @param token - 认证令牌
+ * @returns 包含用户信息的Promise
+ */
+export const getUserInfo = async (
+    userId: string,
+    token: string
+): Promise<{ success: boolean; data?: GetUserInfoResponse; message?: string }> => {
+    try {
+        const res: Response = await fetch(
+            `${import.meta.env.VITE_BACK_END}/users/${userId}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+            }
+        );
+
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || `HTTP error! status: ${res.status}`);
+        }
+
+        const json: GetUserInfoResponse = await res.json();
+        return { success: true, data: json };
+    } catch (error: unknown) {
+        console.error("Get user info error:", error);
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return { success: false, message: errorMessage };
     }

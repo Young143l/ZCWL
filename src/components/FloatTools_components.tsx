@@ -2,23 +2,27 @@ import { FloatButton, Modal } from "antd";
 import {
     ArrowUpOutlined,
     SyncOutlined,
-    HomeOutlined,
+    // HomeOutlined,
     SunOutlined,
     MoonOutlined,
+    QuestionCircleOutlined,
 } from "@ant-design/icons";
 import Icon from "@ant-design/icons";
 import { type FC } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+// import { useNavigate, useLocation } from "react-router-dom";
 import AIChatDoc_components from "./AIChatDoc_components.tsx";
 import QwenIcon from "../../public/qwen.svg?react";
 import useAIChatDoc from "../status/AIChatDoc_status.ts";
 import useIsDark from "../status/IsDark_status.ts";
+import Help_components from "./Help_components.tsx";
+import useHelp from "../status/Help_status.ts";
 
 const FloatTools_components: FC = () => {
-    const location = useLocation();
+    // const location = useLocation();
     const { isAIChatOpen, setIsAIChatOpen } = useAIChatDoc();
-    const nav = useNavigate();
+    // const nav = useNavigate();
     const { isDark, toggleDark } = useIsDark();
+    const { setIsOpen } = useHelp();
     return (
         <>
             <Modal
@@ -40,20 +44,26 @@ const FloatTools_components: FC = () => {
                     icon={<Icon component={QwenIcon} />}
                     onClick={() => setIsAIChatOpen(true)}
                 />
-                {location.pathname === "/" ? (
+                {/* {location.pathname === "/" ? (
                     <></>
                 ) : (
                     <FloatButton
                         icon={<HomeOutlined />}
                         onClick={() => nav("/")}
                     />
-                )}
-
+                )} */}
                 <FloatButton.BackTop icon={<ArrowUpOutlined />} />
                 <FloatButton
                     icon={<SyncOutlined />}
                     onClick={() => {
                         window.location.reload();
+                    }}
+                />
+                <Help_components />
+                <FloatButton
+                    icon={<QuestionCircleOutlined />}
+                    onClick={() => {
+                        setIsOpen(true);
                     }}
                 />
             </FloatButton.Group>

@@ -1,10 +1,12 @@
-import type { FC } from "react";
+import { useCallback, useEffect, useState, type FC } from "react";
 import { Avatar, Button, Divider, theme } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { Md5 } from "ts-md5";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import useIsDark from "../status/IsDark_status";
+import { getUserInfo } from "../api/User_api";
+import useLogin from "../status/Login_status";
 // import "github-markdown-css/github-markdown-light.css"
 // import "github-markdown-css/github-markdown.css";
 
@@ -36,6 +38,39 @@ export interface CommentProps {
 const DocComment_compents: FC<CommentProps> = ({ comment, setAt }) => {
     const pColor = theme.useToken().token.colorPrimaryBorder;
     const { isDark } = useIsDark();
+    const { token } = useLogin();
+    const getUserName = useCallback(
+        async (uId: string) => {
+            const res = await getUserInfo(uId, token);
+            if (res.success) {
+                return res.data?.name as string;
+            }
+            return uId;
+        },
+        [token],
+    );
+
+    const [userNameMap, setUserNameMap] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        const fetchUserNames = async () => {
+            const userNames: Record<string, string> = {};
+
+            const mainUserName = await getUserName(comment.uId);
+            userNames[comment.uId] = mainUserName;
+
+            const childPromises = comment.children.map(async (child) => {
+                const name = await getUserName(child.uId);
+                userNames[child.uId] = name;
+            });
+
+            await Promise.all(childPromises);
+            setUserNameMap(userNames);
+        };
+
+        fetchUserNames();
+    }, [comment.uId, comment.children, getUserName]);
+
     return (
         <>
             <div className="flex gap-2 items-start">
@@ -54,13 +89,16 @@ const DocComment_compents: FC<CommentProps> = ({ comment, setAt }) => {
                             }}
                             className="  font-bold text-xl"
                         >
-                            {comment.uId}
+                            {userNameMap[comment.uId]}
                         </span>
                         <Button
                             color="primary"
                             variant="text"
                             onClick={() => {
-                                setAt({ name: comment.uId, fa: comment.id });
+                                setAt({
+                                    name: userNameMap[comment.uId],
+                                    fa: comment.id,
+                                });
                             }}
                         >
                             回复
@@ -94,14 +132,16 @@ const DocComment_compents: FC<CommentProps> = ({ comment, setAt }) => {
                                                     }}
                                                     className="  font-bold text-xl"
                                                 >
-                                                    {i.uId}
+                                                    {userNameMap[i.uId]}
                                                 </span>
                                                 <Button
                                                     color="primary"
                                                     variant="text"
                                                     onClick={() => {
                                                         setAt({
-                                                            name: i.uId,
+                                                            name: userNameMap[
+                                                                i.uId
+                                                            ],
                                                             fa: comment.id,
                                                         });
                                                     }}

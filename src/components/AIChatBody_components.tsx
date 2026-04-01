@@ -32,7 +32,7 @@ const AIChatBody_components: FC<AIChatBody> = ({ ask, ans, over }) => {
                 <div>
                     <Avatar
                         size={32}
-                        src={(isCdn ? cdn : "../../public/") + "qwen.svg"}
+                        src={(isCdn ? cdn : "../../public/") + "AIChat.jpg"}
                     />
                 </div>
                 <div className="border border-gray-300 rounded-xl p-2 whitespace-normal max-w-5/6">

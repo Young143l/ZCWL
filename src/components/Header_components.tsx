@@ -18,6 +18,7 @@ type MenuItem = Required<MenuProps>["items"][number];
 import useAIChatDoc from "../status/AIChatDoc_status";
 import { cdn, isCdn } from "../config/cdn";
 import useIsDark from "../status/IsDark_status";
+import NotificationButton_components from "./Notification_components";
 const items: MenuItem[] = [
     {
         label: (
@@ -148,10 +149,11 @@ const Header_components: FC = () => {
                         className="flex justify-center border-0!"
                     />
                 </div>
-                <div className="flex gap-2 items-center">
-                   {/* <div>
+                <div className="flex gap-4 items-center">
+                    {/* <div>
 
                    </div> */}
+                    <NotificationButton_components />
                     <div className="hidden md:block">
                         <Popover
                             title={

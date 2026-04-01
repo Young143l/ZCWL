@@ -20,6 +20,7 @@ import { getNewChat, getAsk } from "../api/AIChatDoc_api";
 import useLogin from "../status/Login_status";
 import { useNavigate } from "react-router-dom";
 import { flushSync } from "react-dom";
+import useIsDark from "../status/IsDark_status";
 
 const AIChatDoc_components: FC = () => {
     const [inputValue, setInputValue] = useState<string>("");
@@ -31,7 +32,7 @@ const AIChatDoc_components: FC = () => {
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const [messageApi, contextHolder] = message.useMessage();
     const pColor = theme.useToken().token.colorPrimaryBorder;
-
+    const {isDark} =useIsDark()
     const scrollToBottom = () => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop =
@@ -172,7 +173,7 @@ const AIChatDoc_components: FC = () => {
                     {code ? (
                         <Popover
                             content={
-                                <div className="w-60 h-60 bg-gray-100 rounded-xl p-2 flex justify-center whitespace-pre-wrap break-all overflow-y-scroll">
+                                <div className={`w-60 h-60 ${isDark?"bg-gray-800":"bg-gray-100"} rounded-xl p-2 flex justify-center whitespace-pre-wrap break-all overflow-y-scroll`}>
                                     {code}
                                 </div>
                             }
@@ -183,7 +184,7 @@ const AIChatDoc_components: FC = () => {
                                     setCode(null);
                                 }}
                                 variant="filled"
-                                color={pColor}
+                                // color={pColor}
                             >
                                 Code Snippet
                             </Tag>
