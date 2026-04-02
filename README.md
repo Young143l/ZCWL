@@ -13,14 +13,14 @@
 
 ## 🛠️ 技术栈
 
-| 类别 | 技术 |
-|------|------|
-| Web 框架 | FastAPI + Uvicorn |
-| AI 框架 | LangChain + LangChain-OpenAI |
-| MCP SDK | mcp >= 1.1.2 |
-| 数据验证 | Pydantic v2 |
-| 云存储 | 七牛云 Kodo |
-| LLM | DeepSeek V3.2 (via API) |
+| 类别     | 技术                         |
+| -------- | ---------------------------- |
+| Web 框架 | FastAPI + Uvicorn            |
+| AI 框架  | LangChain + LangChain-OpenAI |
+| MCP SDK  | mcp >= 1.1.2                 |
+| 数据验证 | Pydantic v2                  |
+| 云存储   | 七牛云 Kodo                  |
+| LLM      | DeepSeek V3.2 (via API)      |
 
 ## 📁 项目结构
 
@@ -54,16 +54,22 @@ pip install -r requirements.txt
 
 ### 配置
 
-编辑 `src/config.py` 配置以下信息：
+1. 复制配置模板文件：
+
+```bash
+cp src/config_tample.py src/config.py
+```
+
+2. 编辑 `src/config.py` 配置以下信息：
 
 ```python
-# 七牛云配置
+# 七牛云配置（已预配置）
 ak = "your-qiniu-access-key"
 sk = "your-qiniu-secret-key"
 qiniu_kado_url = "your-bucket.domain.com"
 
-# AI API 配置
-api_key = "your-openai-api-key"
+# AI API 配置（必填）
+api_key = "your-openai-api-key"  # 请填写你的 API Key
 model_name = "deepseek/deepseek-v3.2-251201"
 base_url = "https://api.qnaigc.com/v1"
 
@@ -71,6 +77,8 @@ base_url = "https://api.qnaigc.com/v1"
 host = "0.0.0.0"
 port = 8001
 ```
+
+> ⚠️ **注意**：`src/config.py` 包含敏感信息，已被添加到 `.gitignore` 中，不会被提交到 Git。
 
 ### 启动服务
 
@@ -83,6 +91,7 @@ python run.py --check
 ```
 
 服务启动后访问：
+
 - API 文档: http://localhost:8001/docs
 - 前端页面: http://localhost:8001/index.html
 
@@ -96,24 +105,24 @@ python run.py --check
 
 **请求参数：**
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | path | 项目ID（七牛云存储路径） |
-| ask | body | 用户问题 |
-| codeSnap | body | 代码片段列表（可选） |
+| 字段     | 类型 | 说明                     |
+| -------- | ---- | ------------------------ |
+| id       | path | 项目ID（七牛云存储路径） |
+| ask      | body | 用户问题                 |
+| codeSnap | body | 代码片段列表（可选）     |
 
 **请求示例：**
 
 ```json
 {
-  "ask": "这个函数的作用是什么？",
-  "codeSnap": [
-    {
-      "fileName": "/src/main.py",
-      "lineStart": 10,
-      "lineEnd": 25
-    }
-  ]
+    "ask": "这个函数的作用是什么？",
+    "codeSnap": [
+        {
+            "fileName": "/src/main.py",
+            "lineStart": 10,
+            "lineEnd": 25
+        }
+    ]
 }
 ```
 
@@ -121,7 +130,7 @@ python run.py --check
 
 ```json
 {
-  "ans": "这个函数用于处理用户请求..."
+    "ans": "这个函数用于处理用户请求..."
 }
 ```
 
@@ -135,7 +144,7 @@ python run.py --check
 
 ```json
 {
-  "doc": "# 项目学习文档\n\n## 1. 项目概述..."
+    "doc": "# 项目学习文档\n\n## 1. 项目概述..."
 }
 ```
 
@@ -150,6 +159,7 @@ python run.py --check
 ### MCP 客户端 (`src/mcp_tool.py`)
 
 封装七牛云 MCP Server，提供：
+
 - 与七牛云存储的连接管理
 - 工具发现和调用
 - LangChain 工具包装器
@@ -157,6 +167,7 @@ python run.py --check
 ### Agent 服务 (`src/agent_service.py`)
 
 管理 LangChain Agent：
+
 - Agent 初始化和生命周期管理
 - 工具调用编排
 - 流式/非流式响应支持
@@ -164,6 +175,7 @@ python run.py --check
 ### 配置管理 (`src/config.py`)
 
 集中管理所有配置项，包括：
+
 - 七牛云认证信息
 - AI API 配置
 - 服务运行参数
@@ -215,9 +227,11 @@ prompt = ChatPromptTemplate.from_messages([
 ## ⚠️ 注意事项
 
 1. **安全性**：生产环境请使用环境变量管理敏感配置，不要硬编码在代码中
-2. **存储空间**：服务仅操作 `zcwl-project` 存储空间
-3. **依赖**：确保已安装 `uv` 或 `uvx` 命令
-4. **网络**：需要能够访问七牛云和 AI API 服务
+2. **配置文件**：首次使用需要复制 `config_tample.py` 为 `config.py` 并填写 `api_key`
+3. **存储空间**：服务仅操作 `zcwl-project` 存储空间
+4. **依赖**：确保已安装 `uv` 或 `uvx` 命令
+5. **网络**：需要能够访问七牛云和 AI API 服务
+6. **Git**：`src/config.py` 已加入 `.gitignore`，不会被提交
 
 ## 📄 许可证
 
