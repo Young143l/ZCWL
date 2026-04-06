@@ -52,3 +52,28 @@ html.dark-mode ::-webkit-scrollbar-thumb:hover {
 html.dark-mode ::-webkit-scrollbar-thumb:active {
     background: #aaa;
 }
+
+/* Carousel 自定义样式 - 反色使箭头和进度条在白色背景可见 */
+.help-carousel .slick-prev,
+.help-carousel .slick-next,
+.help-carousel .slick-prev:hover,
+.help-carousel .slick-next:hover,
+.help-carousel .slick-prev:focus,
+.help-carousel .slick-next:focus {
+    color: #333 !important;
+    font-size: 20px !important;
+}
+
+.help-carousel .slick-prev::before,
+.help-carousel .slick-next::before {
+    color: #333 !important;
+}
+
+.help-carousel-dots li button {
+    background: #999 !important;
+    opacity: 1 !important;
+}
+
+.help-carousel-dots li.slick-active button {
+    background: #333 !important;
+}

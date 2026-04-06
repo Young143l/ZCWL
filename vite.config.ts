@@ -17,12 +17,12 @@ export default defineConfig({
     server: {
         proxy: {
             "/api": {
-                target: "http://localhost:8080", 
+                target: "http://localhost:8080",
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/api/, ""),
             },
             "/mcp": {
-                target: "http://localhost:8001", 
+                target: "http://localhost:8001",
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/mcp/, ""),
             },
@@ -49,7 +49,11 @@ export default defineConfig({
                     // 路由和状态管理
                     "router-state": ["react-router-dom", "zustand"],
                     // Markdown 相关
-                    "markdown-vendor": ["react-markdown", "remark-gfm", "github-markdown-css"],
+                    "markdown-vendor": [
+                        "react-markdown",
+                        "remark-gfm",
+                        "github-markdown-css",
+                    ],
                 },
                 // 资源文件命名规则
                 chunkFileNames: "assets/js/[name]-[hash].js",

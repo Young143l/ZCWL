@@ -2,15 +2,6 @@ import { Carousel, Modal } from "antd";
 import { useEffect, type FC } from "react";
 import useHelp from "../status/Help_status";
 
-const contentStyle: React.CSSProperties = {
-    margin: 0,
-    height: "160px",
-    color: "#fff",
-    lineHeight: "160px",
-    textAlign: "center",
-    background: "#364d79",
-};
-
 const Help_components: FC = () => {
     const { setFirst, setIsOpen, first, isOpen } = useHelp();
     useEffect(() => {
@@ -26,18 +17,24 @@ const Help_components: FC = () => {
             }}
             footer={null}
         >
-            <Carousel arrows infinite={false}>
-                <div>
-                    <h3 style={contentStyle}>1</h3>
+            <Carousel
+                arrows
+                infinite={false}
+                className="w-full rounded-xl overflow-auto help-carousel help-carousel-dots"
+            >
+                <div className="w-full">
+                    <img
+                        src="https://img.young143.top/zcwl/help/1.png"
+                        alt=""
+                        className="w-full object-cover "
+                    />
                 </div>
-                <div>
-                    <h3 style={contentStyle}>2</h3>
-                </div>
-                <div>
-                    <h3 style={contentStyle}>3</h3>
-                </div>
-                <div>
-                    <h3 style={contentStyle}>4</h3>
+                <div className="w-full">
+                    <img
+                        src="https://img.young143.top/zcwl/help/2.png"
+                        alt=""
+                        className="w-full object-cover "
+                    />
                 </div>
             </Carousel>
         </Modal>

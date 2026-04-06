@@ -2,9 +2,11 @@ import {
     BellOutlined,
     CloseOutlined,
     LoadingOutlined,
+    ReloadOutlined,
 } from "@ant-design/icons";
 import { Badge, Button, Divider, Empty, message, Popover } from "antd";
 import {
+    useCallback,
     useEffect,
     useState,
     type Dispatch,
@@ -54,7 +56,7 @@ const Notification: FC<{
             <div
                 className={`flex items-center justify-between  max-w-full gap-1`}
                 onClick={() => {
-                    nav("/" + dId + "/" + cId);
+                    nav("/document/" + dId + "/" + cId);
                 }}
             >
                 <div className="flex flex-col gap-1  max-w-[calc(100%-32px)]">
@@ -109,14 +111,18 @@ const Notification: FC<{
 const NotificationButton_components: FC = () => {
     const [notifications, setNotifications] = useState<NotificationType[]>([]);
     const { userId, token } = useLogin();
-    const {isDark}=useIsDark()
-    useEffect(() => {
+    const { isDark } = useIsDark();
+
+    const getNf = useCallback(() => {
         getNotifications(userId, token).then((res) => {
             if (res.success) {
                 setNotifications(res.data?.notifications as NotificationType[]);
             }
         });
-    }, [userId, token]);
+    }, [token, userId]);
+    useEffect(() => {
+        getNf();
+    }, [getNf]);
 
     return (
         <>
@@ -146,11 +152,28 @@ const NotificationButton_components: FC = () => {
                         )}
                     </div>
                 }
-                title="未读通知"
+                title={
+                    <div className="flex justify-between items-center">
+                        <span>未读通知</span>
+                        <Button
+                            color="primary"
+                            icon={<ReloadOutlined />}
+                            variant="text"
+                            onClick={() => {
+                                getNf();
+                            }}
+                        />
+                    </div>
+                }
                 trigger="click"
             >
                 <Badge count={notifications.length}>
-                    <Button icon={<BellOutlined />} className={isDark?"bg-[#14141475]!" : "bg-[#F8F8F875]!"} />
+                    <Button
+                        icon={<BellOutlined />}
+                        className={
+                            isDark ? "bg-[#14141475]!" : "bg-[#F8F8F875]!"
+                        }
+                    />
                 </Badge>
             </Popover>
         </>

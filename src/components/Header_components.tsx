@@ -11,6 +11,8 @@ import {
     UserOutlined,
     LoginOutlined,
     LogoutOutlined,
+    MoonOutlined,
+    SunOutlined,
 } from "@ant-design/icons";
 import useLogin from "../status/Login_status";
 import UserAvatar_components from "./UserAvatar_components";
@@ -63,7 +65,7 @@ const Header_components: FC = () => {
     const location = useLocation();
     const { isLogin, userName, clearLoginStatus } = useLogin();
     const { clear } = useAIChatDoc();
-    const { isDark } = useIsDark();
+    const { isDark, toggleDark } = useIsDark();
     // 计算当前激活的菜单项，而不是使用状态
     const getCurrentKey = (pathname: string): string => {
         if (pathname === "/") {
@@ -149,11 +151,21 @@ const Header_components: FC = () => {
                         className="flex justify-center border-0!"
                     />
                 </div>
-                <div className="flex gap-4 items-center">
+                <div className="flex gap-3 items-center">
                     {/* <div>
 
                    </div> */}
-                    <NotificationButton_components />
+                    <Button
+                        icon={isDark ? <MoonOutlined /> : <SunOutlined />}
+                        onClick={() => {
+                            toggleDark();
+                        }}
+                        className={
+                            isDark ? "bg-[#14141475]!" : "bg-[#F8F8F875]!"
+                        }
+                    />
+
+                    {isLogin ? <NotificationButton_components /> : <></>}
                     <div className="hidden md:block">
                         <Popover
                             title={

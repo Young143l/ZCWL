@@ -39,6 +39,9 @@ export const getNotifications = async (
         );
 
         if (!res.ok) {
+            // const json=await res.json();
+            // console.log(json)
+            // console.log(1)
             const errorData = await res.json().catch(() => ({}));
             throw new Error(errorData.message || `HTTP error! status: ${res.status}`);
         }
@@ -75,6 +78,7 @@ export const readNotification = async (
         );
 
         if (!res.ok) {
+            
             const errorData = await res.json().catch(() => ({}));
             throw new Error(errorData.message || `HTTP error! status: ${res.status}`);
         }
