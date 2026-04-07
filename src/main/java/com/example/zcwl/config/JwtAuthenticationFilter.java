@@ -53,11 +53,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @throws IOException IO异常
      */
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                    @NonNull HttpServletResponse response,
+    protected void doFilterInternal(@NonNull HttpServletRequest request, 
+                                    @NonNull HttpServletResponse response, 
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         try {
-            // 从请求头中获取token
+            // 从请求头或URL查询参数中获取token
             String authorizationHeader = request.getHeader("Authorization");
             String username = null;
             String token = null;
@@ -66,6 +66,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 token = authorizationHeader.substring(7);
                 username = extractUsernameFromToken(token);
+            } else {
+                // 从URL查询参数中获取token
+                token = request.getParameter("token");
+                if (token != null) {
+                    username = extractUsernameFromToken(token);
+                }
             }
 
             // 如果token有效且用户未认证

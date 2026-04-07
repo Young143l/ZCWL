@@ -77,6 +77,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         // 允许 code 相关路径
                         .requestMatchers("/code/**").permitAll()
+                        // 允许 WebSocket 相关路径
+                        .requestMatchers("/ws/code/cp/**").permitAll()
+                        .requestMatchers("/console").permitAll()
                         // 允许 project 相关路径
                         .requestMatchers("/project/**").permitAll()
                         // GET /users/:id 需要认证
