@@ -1,13 +1,16 @@
 package com.example.zcwl.service.impl;
 
 import com.example.zcwl.entity.DocComment;
+import com.example.zcwl.entity.Notification;
 import com.example.zcwl.repository.DocCommentRepository;
+import com.example.zcwl.repository.NotificationRepository;
 import com.example.zcwl.service.DocCommentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,10 +25,12 @@ public class DocCommentServiceImpl implements DocCommentService {
     private static final Logger logger = LoggerFactory.getLogger(DocCommentServiceImpl.class);
 
     private final DocCommentRepository docCommentRepository;
+    private final NotificationRepository notificationRepository;
 
     @Autowired
-    public DocCommentServiceImpl(DocCommentRepository docCommentRepository) {
+    public DocCommentServiceImpl(DocCommentRepository docCommentRepository, NotificationRepository notificationRepository) {
         this.docCommentRepository = docCommentRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     @Override
@@ -68,7 +73,43 @@ public class DocCommentServiceImpl implements DocCommentService {
         // 保存评论
         DocComment savedComment = docCommentRepository.save(comment);
         logger.info("保存评论成功，评论ID: {}", savedComment.getId());
+        
+        // 创建通知
+        createNotification(comment);
+        
         return savedComment;
+    }
+    
+    /**
+     * 创建通知
+     * @param comment 评论
+     */
+    private void createNotification(DocComment comment) {
+        // 只处理二级评论（回复）
+        if (comment.getFa() != -1) {
+            // 获取父评论
+            DocComment parentComment = docCommentRepository.findById(comment.getFa())
+                    .orElseThrow(() -> new IllegalArgumentException("父评论不存在"));
+            
+            // 创建通知
+            Notification notification = new Notification();
+            notification.setUId(parentComment.getUId()); // 被回复的评论的发表者id
+            notification.setDId(comment.getDId()); // 文档ID
+            notification.setCId(comment.getCId()); // 章节ID
+            notification.setFromUName(comment.getUId()); // 回复者id（使用email作为用户名）
+            
+            // 处理内容，超过10个字符则截断
+            String content = comment.getComment();
+            if (content.length() > 10) {
+                content = content.substring(0, 10) + "...";
+            }
+            notification.setContent(content); // 回复内容
+            notification.setTime(LocalDateTime.now()); // 回复时间
+            
+            // 保存通知
+            notificationRepository.save(notification);
+            logger.info("创建通知成功，通知ID: {}", notification.getId());
+        }
     }
 
     @Override
