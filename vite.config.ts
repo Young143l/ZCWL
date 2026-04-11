@@ -26,6 +26,11 @@ export default defineConfig({
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/mcp/, ""),
             },
+            "/ws": {
+                target: "ws://localhost:8080",
+                changeOrigin: true,
+                ws: true,
+            },
         },
     },
     build: {

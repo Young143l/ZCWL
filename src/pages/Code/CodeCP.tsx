@@ -204,7 +204,11 @@ const CodeCP: FC = () => {
                             </Splitter>
                         </Splitter.Panel>
                         <Splitter.Panel>
-                            <Console_components />
+                            <Console_components
+                                cpId={cp_id || ""}
+                                token={token}
+                                code={cp.code}
+                            />
                         </Splitter.Panel>
                     </Splitter>
                 </div>
