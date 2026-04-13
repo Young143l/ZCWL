@@ -16,29 +16,29 @@ import useIsDark from "../status/IsDark_status"; // 导入深色模式状态
 const getCustomThemeStyles = (pColor: string, isDarkMode: boolean) => `
   /* 优化后的主题 - 与网站风格一致 */
   jmnodes.theme-cfww jmnode {
-    background: ${isDarkMode ? '#1f1f1f' : '#ffffff'};
-    color: ${isDarkMode ? '#f5f5f5' : '#1f1f1f'};
+    background: ${isDarkMode ? "#1f1f1f" : "#ffffff"};
+    color: ${isDarkMode ? "#f5f5f5" : "#1f1f1f"};
     border-radius: 8px;
-    box-shadow: 0 1px 3px ${isDarkMode ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)'};
+    box-shadow: 0 1px 3px ${isDarkMode ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.06)"};
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     font-size: 13px;
     line-height: 1.4;
     padding: 8px 12px;
-    border: 2px solid ${isDarkMode ? '#303030' : '#f0f0f0'};
+    border: 2px solid ${isDarkMode ? "#303030" : "#f0f0f0"};
     transition: all 0.2s ease;
     backdrop-filter: blur(4px);
   }
   
   jmnodes.theme-cfww jmnode:hover {
-    background: ${isDarkMode ? '#2a2a2a' : '#f9f9f9'};
-    box-shadow: 0 2px 6px ${isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'};
+    background: ${isDarkMode ? "#2a2a2a" : "#f9f9f9"};
+    box-shadow: 0 2px 6px ${isDarkMode ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)"};
     border-color: ${isDarkMode ? `${pColor}80` : `${pColor}40`};
     transform: translateY(-1px);
   }
   
   jmnodes.theme-cfww jmnode.selected {
     background: ${isDarkMode ? `${pColor}30` : `${pColor}10`};
-    color: ${isDarkMode ? '#ffffff' : '#141414'};
+    color: ${isDarkMode ? "#ffffff" : "#141414"};
     box-shadow: 0 2px 8px ${isDarkMode ? `${pColor}40` : `${pColor}20`};
     border-color: ${isDarkMode ? `${pColor}80` : `${pColor}60`};
     transform: translateY(-1px);
@@ -58,7 +58,7 @@ const getCustomThemeStyles = (pColor: string, isDarkMode: boolean) => `
   jmnodes.theme-cfww jmexpander {
     background: ${isDarkMode ? `${pColor}30` : `${pColor}20`};
     border: none;
-    color: ${isDarkMode ? 'white' : pColor};
+    color: ${isDarkMode ? "white" : pColor};
     font-weight: 600;
     font-size: 10px;
     width: 16px;
@@ -77,13 +77,13 @@ const getCustomThemeStyles = (pColor: string, isDarkMode: boolean) => `
   
   jmnodes.theme-cfww jmexpander:hover {
     background: ${isDarkMode ? `${pColor}60` : `${pColor}40`};
-    color: ${isDarkMode ? 'black' : 'white'};
+    color: ${isDarkMode ? "black" : "white"};
     transform: scale(1.1);
   }
   
   /* 连接线样式 */
   .theme-cfww path.jmnode-link {
-    stroke: ${isDarkMode ? '#4a4a4a' : '#e8e8e8'};
+    stroke: ${isDarkMode ? "#4a4a4a" : "#e8e8e8"};
     stroke-width: 1.2;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -91,18 +91,18 @@ const getCustomThemeStyles = (pColor: string, isDarkMode: boolean) => `
   
   /* 左右分支使用相同颜色 */
   .theme-cfww path.jmnode-link-left {
-    stroke: ${isDarkMode ? '#4a4a4a' : '#e8e8e8'};
+    stroke: ${isDarkMode ? "#4a4a4a" : "#e8e8e8"};
   }
   
   .theme-cfww path.jmnode-link-right {
-    stroke: ${isDarkMode ? '#4a4a4a' : '#e8e8e8'};
+    stroke: ${isDarkMode ? "#4a4a4a" : "#e8e8e8"};
   }
   
   /* 容器样式 */
   .mindmap-container {
-    background: ${isDarkMode ? '#141414' : '#ffffff'};
+    background: ${isDarkMode ? "#141414" : "#ffffff"};
     border-radius: 12px;
-    border: 1px solid ${isDarkMode ? '#2a2a2a' : '#f5f5f5'};
+    border: 1px solid ${isDarkMode ? "#2a2a2a" : "#f5f5f5"};
     overflow: hidden;
     // box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     backdrop-filter: blur(4px);
@@ -278,12 +278,12 @@ const LearnMind_components: FC = () => {
     return (
         <>
             <div
-                className={`flex justify-center items-center w-full h-full ${!loading ? "hidden" : ""}`}
+                className={`flex justify-center items-center w-full h-100 lg:h-full ${!loading ? "hidden" : ""}`}
             >
                 <Spin indicator={<LoadingOutlined spin />} size="large" />
             </div>
             <div
-                className={`w-full h-full relative ${loading ? "hidden" : ""}`}
+                className={`w-full h-100 lg:h-full relative ${loading ? "hidden" : ""}`}
             >
                 <div
                     ref={jmRef}
