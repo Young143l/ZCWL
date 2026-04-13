@@ -37,9 +37,9 @@ const Console_components: FC<ConsoleProps> = ({ cpId, token, code }) => {
         }
 
         // 开发环境直接使用本地服务器，不走 /api 代理
-        const wsBaseUrl = import.meta.env.DEV 
-            ? `ws://${window.location.host}` 
-            : import.meta.env.VITE_BACK_END.replace("http", "ws");
+        const wsBaseUrl = import.meta.env.DEV
+            ? `ws://${window.location.host}`
+            : "wss://zcwl.young143.top";
         const wsUrl = `${wsBaseUrl}/ws/code/cp/${cpId}?token=${token}`;
         const ws = new WebSocket(wsUrl);
 
@@ -56,7 +56,10 @@ const Console_components: FC<ConsoleProps> = ({ cpId, token, code }) => {
         ws.onmessage = (event) => {
             const data: WebSocketMessage = JSON.parse(event.data);
             if (data.done) {
-                setOutput((prev) => [...prev, `\n[运行结束] ${data.message || ""}`]);
+                setOutput((prev) => [
+                    ...prev,
+                    `\n[运行结束] ${data.message || ""}`,
+                ]);
                 setIsRunning(false);
                 ws.close();
             } else {
@@ -201,7 +204,10 @@ const Console_components: FC<ConsoleProps> = ({ cpId, token, code }) => {
                 </div>
 
                 {/* 输出区域 */}
-                <div ref={outputContainerRef} className={`flex-1 overflow-auto p-4 ${isDark ? "bg-black" : "bg-white"}`}>
+                <div
+                    ref={outputContainerRef}
+                    className={`flex-1 overflow-auto p-4 ${isDark ? "bg-black" : "bg-white"}`}
+                >
                     {output.length === 0 ? (
                         <div className="text-gray-500 text-center mt-8">
                             点击"运行"按钮开始执行代码
@@ -209,7 +215,14 @@ const Console_components: FC<ConsoleProps> = ({ cpId, token, code }) => {
                     ) : (
                         <div className="font-mono text-sm whitespace-pre-wrap">
                             {output.map((line, index) => (
-                                <div key={index} className={isDark ? "text-green-400" : "text-green-600"}>
+                                <div
+                                    key={index}
+                                    className={
+                                        isDark
+                                            ? "text-green-400"
+                                            : "text-green-600"
+                                    }
+                                >
                                     {line}
                                 </div>
                             ))}
