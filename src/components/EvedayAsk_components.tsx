@@ -3,7 +3,6 @@ import { Button, Card, theme, ConfigProvider } from "antd";
 import {
     LeftOutlined,
     RightOutlined,
-    CalendarOutlined,
     QuestionCircleOutlined,
     EyeOutlined,
     EyeInvisibleOutlined,
@@ -377,43 +376,44 @@ const EvedayAsk_components: FC = () => {
                 <div
                     className={`flex items-center justify-between px-5 py-4 border-b ${isDark ? "border-gray-700" : "border-gray-200"}`}
                 >
-                    <div className="flex items-center gap-3">
-                        <CalendarOutlined
-                            className={`text-xl ${isDark ? "text-gray-300" : "text-gray-600"}`}
-                        />
-                        <div className="flex flex-col">
+                    <div
+                        className="flex flex-col border-l-4 pl-2.5"
+                        style={{ borderColor: pColor }}
+                    >
+                        <div className="flex items-center gap-2">
                             <span
-                                className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-800"}`}
+                                className={`text-lg font-bold whitespace-nowrap ${isDark ? "text-white" : "text-gray-800"}`}
                             >
                                 每日问答
-                                {isToday && (
-                                    <span
-                                        className="ml-2 text-xs px-2 py-0.5 rounded-full bg-blue-500 text-white"
-                                    >
-                                        今日
-                                    </span>
-                                )}
                             </span>
-                            <span
-                                className="text-sm opacity-60"
-                                style={{ color: pColor }}
-                            >
-                                Daily Q&A
-                            </span>
+                            {isToday && (
+                                <span
+                                    className="text-xs px-2 py-0.5 rounded-full bg-blue-500 text-white"
+                                >
+                                    今日
+                                </span>
+                            )}
                         </div>
+                        <span
+                            className="text-base font-medium tracking-wider opacity-60"
+                            style={{ color: pColor }}
+                        >
+                            Daily Q&A
+                        </span>
                     </div>
 
                     {/* 日期切换控件 */}
-                    <div className="flex items-center gap-1 sm:gap-2">
+                    <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                         <Button
                             type="text"
                             icon={<LeftOutlined />}
                             onClick={handlePrevDay}
                             className={isDark ? "text-gray-300" : "text-gray-600"}
+                            size="small"
                         />
-                        <div className="flex flex-col items-center min-w-22.5 sm:min-w-25">
+                        <div className="flex flex-col items-center min-w-18 sm:min-w-20">
                             <span
-                                className={`text-sm sm:text-base font-semibold whitespace-nowrap ${isDark ? "text-white" : "text-gray-800"}`}
+                                className={`text-xs sm:text-sm font-semibold whitespace-nowrap ${isDark ? "text-white" : "text-gray-800"}`}
                             >
                                 {dateStr}
                             </span>
@@ -429,6 +429,7 @@ const EvedayAsk_components: FC = () => {
                             onClick={handleNextDay}
                             disabled={isAfterToday()}
                             className={isDark ? "text-gray-300" : "text-gray-600"}
+                            size="small"
                         />
                     </div>
                 </div>
@@ -470,11 +471,11 @@ const EvedayAsk_components: FC = () => {
                         </div>
                     )}
 
-                    {/* 答案区域 - 固定高度，带遮罩效果 */}
+                    {/* 答案区域 - 固定高度，支持滚动 */}
                     <div className="relative h-50 mt-4">
                         {/* 答案内容 - 始终显示但透明度变化 */}
                         <div
-                            className={`absolute inset-0 p-4 rounded-xl overflow-hidden transition-opacity duration-300 ${
+                            className={`absolute inset-0 p-4 rounded-xl overflow-y-auto transition-opacity duration-300 ${
                                 isDark
                                     ? "bg-[#2a2a2a] border-gray-600"
                                     : "bg-gray-50 border-gray-200"
@@ -482,20 +483,20 @@ const EvedayAsk_components: FC = () => {
                         >
                             <div className="flex items-start gap-3">
                                 <div
-                                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
+                                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
                                         isDark ? "bg-green-600 text-white" : "bg-green-500 text-white"
                                     }`}
                                 >
                                     A
                                 </div>
-                                <div className="flex-1 overflow-hidden">
+                                <div className="flex-1">
                                     <span
                                         className={`text-base font-medium ${isDark ? "text-gray-300" : "text-gray-600"}`}
                                     >
                                         答案：
                                     </span>
                                     <p
-                                        className={`mt-2 text-base leading-relaxed ${isDark ? "text-gray-200" : "text-gray-800"} line-clamp-5`}
+                                        className={`mt-2 text-base leading-relaxed ${isDark ? "text-gray-200" : "text-gray-800"}`}
                                     >
                                         {qaData.answer}
                                     </p>

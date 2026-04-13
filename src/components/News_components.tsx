@@ -2,7 +2,6 @@ import { useState, type FC } from "react";
 import { Card, List, Tag, theme } from "antd";
 import {
     FireOutlined,
-    ReadOutlined,
     RightOutlined,
 } from "@ant-design/icons";
 import useIsDark from "../status/IsDark_status";
@@ -141,23 +140,21 @@ const News_components: FC = () => {
             <div
                 className={`flex items-center justify-between px-5 py-4 border-b ${isDark ? "border-gray-700" : "border-gray-200"}`}
             >
-                <div className="flex items-center gap-3">
-                    <ReadOutlined
-                        className={`text-xl ${isDark ? "text-gray-300" : "text-gray-600"}`}
-                    />
-                    <div className="flex flex-col">
-                        <span
-                            className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-800"}`}
-                        >
-                            编程资讯
-                        </span>
-                        <span
-                            className="text-sm opacity-60"
-                            style={{ color: pColor }}
-                        >
-                            Tech News
-                        </span>
-                    </div>
+                <div
+                    className="flex flex-col border-l-4 pl-2.5"
+                    style={{ borderColor: pColor }}
+                >
+                    <span
+                        className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-800"}`}
+                    >
+                        编程资讯
+                    </span>
+                    <span
+                        className="text-base font-medium tracking-wider opacity-60"
+                        style={{ color: pColor }}
+                    >
+                        Tech News
+                    </span>
                 </div>
             </div>
 
@@ -167,7 +164,7 @@ const News_components: FC = () => {
                     dataSource={newsData}
                     renderItem={(item) => (
                         <List.Item
-                            className={`!px-3 !py-3 rounded-lg transition-all duration-200 cursor-pointer ${
+                            className={`px-3! py-3! rounded-lg transition-all duration-200 cursor-pointer ${
                                 hoveredId === item.id
                                     ? isDark
                                         ? "bg-gray-800"
@@ -218,7 +215,7 @@ const News_components: FC = () => {
 
                                 {/* 箭头图标 */}
                                 <RightOutlined
-                                    className={`flex-shrink-0 transition-all duration-200 ${
+                                    className={`shrink-0 transition-all duration-200 ${
                                         hoveredId === item.id
                                             ? isDark
                                                 ? "text-gray-300 translate-x-1"

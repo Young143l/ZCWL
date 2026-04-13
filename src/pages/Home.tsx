@@ -33,7 +33,7 @@ const Home: FC = () => {
                             Knowledge Graph
                         </span>
                     </div>
-                    <div className="h-100">
+                    <div className="h-full">
                         <LearnMind_components />
                     </div>
                 </div>
