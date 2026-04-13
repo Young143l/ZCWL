@@ -75,9 +75,22 @@ public class CodeWebSocketHandler extends TextWebSocketHandler {
                 stopProcess(session);
                 sendMessage(session, true, "User stopped execution");
             } else {
-                // 前端发送输入消息，运行代码
+                // 检查是否是代码执行请求还是输入请求
                 String input = jsonNode.get("input").asText();
-                runCode(session, input);
+                ProcessInfo processInfo = sessionMap.get(session);
+                
+                // 如果已经有运行的进程，说明这是输入数据
+                if (processInfo != null && processInfo.getProcess() != null && !processInfo.getProcess().isAlive()) {
+                    // 进程已结束，重新运行代码
+                    runCode(session, input);
+                } else if (processInfo != null && processInfo.getInputWriter() != null) {
+                    // 进程正在运行，发送输入到进程
+                    processInfo.getInputWriter().println(input);
+                    processInfo.getInputWriter().flush();
+                } else {
+                    // 首次运行代码
+                    runCode(session, input);
+                }
             }
         } catch (Exception e) {
             try {
@@ -178,14 +191,18 @@ public class CodeWebSocketHandler extends TextWebSocketHandler {
                 writer.write(code);
             }
 
-            // 启动Python进程
+            // 启动Python进程，启用标准输入
             ProcessBuilder processBuilder = new ProcessBuilder("python", tempFile.getAbsolutePath());
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
+            
+            // 获取进程的输入流，用于向Python程序发送输入
+            PrintWriter inputWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8), true);
 
             // 更新进程信息
             processInfo.setProcess(process);
             processInfo.setTempFile(tempFile);
+            processInfo.setInputWriter(inputWriter);
 
             // 启动线程读取进程输出
             ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -227,6 +244,10 @@ public class CodeWebSocketHandler extends TextWebSocketHandler {
     private void stopProcess(WebSocketSession session) {
         ProcessInfo processInfo = sessionMap.get(session);
         if (processInfo != null) {
+            // 关闭输入流
+            if (processInfo.getInputWriter() != null) {
+                processInfo.getInputWriter().close();
+            }
             // 销毁进程
             if (processInfo.getProcess() != null) {
                 processInfo.getProcess().destroyForcibly();
@@ -239,6 +260,8 @@ public class CodeWebSocketHandler extends TextWebSocketHandler {
             if (processInfo.getTempFile() != null) {
                 processInfo.getTempFile().delete();
             }
+            // 清空输入写入器引用
+            processInfo.setInputWriter(null);
         }
     }
 
@@ -264,6 +287,7 @@ public class CodeWebSocketHandler extends TextWebSocketHandler {
         private Process process;
         private File tempFile;
         private ExecutorService executorService;
+        private PrintWriter inputWriter;  // 用于向进程发送输入
 
         public Process getProcess() {
             return process;
@@ -287,6 +311,14 @@ public class CodeWebSocketHandler extends TextWebSocketHandler {
 
         public void setExecutorService(ExecutorService executorService) {
             this.executorService = executorService;
+        }
+
+        public PrintWriter getInputWriter() {
+            return inputWriter;
+        }
+
+        public void setInputWriter(PrintWriter inputWriter) {
+            this.inputWriter = inputWriter;
         }
     }
 }
