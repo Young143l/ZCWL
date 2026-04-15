@@ -1,11 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { RAGSearchResult } from "../api/RAG_api";
 
 export interface AIChatBody {
     id: string;
     ask: string;
     ans: string;
     over: boolean;
+    sources?: RAGSearchResult[]; // 溯源信息
 }
 
 interface AIChatDocStatus {
@@ -20,6 +22,7 @@ interface AIChatDocStatus {
     newChat: (id: string) => void;
     clear: () => void;
     setAns: (id: string, ans: string) => void;
+    setSources: (sources: RAGSearchResult[]) => void; // 设置溯源信息
 }
 
 const useAIChatDoc = create<AIChatDocStatus>()(
@@ -72,6 +75,16 @@ const useAIChatDoc = create<AIChatDocStatus>()(
                     chat: s.chat.map((item, index) =>
                         index === s.chat.length - 1
                             ? { ...item, id, ans, over: true }
+                            : item,
+                    ),
+                }));
+            },
+            setSources: (sources: RAGSearchResult[]) => {
+                set((s) => ({
+                    ...s,
+                    chat: s.chat.map((item, index) =>
+                        index === s.chat.length - 1
+                            ? { ...item, sources }
                             : item,
                     ),
                 }));

@@ -17,6 +17,7 @@ const { TextArea } = Input;
 import AIChatBody_components from "./AIChatBody_components";
 import useAIChatDoc from "../status/AIChatDoc_status";
 import { getNewChat, getAsk } from "../api/AIChatDoc_api";
+import { ragSearch } from "../api/RAG_api";
 import useLogin from "../status/Login_status";
 import { useNavigate } from "react-router-dom";
 import { flushSync } from "react-dom";
@@ -25,7 +26,7 @@ import useIsDark from "../status/IsDark_status";
 const AIChatDoc_components: FC = () => {
     const [inputValue, setInputValue] = useState<string>("");
     const [asking, setAsking] = useState<boolean>(false);
-    const { setAns, have, chat, id, newChat, clear, addChat, code, setCode } =
+    const { setAns, have, chat, id, newChat, clear, addChat, code, setCode, setSources } =
         useAIChatDoc();
     const { isLogin, token, userId } = useLogin();
     const nav = useNavigate();
@@ -81,6 +82,9 @@ const AIChatDoc_components: FC = () => {
 
         addChat({ id: "", ask: ask, over: false, ans: "" });
 
+        // 同时进行RAG搜索获取溯源信息
+        const ragPromise = ragSearch(inputValue, token);
+
         const askRes = await getAsk(userId, currentId, ask, token);
         if (askRes.ok) {
             const t = chat.length;
@@ -99,6 +103,16 @@ const AIChatDoc_components: FC = () => {
                 flushSync(() => {
                     setAns(t.toString(), buffer);
                 });
+            }
+
+            // 流式输出完成后，设置RAG溯源信息
+            try {
+                const ragResults = await ragPromise;
+                if (ragResults.length > 0) {
+                    setSources(ragResults);
+                }
+            } catch (e) {
+                console.error("RAG search failed:", e);
             }
         } else {
             messageApi.open({
@@ -142,6 +156,7 @@ const AIChatDoc_components: FC = () => {
                             ask={i.ask}
                             id={i.id}
                             key={i.id}
+                            sources={i.sources}
                         />
                     ))
                 ) : (

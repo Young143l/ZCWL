@@ -1,7 +1,7 @@
 import { useState, type FC } from "react";
 import { Menu, Drawer, Popover, Button, ConfigProvider } from "antd";
 import type { MenuProps } from "antd";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
     HomeOutlined,
     BookOutlined,
@@ -66,6 +66,7 @@ const Header_components: FC = () => {
     const { isLogin, userName, clearLoginStatus } = useLogin();
     const { clear } = useAIChatDoc();
     const { isDark, toggleDark } = useIsDark();
+    const nav = useNavigate();
     // 计算当前激活的菜单项，而不是使用状态
     const getCurrentKey = (pathname: string): string => {
         if (pathname === "/") {
@@ -99,6 +100,7 @@ const Header_components: FC = () => {
                 onClick={() => {
                     clearLoginStatus();
                     clear();
+                    nav("/");
                 }}
                 icon={<LogoutOutlined />}
             >
@@ -219,6 +221,8 @@ const Header_components: FC = () => {
                                     <Button
                                         onClick={() => {
                                             clearLoginStatus();
+                                            clear();
+                                            nav("/");
                                         }}
                                         icon={<LogoutOutlined />}
                                     >
