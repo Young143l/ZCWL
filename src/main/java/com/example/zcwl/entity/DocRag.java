@@ -58,6 +58,28 @@ public class DocRag implements Serializable {
     @Column(name = "vector", columnDefinition = "vector")
     private String vector;
 
+    /**
+     * 文档ID（关联doc表）
+     * -- GETTER --
+     *  获取文档ID
+     * -- SETTER --
+     *  设置文档ID
+     *
+     */
+    @Column(name = "d_id")
+    private Integer dId;
+
+    /**
+     * 章节ID（关联doc_contents表）
+     * -- GETTER --
+     *  获取章节ID
+     * -- SETTER --
+     *  设置章节ID
+     *
+     */
+    @Column(name = "c_id")
+    private Integer cId;
+
     @Override
     public String toString() {
         return "DocRag{" +
