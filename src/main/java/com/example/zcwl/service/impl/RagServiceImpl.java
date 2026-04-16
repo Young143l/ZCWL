@@ -209,6 +209,8 @@ public class RagServiceImpl implements RagService {
                 Map<String, Object> formattedResult = new HashMap<>();
                 formattedResult.put("id", result.get("id"));
                 formattedResult.put("content", result.get("chunk"));
+                formattedResult.put("d_id", result.get("d_id"));
+                formattedResult.put("c_id", result.get("c_id"));
                 formattedResult.put("distance", result.get("distance"));
                 formattedResults.add(formattedResult);
             }

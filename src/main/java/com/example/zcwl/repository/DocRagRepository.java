@@ -19,9 +19,9 @@ public interface DocRagRepository extends JpaRepository<DocRag, Integer> {
      * 使用PostgresSQL的向量相似度查询
      * @param vector 查询向量
      * @param limit 返回结果数量限制
-     * @return 包含id、chunk和distance的Map列表
+     * @return 包含id、chunk、d_id、c_id和distance的Map列表
      */
-    @Query(value = "SELECT id, chunk, vector <=> CAST(:vector AS vector) AS distance " +
+    @Query(value = "SELECT id, chunk, d_id, c_id, vector <=> CAST(:vector AS vector) AS distance " +
             "FROM doc_rag " +
             "ORDER BY vector <=> CAST(:vector AS vector) " +
             "LIMIT :limit",

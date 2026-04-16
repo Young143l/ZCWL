@@ -590,8 +590,8 @@ public class AiChatServiceImpl implements AiChatService {
         
         requestBody.put("messages", messages);
         requestBody.put("stream", stream);
-        // 设置最大token数
-        requestBody.put("max_tokens", 100000);
+        // 设置最大 token 数，必须在 [1, 65536] 范围内
+        requestBody.put("max_tokens", 8192);
         
         return requestBody;
     }

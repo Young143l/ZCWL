@@ -34,7 +34,7 @@ public class NotificationController {
      * @param uId 用户ID
      * @return 未读消息列表
      */
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<?> getNotifications(@RequestParam("uId") String uId) {
         logger.debug("获取用户未读消息，用户ID: {}", uId);
 
