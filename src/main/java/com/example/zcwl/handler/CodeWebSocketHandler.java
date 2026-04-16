@@ -154,6 +154,7 @@ public class CodeWebSocketHandler extends TextWebSocketHandler {
      * @return 是否有效
      */
     private boolean validateToken(String token) {
+        // 验证JWT token
         return jwtTokenUtil.validateToken(token);
     }
 
@@ -174,13 +175,16 @@ public class CodeWebSocketHandler extends TextWebSocketHandler {
         try {
             // 创建临时文件
             File tempFile = File.createTempFile("code", ".py");
-            try (FileWriter writer = new FileWriter(tempFile)) {
+            try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(tempFile), StandardCharsets.UTF_8)) {
                 writer.write(code);
             }
 
             // 启动Python进程
             ProcessBuilder processBuilder = new ProcessBuilder("python", tempFile.getAbsolutePath());
             processBuilder.redirectErrorStream(true);
+            // 设置PYTHONIOENCODING环境变量，确保Python进程的输出编码是UTF-8
+            Map<String, String> env = processBuilder.environment();
+            env.put("PYTHONIOENCODING", "utf-8");
             Process process = processBuilder.start();
 
             // 更新进程信息
@@ -254,7 +258,7 @@ public class CodeWebSocketHandler extends TextWebSocketHandler {
         response.put("done", done);
         response.put("message", message);
         String json = objectMapper.writeValueAsString(response);
-        session.sendMessage(new TextMessage(json));
+        session.sendMessage(new TextMessage(json.getBytes(StandardCharsets.UTF_8)));
     }
 
     /**

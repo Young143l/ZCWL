@@ -3,6 +3,7 @@ package com.example.zcwl.service.impl;
 import com.example.zcwl.entity.ConsoleProject;
 import com.example.zcwl.repository.ConsoleProjectRepository;
 import com.example.zcwl.service.ConsoleProjectService;
+import com.example.zcwl.utils.CodeTester;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,20 +184,55 @@ public class ConsoleProjectServiceImpl implements ConsoleProjectService {
             
             // 检查缓存中是否已有结果
             if (codeCache.containsKey(cacheKey)) {
-                return codeCache.get(cacheKey);
+                String cachedCode = codeCache.get(cacheKey);
+                // 测试缓存的代码是否能正常运行
+                if (CodeTester.testCode(cachedCode, type)) {
+                    return cachedCode;
+                } else {
+                    // 如果缓存的代码不能正常运行，删除缓存
+                    codeCache.remove(cacheKey);
+                    logger.info("缓存的代码测试失败，重新生成");
+                }
             }
             
-            // 构建完整的AI提示词
-            String prompt = buildAIPrompt(message, type);
-
-            // 调用AI服务生成代码
-            logger.info("调用AI服务生成控制台应用代码");
-            String aiResponse = callAIService(prompt);
-
-            // 将结果存入缓存
-            codeCache.put(cacheKey, aiResponse);
+            int maxRetries = 3; // 最大重试次数
+            int retryCount = 0;
+            String generatedCode = null;
+            boolean testPassed = false;
             
-            return aiResponse;
+            while (retryCount < maxRetries && !testPassed) {
+                // 构建完整的AI提示词
+                String prompt = buildAIPrompt(message, type);
+
+                // 调用AI服务生成代码
+                logger.info("调用AI服务生成控制台应用代码 (尝试 {}/{})", retryCount + 1, maxRetries);
+                String aiResponse = callAIService(prompt);
+                
+                // 打印AI返回的内容，以便于调试
+                logger.info("AI返回的内容: {}", aiResponse);
+                
+                // 测试生成的代码是否能正常运行
+                logger.info("测试生成的代码");
+                testPassed = CodeTester.testCode(aiResponse, type);
+                
+                if (testPassed) {
+                    generatedCode = aiResponse;
+                    // 将结果存入缓存
+                    codeCache.put(cacheKey, generatedCode);
+                    logger.info("代码测试通过，返回生成的代码");
+                } else {
+                    retryCount++;
+                    logger.warn("代码测试失败，第 {} 次重试", retryCount);
+                }
+            }
+            
+            if (generatedCode != null) {
+                return generatedCode;
+            } else {
+                logger.error("多次尝试后代码测试仍失败，返回默认代码");
+                // 如果多次尝试后仍失败，返回默认代码
+                return "# 控制台应用\n\n" + message;
+            }
         } catch (Exception e) {
             logger.error("生成代码失败", e);
             // 如果生成失败，返回默认代码
@@ -218,20 +254,52 @@ public class ConsoleProjectServiceImpl implements ConsoleProjectService {
             
             // 检查缓存中是否已有结果
             if (codeCache.containsKey(cacheKey)) {
-                return codeCache.get(cacheKey);
+                String cachedCode = codeCache.get(cacheKey);
+                // 测试缓存的代码是否能正常运行
+                if (CodeTester.testCode(cachedCode, type)) {
+                    return cachedCode;
+                } else {
+                    // 如果缓存的代码不能正常运行，删除缓存
+                    codeCache.remove(cacheKey);
+                    logger.info("缓存的代码测试失败，重新生成");
+                }
             }
             
-            // 构建完整的AI提示词，包含现有代码
-            String prompt = buildAIPromptWithExistingCode(existingCode, message, type);
-
-            // 调用AI服务生成代码
-            logger.info("调用AI服务生成控制台应用代码");
-            String aiResponse = callAIService(prompt);
-
-            // 将结果存入缓存
-            codeCache.put(cacheKey, aiResponse);
+            int maxRetries = 3; // 最大重试次数
+            int retryCount = 0;
+            String generatedCode = null;
+            boolean testPassed = false;
             
-            return aiResponse;
+            while (retryCount < maxRetries && !testPassed) {
+                // 构建完整的AI提示词，包含现有代码
+                String prompt = buildAIPromptWithExistingCode(existingCode, message, type);
+
+                // 调用AI服务生成代码
+                logger.info("调用AI服务生成控制台应用代码 (尝试 {}/{})", retryCount + 1, maxRetries);
+                String aiResponse = callAIService(prompt);
+                
+                // 测试生成的代码是否能正常运行
+                logger.info("测试生成的代码");
+                testPassed = CodeTester.testCode(aiResponse, type);
+                
+                if (testPassed) {
+                    generatedCode = aiResponse;
+                    // 将结果存入缓存
+                    codeCache.put(cacheKey, generatedCode);
+                    logger.info("代码测试通过，返回生成的代码");
+                } else {
+                    retryCount++;
+                    logger.warn("代码测试失败，第 {} 次重试", retryCount);
+                }
+            }
+            
+            if (generatedCode != null) {
+                return generatedCode;
+            } else {
+                logger.error("多次尝试后代码测试仍失败，返回现有代码");
+                // 如果多次尝试后仍失败，返回现有代码
+                return existingCode;
+            }
         } catch (Exception e) {
             logger.error("生成代码失败", e);
             // 如果生成失败，返回现有代码
@@ -278,8 +346,17 @@ public class ConsoleProjectServiceImpl implements ConsoleProjectService {
                "* **目标编程语言**：`" + type + "`\n" +
                "\n" +
                "## Output Format\n" +
-               "直接输出完整的控制台应用代码，不需要任何解释或标记。\n" +
-               "注意：请不要包含shebang行（如#!/usr/bin/env python3）、编码声明（如# -*- coding: utf-8 -*-）或文档字符串等头部信息，直接输出核心代码。";
+               "**重要**：请严格按照以下格式输出，否则将被视为无效响应：\n" +
+               "1. 直接输出完整的控制台应用代码，不需要任何解释、注释或标记。\n" +
+               "2. 确保输出的代码是有效的" + type + "代码，可以直接运行。\n" +
+               "3. 不要包含任何非代码内容，如中文描述、说明文字等。\n" +
+               "4. 不要包含shebang行（如#!/usr/bin/env python3）、编码声明（如# -*- coding: utf-8 -*-）或文档字符串等头部信息。\n" +
+               "5. 确保代码符合所有技术约束和要求。\n" +
+               "\n" +
+               "**示例输出（Python）**：\n" +
+               "def main():\n    print(\"Hello, World!\")\n\nif __name__ == \"__main__\":\n    main()\n" +
+               "\n" +
+               "请严格按照示例格式输出，只输出代码，不输出任何其他内容。";
     }
 
     /**
@@ -323,8 +400,17 @@ public class ConsoleProjectServiceImpl implements ConsoleProjectService {
                "* **目标编程语言**：`" + type + "`\n" +
                "\n" +
                "## Output Format\n" +
-               "直接输出完整的控制台应用代码，不需要任何解释或标记。\n" +
-               "注意：请不要包含shebang行（如#!/usr/bin/env python3）、编码声明（如# -*- coding: utf-8 -*-）或文档字符串等头部信息，直接输出核心代码。";
+               "**重要**：请严格按照以下格式输出，否则将被视为无效响应：\n" +
+               "1. 直接输出完整的控制台应用代码，不需要任何解释、注释或标记。\n" +
+               "2. 确保输出的代码是有效的" + type + "代码，可以直接运行。\n" +
+               "3. 不要包含任何非代码内容，如中文描述、说明文字等。\n" +
+               "4. 不要包含shebang行（如#!/usr/bin/env python3）、编码声明（如# -*- coding: utf-8 -*-）或文档字符串等头部信息。\n" +
+               "5. 确保代码符合所有技术约束和要求。\n" +
+               "\n" +
+               "**示例输出（Python）**：\n" +
+               "def main():\n    print(\"Hello, World!\")\n\nif __name__ == \"__main__\":\n    main()\n" +
+               "\n" +
+               "请严格按照示例格式输出，只输出代码，不输出任何其他内容。";
     }
 
     /**

@@ -156,14 +156,14 @@ public class UserController {
         } catch (RuntimeException e) {
             // 处理业务逻辑错误，返回400状态码
             java.util.Map<String, Object> response = new java.util.HashMap<>();
-            response.put("message", "服务器内部错误");
+            response.put("message", e.getMessage());
             response.put("error", e.getMessage());
             response.put("status", 400);
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             // 处理其他错误，返回500状态码
             java.util.Map<String, Object> response = new java.util.HashMap<>();
-            response.put("message", "服务器内部错误");
+            response.put("message", e.getMessage());
             response.put("error", e.getMessage());
             response.put("status", 500);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);

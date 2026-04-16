@@ -69,13 +69,13 @@ public class UserServiceImpl implements UserService {
         // 检查用户名是否已存在
         if (userRepository.findByName(userDTO.getUserName()) != null) {
             logger.warn("Username already exists: {}", userDTO.getUserName());
-            throw new RuntimeException("Username already exists");
+            throw new RuntimeException("用户名已存在");
         }
 
         // 检查邮箱是否已存在
         if (userRepository.findByEmail(userDTO.getEmail()) != null) {
             logger.warn("Email already exists: {}", userDTO.getEmail());
-            throw new RuntimeException("Email already exists");
+            throw new RuntimeException("邮箱已存在");
         }
 
         // 检查用户ID是否已存在
