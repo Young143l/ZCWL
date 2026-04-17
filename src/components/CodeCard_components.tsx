@@ -2,6 +2,9 @@ import { theme } from "antd";
 import type { FC } from "react";
 import SF from "../../public/sf.svg?react";
 import SF_dark from "../../public/sf_dark.svg?react";
+import CP_PY from "../../public/cp_py.svg?react";
+import CP_PY_dark from "../../public/cp_py_dark.svg?react";
+
 import { useNavigate } from "react-router-dom";
 import { type CodeProject } from "../api/Code_api";
 import useIsDark from "../status/IsDark_status";
@@ -30,9 +33,9 @@ const CodeCard_components: FC<CodeProject> = ({ name, id, type }) => {
                         <SF className="shrink-0 w-10 h-10" />
                     )
                 ) : isDark ? (
-                    <SF_dark className="shrink-0 w-10 h-10" />
+                    <CP_PY_dark className="shrink-0 w-10 h-10" />
                 ) : (
-                    <SF className="shrink-0 w-10 h-10" />
+                    <CP_PY className="shrink-0 w-10 h-10" />
                 )}
                 <div className="font-bold text-2xl h-full overflow-hidden text-ellipsis whitespace-nowrap">
                     {name}

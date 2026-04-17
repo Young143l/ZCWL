@@ -114,7 +114,7 @@ const CodeCP: FC = () => {
                         >
                             <Splitter orientation="vertical">
                                 <Splitter.Panel
-                                    defaultSize="70%"
+                                    defaultSize="65%"
                                     min="10%"
                                     max="90%"
                                     collapsible
