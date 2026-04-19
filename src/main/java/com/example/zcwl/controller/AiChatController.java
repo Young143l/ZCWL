@@ -99,26 +99,28 @@ public class AiChatController {
         // 获取请求参数
         String ask = request.get("ask");
         String uId = request.get("uId");
-        
+        String img = request.get("img");
+
         logger.debug("问题: {}", ask);
         logger.debug("用户ID: {}", uId);
-        
+        logger.debug("图片: {}", img != null && !img.isEmpty() ? "有图片" : "无图片");
+
         // 验证参数
         if (ask == null || ask.isEmpty()) {
             logger.error("请求参数错误: ask参数为空");
             return Flux.error(new IllegalArgumentException("请求参数错误: ask参数不能为空"));
         }
-        
+
         if (uId == null || uId.isEmpty()) {
             logger.error("请求参数错误: uId参数为空");
             return Flux.error(new IllegalArgumentException("请求参数错误: uId参数不能为空"));
         }
-        
+
         logger.debug("调用aiChatService.addChatMessageStream获取流式回答...");
-        
+
         // 调用AI获取流式回答并直接返回Flux
         // Spring WebFlux会自动处理流式响应的生命周期
-        return aiChatService.addChatMessageStream(id, ask, uId)
+        return aiChatService.addChatMessageStream(id, ask, uId, img)
                 .doOnNext(content -> {
                     logger.debug("发送流式数据，长度: {}", content.length());
                 })

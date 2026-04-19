@@ -36,32 +36,36 @@ public interface AiChatService {
      * @param id 聊天文档ID
      * @param ask 用户问题
      * @param uId 用户ID
+     * @param img 图片URL（可为空）
      * @return 包含回答的Map
      */
-    Map<String, Object> addChatMessage(Integer id, String ask, String uId);
+    Map<String, Object> addChatMessage(Integer id, String ask, String uId, String img);
 
     /**
      * 新增指定ID的AI对话询问（流式返回）
      * @param id 聊天文档ID
      * @param ask 用户问题
      * @param uId 用户ID
+     * @param img 图片URL（可为空）
      * @return 流式返回的回答
      */
-    Flux<String> addChatMessageStream(Integer id, String ask, String uId);
+    Flux<String> addChatMessageStream(Integer id, String ask, String uId, String img);
 
     /**
      * 调用AI模型获取回答
      * @param dialogId 对话ID
      * @param ask 用户问题
+     * @param img 图片URL（可为空）
      * @return AI回答
      */
-    String callAI(Integer dialogId, String ask);
+    String callAI(Integer dialogId, String ask, String img);
 
     /**
      * 调用AI模型获取流式回答
      * @param dialogId 对话ID
      * @param ask 用户问题
+     * @param img 图片URL（可为空）
      * @return 流式回答的Flux
      */
-    Flux<String> callAIStream(Integer dialogId, String ask);
+    Flux<String> callAIStream(Integer dialogId, String ask, String img);
 }

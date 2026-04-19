@@ -79,7 +79,7 @@ public class RagServiceImpl implements RagService {
 
             // 4. 调用AI模型获取回答
             // 使用临时对话ID 0，因为RAG问答不需要上下文历史
-            String answer = aiChatService.callAI(0, context);
+            String answer = aiChatService.callAI(0, context, null);
 
             // 5. 构建返回结果
             Map<String, Object> result = new HashMap<>();
@@ -109,7 +109,7 @@ public class RagServiceImpl implements RagService {
 
             // 4. 调用AI模型获取流式回答
             // 使用临时对话ID 0，因为RAG问答不需要上下文历史
-            return aiChatService.callAIStream(0, context);
+            return aiChatService.callAIStream(0, context, null);
         } catch (Exception e) {
             logger.error("RAG流式问答失败: {}", e.getMessage(), e);
             return Flux.just("抱歉，无法获取回答，请稍后再试。");

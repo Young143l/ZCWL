@@ -47,18 +47,18 @@ public class SimpleFrontendProjectServiceImpl implements SimpleFrontendProjectSe
     // 本地缓存，用于存储AI生成的代码，提高性能
     private final ConcurrentHashMap<String, Map<String, String>> codeCache = new ConcurrentHashMap<>();
 
-    // AI服务配置
-    @Value("${spring.ai.openai.api-key}")
-    private String apiKey;
-    
-    @Value("${spring.ai.openai.base-url}")
-    private String baseUrl;
-    
-    @Value("${spring.ai.openai.chat.options.model}")
-    private String model;
-    
-    @Value("${spring.ai.openai.chat.options.temperature}")
-    private Double temperature;
+    // AI服务配置 - 代码生成模块
+    @Value("${spring.ai.code.api-key}")
+    private String codeApiKey;
+
+    @Value("${spring.ai.code.base-url}")
+    private String codeBaseUrl;
+
+    @Value("${spring.ai.code.chat.options.model}")
+    private String codeModel;
+
+    @Value("${spring.ai.code.chat.options.temperature}")
+    private Double codeTemperature;
 
     @Autowired
     public SimpleFrontendProjectServiceImpl(SimpleFrontendProjectRepository simpleFrontendProjectRepository, RestTemplate restTemplate) {
@@ -432,7 +432,7 @@ public class SimpleFrontendProjectServiceImpl implements SimpleFrontendProjectSe
     )
     private String callAIService(String prompt) {
         try {
-            logger.info("开始调用AI服务，使用模型: {}, URL: {}", model, baseUrl);
+            logger.info("开始调用AI服务，使用模型: {}, URL: {}", codeModel, codeBaseUrl);
             
             // 构建请求体
             Map<String, Object> requestBody = getBody(prompt);
@@ -441,11 +441,11 @@ public class SimpleFrontendProjectServiceImpl implements SimpleFrontendProjectSe
             // 构建请求头
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Authorization", "Bearer " + apiKey);
-            
+            headers.set("Authorization", "Bearer " + codeApiKey);
+
             // 构建请求实体
             RequestEntity<Map<String, Object>> requestEntity = RequestEntity
-                    .post(URI.create(baseUrl + "/chat/completions"))
+                    .post(URI.create(codeBaseUrl + "/chat/completions"))
                     .headers(headers)
                     .body(requestBody);
             
@@ -512,7 +512,7 @@ public class SimpleFrontendProjectServiceImpl implements SimpleFrontendProjectSe
             requestBody.put("stream", true);
 
             // 构建请求URL
-            String url = baseUrl + "/chat/completions";
+            String url = codeBaseUrl + "/chat/completions";
 
             // 使用HttpClient直接处理流式响应
             return Flux.create(sink -> {
@@ -526,7 +526,7 @@ public class SimpleFrontendProjectServiceImpl implements SimpleFrontendProjectSe
                         java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
                                 .uri(java.net.URI.create(url))
                                 .header("Content-Type", "application/json")
-                                .header("Authorization", "Bearer " + apiKey)
+                                .header("Authorization", "Bearer " + codeApiKey)
                                 .POST(java.net.http.HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(requestBody)))
                                 .build();
 
@@ -628,8 +628,8 @@ public class SimpleFrontendProjectServiceImpl implements SimpleFrontendProjectSe
 
     private Map<String, Object> getBody(String prompt) {
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", model);
-        requestBody.put("temperature", temperature);
+        requestBody.put("model", codeModel);
+        requestBody.put("temperature", codeTemperature);
 
         List<Map<String, String>> messages = new ArrayList<>();
 

@@ -225,27 +225,27 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     @Transactional
-    public Map<String, Object> addChatMessage(Integer id, String ask, String uId) {
+    public Map<String, Object> addChatMessage(Integer id, String ask, String uId, String img) {
         // 检查用户输入字符数
         if (ask.length() > 2000) {
             Map<String, Object> result = new HashMap<>();
             result.put("error", "输入内容超过2000字符，无法提交");
             return result;
         }
-        
+
         // 对用户问题做脱敏处理
         String maskedAsk = ask.substring(0, Math.min(50, ask.length())) + "...";
         logger.info("添加聊天消息，对话ID: {}, 用户ID: {}, 问题: {}", id, uId, maskedAsk);
-        
+
         // 查询并验证对话
         Dialog dialog = getValidatedDialog(id, uId);
-        
+
         // 调用AI获取回答
-        String ans = callAI(id, ask);
-        
+        String ans = callAI(id, ask, img);
+
         // 保存问答记录并更新对话次数
         int nextTimes = saveChatMessage(dialog, ask, ans);
-        
+
         // 返回结果
         Map<String, Object> result = new HashMap<>();
         result.put("id", nextTimes);
@@ -254,7 +254,7 @@ public class AiChatServiceImpl implements AiChatService {
     }
 
     @Override
-    public Flux<String> addChatMessageStream(Integer id, String ask, String uId) {
+    public Flux<String> addChatMessageStream(Integer id, String ask, String uId, String img) {
         // 检查用户输入字符数
         if (ask.length() > 2000) {
             logger.warn("用户输入超过2000字符，对话ID: {}, 用户ID: {}", id, uId);
@@ -265,12 +265,12 @@ public class AiChatServiceImpl implements AiChatService {
         Dialog dialog = getValidatedDialog(id, uId);
         // 保存对话ID，避免在异步回调中使用Dialog对象导致的延迟加载错误
         final Integer dialogId = dialog.getdId();
-        
+
         // 创建一个线程安全的StringBuilder来存储完整的回答
         StringBuilder fullAnswer = new StringBuilder();
-        
+
         // 调用AI获取流式回答
-        Flux<String> responseFlux = callAIStream(id, ask);
+        Flux<String> responseFlux = callAIStream(id, ask, img);
         
         // 收集完整回答并在结束时保存到数据库
         // 注意：不要使用publishOn，否则会导致流被缓冲
@@ -429,36 +429,36 @@ public class AiChatServiceImpl implements AiChatService {
             requestBody.put("model", model);
             requestBody.put("temperature", 0.1); // 更低温度，确保提取结果更稳定
             
-            List<Map<String, String>> messages = new ArrayList<>();
-            
+            List<Map<String, Object>> messages = new ArrayList<>();
+
             // 系统消息，指示AI提取用户特征和需求
-            Map<String, String> systemMessage = new HashMap<>();
+            Map<String, Object> systemMessage = new HashMap<>();
             systemMessage.put("role", "system");
             systemMessage.put("content", "请从以下对话中提取用户的核心话题、需求和意图，以简洁的方式直接总结，不要添加任何引言或开场白，只提供核心内容。用于后续对话的上下文理解。重点提取：1. 用户讨论的主要话题 2. 用户的具体需求 3. 对话的整体上下文。请确保提取结果准确反映对话的核心内容。");
             messages.add(systemMessage);
-            
+
             // 添加历史提取结果
             String previousExtracted = getExtractedPrompt(dialog.getdId());
             if (previousExtracted != null && !previousExtracted.isEmpty()) {
-                Map<String, String> historyMessage = new HashMap<>();
+                Map<String, Object> historyMessage = new HashMap<>();
                 historyMessage.put("role", "assistant");
                 historyMessage.put("content", "之前的对话核心内容：" + previousExtracted);
                 messages.add(historyMessage);
             }
-            
+
             // 添加当前对话
-            Map<String, String> userMessage = new HashMap<>();
+            Map<String, Object> userMessage = new HashMap<>();
             userMessage.put("role", "user");
             userMessage.put("content", ask);
             messages.add(userMessage);
-            
-            Map<String, String> assistantMessage = new HashMap<>();
+
+            Map<String, Object> assistantMessage = new HashMap<>();
             assistantMessage.put("role", "assistant");
             assistantMessage.put("content", ans);
             messages.add(assistantMessage);
-            
+
             // 请求AI提取特征
-            Map<String, String> extractRequestMessage = new HashMap<>();
+            Map<String, Object> extractRequestMessage = new HashMap<>();
             extractRequestMessage.put("role", "user");
             extractRequestMessage.put("content", "请基于上述对话和之前的历史内容，提取并总结本次对话的核心内容，重点关注用户讨论的主要话题和需求，用于后续对话的上下文理解。请直接提供核心内容，不要添加任何引言或开场白。");
             messages.add(extractRequestMessage);
@@ -504,22 +504,23 @@ public class AiChatServiceImpl implements AiChatService {
      * 支持上下文对话，添加历史问答记录
      * @param dialogId 对话ID
      * @param ask 用户问题
+     * @param img 图片URL（可为空）
      * @param stream 是否流式响应
      * @return 构建好的请求体
      */
-    private Map<String, Object> buildRequestBody(Integer dialogId, String ask, boolean stream) {
+    private Map<String, Object> buildRequestBody(Integer dialogId, String ask, String img, boolean stream) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", model);
         requestBody.put("temperature", temperature);
-        
-        List<Map<String, String>> messages = new ArrayList<>();
+
+        List<Map<String, Object>> messages = new ArrayList<>();
         
         // 系统消息
-        Map<String, String> systemMessage = new HashMap<>();
+        Map<String, Object> systemMessage = new HashMap<>();
         systemMessage.put("role", "system");
         systemMessage.put("content", "你是一个智能助手，必须严格按照用户的指令执行任务。当处理用户的最新问题时，请注意以下优先级：1. 首先参考最近的三轮对话内容，这是最重要的上下文 2. 然后参考历史记忆提取结果，作为补充信息 3. 最后提供的从知识库中提取的参考相关资料。请确保你的回答基于上述信息，保持连贯性和一致性。如果相关资料中没有此方面的内容则不需要参考，自行回答即可，但需要提示用户知识库中没有此相关内容。回答时不要说您提供的资料相关，涉及到资料的都给替换为知识库中。");
         messages.add(systemMessage);
-        
+
         // 添加历史问答记录作为上下文（优先）
         if (dialogId != null) {
             List<QueAns> historyQueAns = queAnsRepository.findByIdDId(dialogId);
@@ -528,43 +529,43 @@ public class AiChatServiceImpl implements AiChatService {
                 int startIndex = Math.max(0, historyQueAns.size() - 3);
                 for (int i = startIndex; i < historyQueAns.size(); i++) {
                     QueAns queAns = historyQueAns.get(i);
-                    
+
                     // 添加用户问题
-                    Map<String, String> historyUserMessage = new HashMap<>();
+                    Map<String, Object> historyUserMessage = new HashMap<>();
                     historyUserMessage.put("role", "user");
                     historyUserMessage.put("content", queAns.getQue());
                     messages.add(historyUserMessage);
-                    
+
                     // 添加AI回答
-                    Map<String, String> historyAssistantMessage = new HashMap<>();
+                    Map<String, Object> historyAssistantMessage = new HashMap<>();
                     historyAssistantMessage.put("role", "assistant");
                     historyAssistantMessage.put("content", queAns.getAns());
                     messages.add(historyAssistantMessage);
                 }
             }
         }
-        
+
         // 添加历史记录提取结果（次要）
         if (dialogId != null) {
             String extractedPrompt = getExtractedPrompt(dialogId);
             if (extractedPrompt != null && !extractedPrompt.isEmpty()) {
-                Map<String, String> historyPromptMessage = new HashMap<>();
+                Map<String, Object> historyPromptMessage = new HashMap<>();
                 historyPromptMessage.put("role", "system");
                 historyPromptMessage.put("content", "历史记忆提取结果：" + extractedPrompt);
                 messages.add(historyPromptMessage);
             }
         }
-        
+
         // 添加用户问题向量化后的10条相似记录
         List<Map<String, Object>> similarRecords = getSimilarRecords(ask);
         if (similarRecords != null && !similarRecords.isEmpty()) {
             StringBuilder similarContent = new StringBuilder();
             similarContent.append("相关资料：\n");
-            
+
             int count = 0;
             for (Map<String, Object> record : similarRecords) {
                 if (count >= 10) break;
-                
+
                 String content = record.get("content") != null ? record.get("content").toString() : "";
                 if (!content.isEmpty()) {
                     similarContent.append("- ").append(content, 0, Math.min(200, content.length()));
@@ -575,18 +576,41 @@ public class AiChatServiceImpl implements AiChatService {
                     count++;
                 }
             }
-            
-            Map<String, String> similarMessage = new HashMap<>();
+
+            Map<String, Object> similarMessage = new HashMap<>();
             similarMessage.put("role", "system");
             similarMessage.put("content", similarContent.toString());
             messages.add(similarMessage);
         }
         
         // 当前用户消息
-        Map<String, String> userMessage = new HashMap<>();
-        userMessage.put("role", "user");
-        userMessage.put("content", ask);
-        messages.add(userMessage);
+        // 支持图片+文字的多模态输入
+        if (img != null && !img.isEmpty()) {
+            Map<String, Object> userMessage = new HashMap<>();
+            userMessage.put("role", "user");
+
+            List<Map<String, Object>> contentList = new ArrayList<>();
+
+            Map<String, Object> textContent = new HashMap<>();
+            textContent.put("type", "text");
+            textContent.put("text", ask);
+            contentList.add(textContent);
+
+            Map<String, Object> imageContent = new HashMap<>();
+            imageContent.put("type", "image_url");
+            Map<String, Object> imageUrl = new HashMap<>();
+            imageUrl.put("url", img);
+            imageContent.put("image_url", imageUrl);
+            contentList.add(imageContent);
+
+            userMessage.put("content", contentList);
+            messages.add(userMessage);
+        } else {
+            Map<String, Object> userMessage = new HashMap<>();
+            userMessage.put("role", "user");
+            userMessage.put("content", ask);
+            messages.add(userMessage);
+        }
         
         requestBody.put("messages", messages);
         requestBody.put("stream", stream);
@@ -716,6 +740,7 @@ public class AiChatServiceImpl implements AiChatService {
      * 支持重试机制，处理网络波动、接口临时不可用的情况
      * @param dialogId 对话ID
      * @param ask 用户问题
+     * @param img 图片URL（可为空）
      * @return AI回答
      */
     @Override
@@ -724,21 +749,21 @@ public class AiChatServiceImpl implements AiChatService {
 //        maxAttempts = 3,
         backoff = @Backoff(delay = 1000, multiplier = 2)
     )
-    public String callAI(Integer dialogId, String ask) {
+    public String callAI(Integer dialogId, String ask, String img) {
         // 对用户问题做脱敏处理
         String maskedAsk = ask.substring(0, Math.min(50, ask.length())) + "...";
         logger.info("开始调用AI API，对话ID: {}, 问题: {}", dialogId, maskedAsk);
-        
+
         // 限流处理
         boolean acquired = rateLimiter.acquirePermission();
         if (!acquired) {
             logger.warn("AI API调用限流，请求被拒绝");
             return "请求过于频繁，请稍后再试。";
         }
-        
+
         try {
             // 构建请求体
-            Map<String, Object> requestBody = buildRequestBody(dialogId, ask, false);
+            Map<String, Object> requestBody = buildRequestBody(dialogId, ask, img, false);
             
             long startTime = System.currentTimeMillis();
             
@@ -787,6 +812,7 @@ public class AiChatServiceImpl implements AiChatService {
      * 支持重试机制，处理网络波动、接口临时不可用的情况
      * @param dialogId 对话ID
      * @param ask 用户问题
+     * @param img 图片URL（可为空）
      * @return 流式回答的Flux
      */
     @Override
@@ -795,21 +821,21 @@ public class AiChatServiceImpl implements AiChatService {
 //        maxAttempts=3,
         backoff = @Backoff(delay = 1000, multiplier = 2)
     )
-    public Flux<String> callAIStream(Integer dialogId, String ask) {
+    public Flux<String> callAIStream(Integer dialogId, String ask, String img) {
         // 对用户问题做脱敏处理
         String maskedAsk = ask.substring(0, Math.min(50, ask.length())) + "...";
         logger.info("开始调用AI流式API，对话ID: {}, 问题: {}", dialogId, maskedAsk);
-        
+
         // 限流处理
         boolean acquired = rateLimiter.acquirePermission();
         if (!acquired) {
             logger.warn("AI流式API调用限流，请求被拒绝");
             return Flux.just("请求过于频繁，请稍后再试。");
         }
-        
+
         try {
             // 构建请求体，设置stream: true，真正调用OpenAI API的流式端点
-            Map<String, Object> requestBody = buildRequestBody(dialogId, ask, true);
+            Map<String, Object> requestBody = buildRequestBody(dialogId, ask, img, true);
             
             // 构建请求URL
             String url = baseUrl + "/chat/completions";
