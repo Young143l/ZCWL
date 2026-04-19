@@ -6,12 +6,14 @@ import {
     theme,
     Tag,
     Popover,
+    Upload,
 } from "antd";
 import { useState, type FC, useEffect, useRef } from "react";
 import {
     SendOutlined,
     ClearOutlined,
     PlusCircleOutlined,
+    PictureOutlined,
 } from "@ant-design/icons";
 const { TextArea } = Input;
 import AIChatBody_components from "./AIChatBody_components";
@@ -26,7 +28,7 @@ import useIsDark from "../status/IsDark_status";
 const AIChatDoc_components: FC = () => {
     const [inputValue, setInputValue] = useState<string>("");
     const [asking, setAsking] = useState<boolean>(false);
-    const { setAns, have, chat, id, newChat, clear, addChat, code, setCode, setSources } =
+    const { setAns, have, chat, id, newChat, clear, addChat, code, setCode, setSources, img, setImg } =
         useAIChatDoc();
     const { isLogin, token, userId } = useLogin();
     const nav = useNavigate();
@@ -44,6 +46,21 @@ const AIChatDoc_components: FC = () => {
     useEffect(() => {
         scrollToBottom();
     }, [chat]);
+
+    // 处理图片上传
+    const handleImgUpload = (file: File) => {
+        const isImage = file.type.startsWith("image/");
+        if (!isImage) {
+            messageApi.error("只能上传图片文件！");
+            return false;
+        }
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            setImg(reader.result as string);
+        };
+        return false;
+    };
 
     const handleAsk = async () => {
         if (chat.length >= 100) {
@@ -77,15 +94,17 @@ const AIChatDoc_components: FC = () => {
         }
         const ask =
             (code !== null ? "```\n" + code + "\n```\n" : "") + inputValue;
+        const currentImg = img;
         setInputValue("");
         setCode(null);
+        setImg(null);
 
-        addChat({ id: "", ask: ask, over: false, ans: "" });
+        addChat({ id: "", ask: ask, over: false, ans: "", img: currentImg || undefined });
 
         // 同时进行RAG搜索获取溯源信息
         const ragPromise = ragSearch(inputValue, token);
 
-        const askRes = await getAsk(userId, currentId, ask, token);
+        const askRes = await getAsk(userId, currentId, ask, token, currentImg || undefined);
         if (askRes.ok) {
             const t = chat.length;
             const reader = askRes.ans as ReadableStreamDefaultReader<
@@ -157,6 +176,7 @@ const AIChatDoc_components: FC = () => {
                             id={i.id}
                             key={i.id}
                             sources={i.sources}
+                            img={i.img}
                         />
                     ))
                 ) : (
@@ -169,9 +189,17 @@ const AIChatDoc_components: FC = () => {
                 rows={3}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="请输入您的问题。"
+                placeholder="请输入您的问题。(Enter发送, Shift+Enter换行)"
                 maxLength={2000}
                 showCount
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (!asking && inputValue !== "") {
+                            handleAsk();
+                        }
+                    }
+                }}
             />
             <div className="w-full pt-1 flex justify-end gap-2 mt-5">
                 <div className="w-full flex items-center gap-1">
@@ -206,6 +234,37 @@ const AIChatDoc_components: FC = () => {
                         </Popover>
                     ) : (
                         <></>
+                    )}
+                    {img ? (
+                        <Popover
+                            content={
+                                <div className="w-60 h-60 rounded-xl p-2 flex justify-center items-center overflow-hidden">
+                                    <img src={img} alt="预览" className="max-w-full max-h-full object-contain" />
+                                </div>
+                            }
+                        >
+                            <Tag
+                                closeIcon
+                                onClose={() => {
+                                    setImg(null);
+                                }}
+                                variant="filled"
+                                color="blue"
+                            >
+                                图片
+                            </Tag>
+                        </Popover>
+                    ) : (
+                        <Upload
+                            accept="image/*"
+                            beforeUpload={handleImgUpload}
+                            showUploadList={false}
+                            disabled={!!img}
+                        >
+                            <Button icon={<PictureOutlined />} size="small" disabled={!!img}>
+                                图片
+                            </Button>
+                        </Upload>
                     )}
                 </div>
 

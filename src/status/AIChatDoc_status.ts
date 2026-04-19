@@ -8,6 +8,7 @@ export interface AIChatBody {
     ans: string;
     over: boolean;
     sources?: RAGSearchResult[]; // 溯源信息
+    img?: string; // 图片base64
 }
 
 interface AIChatDocStatus {
@@ -18,6 +19,8 @@ interface AIChatDocStatus {
     chat: AIChatBody[];
     code: string | null;
     setCode: (code: string | null) => void;
+    img: string | null; // 当前待发送的图片base64
+    setImg: (img: string | null) => void; // 设置图片
     addChat: (i: AIChatBody) => void;
     newChat: (id: string) => void;
     clear: () => void;
@@ -33,6 +36,7 @@ const useAIChatDoc = create<AIChatDocStatus>()(
             id: "",
             chat: [],
             code: null,
+            img: null,
             setIsAIChatOpen: (i: boolean) => {
                 set((s) => ({
                     ...s,
@@ -43,6 +47,12 @@ const useAIChatDoc = create<AIChatDocStatus>()(
                 set((s) => ({
                     ...s,
                     code: code,
+                }));
+            },
+            setImg: (img: string | null) => {
+                set((s) => ({
+                    ...s,
+                    img: img,
                 }));
             },
             addChat: (i: AIChatBody) => {
@@ -58,6 +68,7 @@ const useAIChatDoc = create<AIChatDocStatus>()(
                     id: id,
                     chat: [],
                     code: null,
+                    img: null,
                 }));
             },
             clear: () => {
@@ -67,6 +78,7 @@ const useAIChatDoc = create<AIChatDocStatus>()(
                     id: "",
                     chat: [],
                     code: null,
+                    img: null,
                 }));
             },
             setAns: (id: string, ans: string) => {

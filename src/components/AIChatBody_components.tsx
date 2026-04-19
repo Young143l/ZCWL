@@ -11,7 +11,7 @@ import { cdn, isCdn } from "../config/cdn";
 import useIsDark from "../status/IsDark_status";
 import { useNavigate } from "react-router-dom";
 
-const AIChatBody_components: FC<AIChatBody> = ({ ask, ans, over, sources }) => {
+const AIChatBody_components: FC<AIChatBody> = ({ ask, ans, over, sources, img }) => {
     const {setIsAIChatOpen}=useAIChatDoc();
     const nav = useNavigate()
     const { isDark } = useIsDark();
@@ -20,6 +20,15 @@ const AIChatBody_components: FC<AIChatBody> = ({ ask, ans, over, sources }) => {
         <div className="w-full">
             <div className="flex justify-end gap-1.5">
                 <div className="border border-gray-300 rounded-xl p-2 whitespace-normal max-w-5/6">
+                    {img && (
+                        <div className="mb-2">
+                            <img 
+                                src={img} 
+                                alt="用户上传的图片" 
+                                className="max-w-full max-h-40 rounded-lg object-contain" 
+                            />
+                        </div>
+                    )}
                     <div
                         className={`${isDark ? "markdown-body-dark" : "markdown-body"}`}
                     >
