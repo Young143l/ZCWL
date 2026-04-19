@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * 控制台应用代码生成项目服务实现类
@@ -38,18 +40,18 @@ public class ConsoleProjectServiceImpl implements ConsoleProjectService {
     // 本地缓存，用于存储AI生成的代码，提高性能
     private final ConcurrentHashMap<String, String> codeCache = new ConcurrentHashMap<>();
 
-    // AI服务配置
-    @Value("${spring.ai.openai.api-key}")
-    private String apiKey;
-    
-    @Value("${spring.ai.openai.base-url}")
-    private String baseUrl;
-    
-    @Value("${spring.ai.openai.chat.options.model}")
-    private String model;
-    
-    @Value("${spring.ai.openai.chat.options.temperature}")
-    private Double temperature;
+    // AI服务配置 - 代码生成模块
+    @Value("${spring.ai.code.api-key}")
+    private String codeApiKey;
+
+    @Value("${spring.ai.code.base-url}")
+    private String codeBaseUrl;
+
+    @Value("${spring.ai.code.chat.options.model}")
+    private String codeModel;
+
+    @Value("${spring.ai.code.chat.options.temperature}")
+    private Double codeTemperature;
 
     @Autowired
     public ConsoleProjectServiceImpl(ConsoleProjectRepository consoleProjectRepository, RestTemplate restTemplate) {
@@ -421,25 +423,30 @@ public class ConsoleProjectServiceImpl implements ConsoleProjectService {
      */
     private String callAIService(String prompt) throws Exception {
         // 构建请求体
-        Map<String, Object> requestBody = Map.of(
-                "model", model,
-                "messages", List.of(
-                        Map.of(
-                                "role", "user",
-                                "content", prompt
-                        )
-                ),
-                "temperature", temperature
-        );
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", codeModel);
+        requestBody.put("temperature", codeTemperature);
+        
+        // 关闭思考（OpenAI式API参数）
+        Map<String, Object> thinkingConfig = new HashMap<>();
+        thinkingConfig.put("type", "disabled");
+        requestBody.put("thinking", thinkingConfig);
+        
+        List<Map<String, Object>> messages = new ArrayList<>();
+        Map<String, Object> userMessage = new HashMap<>();
+        userMessage.put("role", "user");
+        userMessage.put("content", prompt);
+        messages.add(userMessage);
+        requestBody.put("messages", messages);
 
         // 设置请求头
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(apiKey);
+        headers.setBearerAuth(codeApiKey);
 
         // 创建请求
         RequestEntity<Map<String, Object>> request = RequestEntity
-                .post(URI.create(baseUrl + "/chat/completions"))
+                .post(URI.create(codeBaseUrl + "/chat/completions"))
                 .headers(headers)
                 .body(requestBody);
 

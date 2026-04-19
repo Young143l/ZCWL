@@ -627,20 +627,29 @@ public class SimpleFrontendProjectServiceImpl implements SimpleFrontendProjectSe
     }
 
     private Map<String, Object> getBody(String prompt) {
+        return getBody(prompt, false);
+    }
+
+    private Map<String, Object> getBody(String prompt, boolean enableThinking) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", codeModel);
         requestBody.put("temperature", codeTemperature);
 
-        List<Map<String, String>> messages = new ArrayList<>();
+        // 关闭思考（OpenAI式API参数）
+        Map<String, Object> thinkingConfig = new HashMap<>();
+        thinkingConfig.put("type", enableThinking ? "enabled" : "disabled");
+        requestBody.put("thinking", thinkingConfig);
+
+        List<Map<String, Object>> messages = new ArrayList<>();
 
         // 系统消息
-        Map<String, String> systemMessage = new HashMap<>();
+        Map<String, Object> systemMessage = new HashMap<>();
         systemMessage.put("role", "system");
         systemMessage.put("content", "你是一位资深前端架构师，擅长生成高质量的前端代码。请根据用户的需求和提示词，生成完整的HTML、CSS和JavaScript代码。");
         messages.add(systemMessage);
 
         // 用户消息
-        Map<String, String> userMessage = new HashMap<>();
+        Map<String, Object> userMessage = new HashMap<>();
         userMessage.put("role", "user");
         userMessage.put("content", prompt);
         messages.add(userMessage);
