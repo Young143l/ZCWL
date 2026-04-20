@@ -107,7 +107,9 @@ const useAIChatDoc = create<AIChatDocStatus>()(
             partialize: (state) => ({
                 have: state.have,
                 id: state.id,
-                chat: state.chat,
+                // 限制聊天记录数量为最近 20 条，避免 localStorage 配额超出
+                // 图片已在上传时压缩到约 100KB，可以保留
+                chat: state.chat.slice(-20),
             }),
         },
     ),

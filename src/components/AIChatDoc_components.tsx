@@ -24,6 +24,7 @@ import useLogin from "../status/Login_status";
 import { useNavigate } from "react-router-dom";
 import { flushSync } from "react-dom";
 import useIsDark from "../status/IsDark_status";
+import { ensureCompressedImage } from "../utils/imageCompress";
 
 const AIChatDoc_components: FC = () => {
     const [inputValue, setInputValue] = useState<string>("");
@@ -47,7 +48,7 @@ const AIChatDoc_components: FC = () => {
         scrollToBottom();
     }, [chat]);
 
-    // 处理图片上传
+    // 处理图片上传（带压缩）
     const handleImgUpload = (file: File) => {
         const isImage = file.type.startsWith("image/");
         if (!isImage) {
@@ -56,8 +57,17 @@ const AIChatDoc_components: FC = () => {
         }
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = () => {
-            setImg(reader.result as string);
+        reader.onload = async () => {
+            try {
+                // 压缩图片到约 100KB
+                const compressed = await ensureCompressedImage(reader.result as string, 100);
+                setImg(compressed);
+                messageApi.success("图片已压缩并上传");
+            } catch (e) {
+                console.error("图片压缩失败:", e);
+                // 压缩失败时使用原图
+                setImg(reader.result as string);
+            }
         };
         return false;
     };

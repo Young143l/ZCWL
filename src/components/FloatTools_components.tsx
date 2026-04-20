@@ -1,7 +1,7 @@
 import { FloatButton, Modal } from "antd";
 import {
     ArrowUpOutlined,
-    SyncOutlined,
+    // SyncOutlined,
     // HomeOutlined,
     QuestionCircleOutlined,
 } from "@ant-design/icons";
@@ -43,12 +43,12 @@ const FloatTools_components: FC = () => {
                     />
                 )} */}
                 <FloatButton.BackTop icon={<ArrowUpOutlined />} />
-                <FloatButton
+                {/* <FloatButton
                     icon={<SyncOutlined />}
                     onClick={() => {
                         window.location.reload();
                     }}
-                />
+                /> */}
                 <Help_components />
                 <FloatButton
                     icon={<QuestionCircleOutlined />}
