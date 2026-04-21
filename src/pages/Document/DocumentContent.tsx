@@ -1,4 +1,4 @@
-import { useEffect, useState, type FC } from "react";
+import { useEffect, useState, useRef, useCallback, type FC } from "react";
 import { Link, useParams } from "react-router-dom";
 import Template_Page from "../Template_Page";
 import ReactMarkdown from "react-markdown";
@@ -34,6 +34,15 @@ import {
 } from "../../api/DocComment.api";
 import useLogin from "../../status/Login_status";
 import useIsDark from "../../status/IsDark_status";
+import {
+    startLearning,
+    updateProgress,
+    endLearning,
+    getLearningRecord,
+    type LearningRecord,
+} from "../../api/Learning_api";
+import LearningProgress_components from "../../components/LearningProgress_components";
+
 const DocumentContent: FC = () => {
     const [messageApi, contextHolder] = message.useMessage();
     const { d_id, c_id } = useParams();
@@ -52,8 +61,13 @@ const DocumentContent: FC = () => {
     const [commentContent, setCommentContent] = useState<string>("");
     const { isLogin, userId, token, email } = useLogin();
     const { isDark } = useIsDark();
+    
+    const contentRef = useRef<HTMLDivElement>(null);
+    const [learningRecord, setLearningRecord] = useState<LearningRecord | null>(null);
+    const sessionRef = useRef<{ docId: number; chapterId: number | null; startTime: number } | null>(null);
+    const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const currentProgressRef = useRef<number>(0);
 
-    // 获取评论列表
     const fetchComments = async () => {
         if (d_id && c_id) {
             const res = await getComments(d_id, c_id);
@@ -63,10 +77,8 @@ const DocumentContent: FC = () => {
         }
     };
 
-    // 提交评论
     const handleSubmitComment = async () => {
         if (!isLogin) {
-            // 未登录提示
             return;
         }
         if (!commentContent.trim() || !d_id || !c_id) {
@@ -78,7 +90,7 @@ const DocumentContent: FC = () => {
         });
         const commentRequest: CommentRequest = {
             uId: userId,
-            email: email, // 从登录状态获取或后端处理
+            email: email,
             content: (at.fa != "-1" ? `**@${at.name}** ` : "") + commentContent,
             fa: at.fa,
         };
@@ -88,7 +100,7 @@ const DocumentContent: FC = () => {
         if (res.ok) {
             setCommentContent("");
             setAt({ name: "", fa: "-1" });
-            fetchComments(); // 刷新评论列表
+            fetchComments();
             messageApi.success({
                 content: "提交成功",
             });
@@ -98,6 +110,41 @@ const DocumentContent: FC = () => {
             });
         }
     };
+
+    const handleScroll = useCallback(() => {
+        if (contentRef.current && isLogin && token && sessionRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
+            const maxScroll = scrollHeight - clientHeight;
+            // 修复进度计算，当滚动到底部时设置为100%
+            let progress = 0;
+            if (maxScroll > 0) {
+                progress = Math.floor((scrollTop / maxScroll) * 100);
+                // 当滚动到接近底部时，设置为100%
+                if (scrollTop >= maxScroll - 10) {
+                    progress = 100;
+                }
+            } else {
+                // 内容不足一屏时，设置为100%
+                progress = 100;
+            }
+            const position = scrollTop;
+            
+            if (progress >= currentProgressRef.current) {
+                currentProgressRef.current = progress;
+                updateProgress(
+                    sessionRef.current.docId,
+                    sessionRef.current.chapterId,
+                    progress,
+                    position,
+                    token
+                ).then((res) => {
+                    if (res.success && res.data) {
+                        setLearningRecord(res.data);
+                    }
+                });
+            }
+        }
+    }, [isLogin, token]);
 
     useEffect(() => {
         getDoc(d_id as string).then((res) => {
@@ -144,6 +191,10 @@ const DocumentContent: FC = () => {
                         }
                     ).docContent,
                 );
+                // 章节切换时滚动到顶部
+                if (contentRef.current) {
+                    contentRef.current.scrollTop = 0;
+                }
             }
         });
     }, [d_id, c_id]);
@@ -159,6 +210,80 @@ const DocumentContent: FC = () => {
         };
         loadComments();
     }, [d_id, c_id]);
+
+    // 处理章节切换
+    useEffect(() => {
+        if (!d_id || !isLogin || !token) {
+            return;
+        }
+
+        const docId = parseInt(d_id, 10);
+        const chapterId = c_id ? parseInt(c_id, 10) : null;
+
+        // 结束上一个章节的学习
+        if (sessionRef.current && token) {
+            endLearning(
+                sessionRef.current.docId,
+                sessionRef.current.chapterId,
+                token
+            );
+        }
+
+        // 重置状态 - 使用 setTimeout 避免同步调用 setState
+        const resetTimer = setTimeout(() => {
+            setLearningRecord(null);
+        }, 0);
+        currentProgressRef.current = 0;
+        sessionRef.current = null;
+
+        // 获取新章节的学习记录
+        getLearningRecord(docId, chapterId, token).then((res) => {
+            if (res.success && res.data) {
+                setLearningRecord(res.data);
+                currentProgressRef.current = res.data.progress || 0;
+            }
+            
+            // 开始新章节的学习
+            startLearning(docId, chapterId, token).then((res) => {
+                if (res.success && res.data) {
+                    setLearningRecord(res.data);
+                    currentProgressRef.current = res.data.progress || 0;
+                    sessionRef.current = {
+                        docId,
+                        chapterId,
+                        startTime: Date.now(),
+                    };
+                }
+            });
+        });
+
+        // 组件卸载时结束学习并清理定时器
+        return () => {
+            clearTimeout(resetTimer);
+            if (sessionRef.current && token) {
+                endLearning(
+                    sessionRef.current.docId,
+                    sessionRef.current.chapterId,
+                    token
+                );
+                sessionRef.current = null;
+            }
+        };
+    }, [d_id, c_id, isLogin, token]);
+
+    useEffect(() => {
+        if (isLogin && token && contentRef.current) {
+            progressTimerRef.current = setInterval(() => {
+                handleScroll();
+            }, 5000);
+        }
+        
+        return () => {
+            if (progressTimerRef.current) {
+                clearInterval(progressTimerRef.current);
+            }
+        };
+    }, [isLogin, token, handleScroll]);
 
     return (
         <>
@@ -176,10 +301,21 @@ const DocumentContent: FC = () => {
                 c_name={docContent?.title as string}
             />
             <div className="flex flex-col gap-4">
+                {isLogin && (
+                    <div className="p-1">
+                        <LearningProgress_components 
+                            progress={learningRecord?.progress || 0} 
+                            status={(learningRecord?.status as "learning" | "completed") || "learning"}
+                        />
+                    </div> 
+                )}
                 <Template_Page
                     children={
                         <div
-                            className={`${isDark ? "markdown-body-dark" : "markdown-body"} p-3`}
+                            ref={contentRef}
+                            onScroll={handleScroll}
+                            className={`${isDark ? "markdown-body-dark" : "markdown-body"} p-3 overflow-auto max-h-[calc(100vh-95px)]`}
+                            
                         >
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {docContent?.content}

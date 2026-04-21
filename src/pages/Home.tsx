@@ -5,9 +5,13 @@ import useIsDark from "../status/IsDark_status.js";
 import { theme } from "antd";
 import EvedayAsk_components from "../components/EvedayAsk_components.js";
 import News_components from "../components/News_components.js";
+import useLogin from "../status/Login_status.js";
+
 const Home: FC = () => {
     const pColor = theme.useToken().token.colorPrimaryBorder;
     const { isDark } = useIsDark();
+    useLogin(); // 保持登录状态检查
+    
     return (
         <>
             <Hello_Sum_component AllCmd="Cfww --info" title="Home" />
