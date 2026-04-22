@@ -3,21 +3,17 @@ import DocCard_component from "../../components/DocCard_components";
 import Hello_Sum_component from "../../components/Hello_Sum_components";
 import { useEffect, useState } from "react";
 import { type DocInfo, getDocList } from "../../api/Doc_api";
-import { getDocsProgress } from "../../api/Learning_api";
 import { SearchOutlined } from "@ant-design/icons";
 import Template_Page from "../Template_Page";
+import LearningPath_components from "../../components/LearningPath_components";
 import useLogin from "../../status/Login_status";
 
-interface DocInfoWithProgress extends DocInfo {
-    progress?: number;
-}
-
 const DocumentList = () => {
-    const [docList, setDocList] = useState<DocInfoWithProgress[]>([]);
-    const [nowDocList, setNowDocList] = useState<DocInfoWithProgress[]>([]);
+    const [docList, setDocList] = useState<DocInfo[]>([]);
+    const [nowDocList, setNowDocList] = useState<DocInfo[]>([]);
     const [load, setLoad] = useState<boolean>(true);
     const mpColor = theme.useToken().token.colorPrimary;
-    const { token, isLogin } = useLogin();
+    const { isLogin } = useLogin();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -29,32 +25,13 @@ const DocumentList = () => {
             }
 
             const docs = (docRes as { ok: boolean; docList: DocInfo[] }).docList;
-            
-            // 如果已登录，获取学习进度
-            if (isLogin && token) {
-                const progressRes = await getDocsProgress(token);
-                if (progressRes.success && progressRes.data) {
-                    const progressMap = progressRes.data;
-                    // 将进度信息合并到文档列表
-                    const docsWithProgress = docs.map(doc => ({
-                        ...doc,
-                        progress: progressMap[parseInt(doc.id, 10)] || 0
-                    }));
-                    setDocList(docsWithProgress);
-                    setNowDocList(docsWithProgress);
-                } else {
-                    setDocList(docs);
-                    setNowDocList(docs);
-                }
-            } else {
-                setDocList(docs);
-                setNowDocList(docs);
-            }
+            setDocList(docs);
+            setNowDocList(docs);
             setLoad(false);
         };
 
         fetchData();
-    }, [isLogin, token]);
+    }, []);
 
     const handleSearch = () => {
         let time: number | null = null;
@@ -64,10 +41,10 @@ const DocumentList = () => {
             time = setTimeout(() => {
                 setNowDocList(
                     docList?.filter(
-                        (i: DocInfo) =>
+                        (i) =>
                             i.name.includes(e.target.value) ||
                             i.summary.includes(e.target.value),
-                    ) as DocInfo[],
+                    ) || [],
                 );
             }, 260);
         };
@@ -139,7 +116,6 @@ const DocumentList = () => {
                                     DocName={i.name}
                                     DocImg={i.img}
                                     DocSum={i.summary}
-                                    progress={i.progress}
                                 />
                             );
                         })}
@@ -147,6 +123,13 @@ const DocumentList = () => {
                 ) : (
                     <div className="mt-20">
                         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                    </div>
+                )}
+
+                {/* 学习路径图 - 仅登录用户可见 */}
+                {isLogin && (
+                    <div className="mt-4">
+                        <LearningPath_components />
                     </div>
                 )}
             </Template_Page>

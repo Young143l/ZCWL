@@ -1,4 +1,4 @@
-import { Avatar, theme, Progress } from "antd";
+import { Avatar, theme } from "antd";
 import type { FC } from "react";
 import { Link } from "react-router-dom";
 import useIsDark from "../status/IsDark_status";
@@ -8,10 +8,9 @@ interface DocInfo {
     DocName: string;
     DocImg: string;
     DocSum: string;
-    progress?: number;
 }
 
-const DocCard_component: FC<DocInfo> = ({ DocId, DocName, DocImg, DocSum, progress }) => {
+const DocCard_component: FC<DocInfo> = ({ DocId, DocName, DocImg, DocSum }) => {
     const pColor = theme.useToken().token.colorPrimaryBorder;
     const {isDark}=useIsDark()
 
@@ -33,17 +32,6 @@ const DocCard_component: FC<DocInfo> = ({ DocId, DocName, DocImg, DocSum, progre
                     <div className="text-[12px] line-clamp-2 min-h-10">
                         {DocSum}
                     </div>
-                    {progress !== undefined && progress > 0 && (
-                        <div className="mt-1">
-                            <Progress 
-                                percent={progress} 
-                                size="small" 
-                                status={progress >= 100 ? "success" : "active"}
-                                showInfo={true}
-                                format={(percent) => `${percent?.toFixed(0)}%`}
-                            />
-                        </div>
-                    )}
                 </div>
             </div>
         </Link>

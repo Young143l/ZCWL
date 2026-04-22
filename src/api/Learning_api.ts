@@ -242,7 +242,7 @@ export const getAllDocProgress = async (
 
 export const getDocsProgress = async (
     token: string
-): Promise<{ success: boolean; data?: Record<number, number>; error?: string }> => {
+): Promise<{ success: boolean; data?: Record<string, number>; error?: string }> => {
     try {
         const res = await fetch(`${BASE_URL}/learning/progress/all`, {
             method: "GET",
@@ -257,11 +257,12 @@ export const getDocsProgress = async (
         }
 
         const json = await res.json();
-        // 将数组转换为以 docId 为键的映射
-        const progressMap: Record<number, number> = {};
+        // 将数组转换为以 docId 为键的映射（使用字符串作为键）
+        // 后端返回的字段是 completionRate 而不是 avgProgress
+        const progressMap: Record<string, number> = {};
         if (json.docs && Array.isArray(json.docs)) {
             for (const doc of json.docs) {
-                progressMap[doc.docId] = doc.avgProgress;
+                progressMap[String(doc.docId)] = doc.completionRate;
             }
         }
         return { success: true, data: progressMap };

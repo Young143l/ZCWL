@@ -63,11 +63,9 @@ const useLearning = (token: string | null) => {
         if (!token || !sessionRef.current) return;
 
         try {
-            const duration = Math.floor((Date.now() - sessionRef.current.startTime) / 1000);
             await endLearning(
                 sessionRef.current.docId,
                 sessionRef.current.chapterId,
-                duration,
                 token
             );
         } catch (error) {
@@ -96,9 +94,8 @@ const useLearning = (token: string | null) => {
 
     useEffect(() => {
         return () => {
-            if (sessionRef.current) {
-                const duration = Math.floor((Date.now() - sessionRef.current.startTime) / 1000);
-                endLearning(sessionRef.current.docId, sessionRef.current.chapterId, duration, token || "");
+            if (sessionRef.current && token) {
+                endLearning(sessionRef.current.docId, sessionRef.current.chapterId, token);
             }
         };
     }, [token]);
