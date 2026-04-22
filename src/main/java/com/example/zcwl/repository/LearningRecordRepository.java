@@ -40,4 +40,7 @@ public interface LearningRecordRepository extends JpaRepository<LearningRecord, 
     List<LearningRecord> findByUserIdAndDocIdOrderByChapterIdAsc(@Param("userId") String userId, @Param("docId") Integer docId);
     
     long countByUserIdAndStatus(String userId, String status);
+
+    @Query("SELECT COUNT(DISTINCT lr.docId) FROM LearningRecord lr WHERE lr.userId = :userId")
+    long countDistinctDocIdByUserId(@Param("userId") String userId);
 }

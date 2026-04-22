@@ -227,13 +227,9 @@ public class LearningServiceImpl implements LearningService {
         long completedCount = learningRecordRepository.countByUserIdAndStatus(userId, "completed");
         stats.setCompletedChapters((int) completedCount);
         
-        // 计算学习文档数（唯一文档ID的数量）
-        List<LearningRecord> records = learningRecordRepository.findByUserId(userId);
-        Set<Integer> uniqueDocs = new HashSet<>();
-        for (LearningRecord record : records) {
-            uniqueDocs.add(record.getDocId());
-        }
-        stats.setTotalDocs(uniqueDocs.size());
+        // 计算学习文档数（使用数据库查询唯一文档ID的数量）
+        long distinctDocCount = learningRecordRepository.countDistinctDocIdByUserId(userId);
+        stats.setTotalDocs((int) distinctDocCount);
 
         userLearningStatsRepository.save(stats);
     }
