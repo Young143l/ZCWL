@@ -1,4 +1,10 @@
-import { useState, useEffect, useCallback, startTransition, type FC } from "react";
+import {
+    useState,
+    useEffect,
+    useCallback,
+    startTransition,
+    type FC,
+} from "react";
 import {
     Button,
     Card,
@@ -86,7 +92,14 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
                 handleGenerate();
             });
         }
-    }, [docId, chapterId, hasContent, handleGenerate, loading, questions.length]);
+    }, [
+        docId,
+        chapterId,
+        hasContent,
+        handleGenerate,
+        loading,
+        questions.length,
+    ]);
 
     // 选择答案
     const handleAnswerChange = (questionIndex: number, value: string) => {
@@ -106,7 +119,13 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
 
         setGrading(true);
         const answerList = questions.map((_, i) => answers[i] || "");
-        const res = await gradeQuiz(docId, chapterId, questions, answerList, token);
+        const res = await gradeQuiz(
+            docId,
+            chapterId,
+            questions,
+            answerList,
+            token,
+        );
 
         if (res.ok && res.details) {
             setResult({
@@ -130,10 +149,7 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
 
     if (!hasContent) {
         return (
-            <Empty
-                description="请在文档页面使用测验功能"
-                className="py-8"
-            />
+            <Empty description="请在文档页面使用测验功能" className="py-8" />
         );
     }
 
@@ -144,8 +160,12 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
                 {/* 标题 */}
                 <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
                     <Space>
-                        <ThunderboltOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                        <Title level={4} className="mb-0!">AI 智能测验</Title>
+                        <ThunderboltOutlined
+                            style={{ color: "#faad14", fontSize: 20 }}
+                        />
+                        <Title level={4} className="mb-0!">
+                            AI 智能测验
+                        </Title>
                         {result && (
                             <Tag
                                 color={
@@ -228,10 +248,11 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
                                 size="small"
                                 title={
                                     <Space>
-                                        <Text strong>
-                                            第 {index + 1} 题
-                                        </Text>
-                                        <Tag color="blue" style={{ fontSize: 11 }}>
+                                        <Text strong>第 {index + 1} 题</Text>
+                                        <Tag
+                                            color="blue"
+                                            style={{ fontSize: 11 }}
+                                        >
                                             选择题
                                         </Tag>
                                     </Space>
@@ -244,11 +265,17 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
                                 <Radio.Group
                                     value={answers[index]}
                                     onChange={(e) =>
-                                        handleAnswerChange(index, e.target.value)
+                                        handleAnswerChange(
+                                            index,
+                                            e.target.value,
+                                        )
                                     }
                                     className="w-full"
                                 >
-                                    <Space direction="vertical" className="w-full">
+                                    <Space
+                                        direction="vertical"
+                                        className="w-full"
+                                    >
                                         {Object.entries(q.options).map(
                                             ([key, value]) => (
                                                 <Radio
@@ -257,7 +284,9 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
                                                     className="p-2 rounded hover:bg-gray-50 w-full"
                                                 >
                                                     <Text>
-                                                        <Text strong>{key}.</Text>{" "}
+                                                        <Text strong>
+                                                            {key}.
+                                                        </Text>{" "}
                                                         {value}
                                                     </Text>
                                                 </Radio>
@@ -280,9 +309,7 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
                                 percent={Math.round(
                                     (result.score / result.total) * 100,
                                 )}
-                                format={() =>
-                                    `${result.score}/${result.total}`
-                                }
+                                format={() => `${result.score}/${result.total}`}
                                 size={100}
                                 status={
                                     result.score / result.total >= 0.6
@@ -295,13 +322,10 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
                                     {result.score / result.total >= 0.8
                                         ? "🌟 太棒了！"
                                         : result.score / result.total >= 0.6
-                                            ? "👍 不错！继续加油"
-                                            : "💪 需要多加复习哦"}
+                                          ? "👍 不错！继续加油"
+                                          : "💪 需要多加复习哦"}
                                 </Title>
-                                <Paragraph
-                                    type="secondary"
-                                    className="mb-0"
-                                >
+                                <Paragraph type="secondary" className="mb-0">
                                     {result.summary}
                                 </Paragraph>
                             </div>
@@ -336,7 +360,9 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
                                                                             : "text-red-600"
                                                                     }
                                                                 >
-                                                                    第 {index + 1} 题
+                                                                    第{" "}
+                                                                    {index + 1}{" "}
+                                                                    题
                                                                 </Text>
                                                                 <Tag
                                                                     color={
@@ -354,22 +380,31 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
                                                         description={
                                                             <div className="space-y-1">
                                                                 <Text type="secondary">
-                                                                    你的答案：{detail.userAnswer || "未作答"}
+                                                                    你的答案：
+                                                                    {detail.userAnswer ||
+                                                                        "未作答"}
                                                                 </Text>
                                                                 <br />
                                                                 {!detail.correct && (
                                                                     <>
                                                                         <Text type="secondary">
                                                                             正确答案：
-                                                                            <Text strong className="text-green-600">
-                                                                                {detail.correctAnswer}
+                                                                            <Text
+                                                                                strong
+                                                                                className="text-green-600"
+                                                                            >
+                                                                                {
+                                                                                    detail.correctAnswer
+                                                                                }
                                                                             </Text>
                                                                         </Text>
                                                                         <br />
                                                                     </>
                                                                 )}
                                                                 <Text type="secondary">
-                                                                    {detail.feedback}
+                                                                    {
+                                                                        detail.feedback
+                                                                    }
                                                                 </Text>
                                                             </div>
                                                         }
