@@ -61,11 +61,19 @@ const DocumentContent: FC = () => {
     const [commentContent, setCommentContent] = useState<string>("");
     const { isLogin, userId, token, email } = useLogin();
     const { isDark } = useIsDark();
-    
+
     const contentRef = useRef<HTMLDivElement>(null);
-    const [learningRecord, setLearningRecord] = useState<LearningRecord | null>(null);
-    const sessionRef = useRef<{ docId: number; chapterId: number | null; startTime: number } | null>(null);
-    const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const [learningRecord, setLearningRecord] = useState<LearningRecord | null>(
+        null,
+    );
+    const sessionRef = useRef<{
+        docId: number;
+        chapterId: number | null;
+        startTime: number;
+    } | null>(null);
+    const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(
+        null,
+    );
     const currentProgressRef = useRef<number>(0);
 
     const fetchComments = async () => {
@@ -113,7 +121,8 @@ const DocumentContent: FC = () => {
 
     const handleScroll = useCallback(() => {
         if (contentRef.current && isLogin && token && sessionRef.current) {
-            const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
+            const { scrollTop, scrollHeight, clientHeight } =
+                contentRef.current;
             const maxScroll = scrollHeight - clientHeight;
             // 修复进度计算，当滚动到底部时设置为100%
             let progress = 0;
@@ -128,7 +137,7 @@ const DocumentContent: FC = () => {
                 progress = 100;
             }
             const position = scrollTop;
-            
+
             if (progress >= currentProgressRef.current) {
                 currentProgressRef.current = progress;
                 updateProgress(
@@ -136,7 +145,7 @@ const DocumentContent: FC = () => {
                     sessionRef.current.chapterId,
                     progress,
                     position,
-                    token
+                    token,
                 ).then((res) => {
                     if (res.success && res.data) {
                         setLearningRecord(res.data);
@@ -225,7 +234,7 @@ const DocumentContent: FC = () => {
             endLearning(
                 sessionRef.current.docId,
                 sessionRef.current.chapterId,
-                token
+                token,
             );
         }
 
@@ -242,7 +251,7 @@ const DocumentContent: FC = () => {
                 setLearningRecord(res.data);
                 currentProgressRef.current = res.data.progress || 0;
             }
-            
+
             // 开始新章节的学习
             startLearning(docId, chapterId, token).then((res) => {
                 if (res.success && res.data) {
@@ -264,7 +273,7 @@ const DocumentContent: FC = () => {
                 endLearning(
                     sessionRef.current.docId,
                     sessionRef.current.chapterId,
-                    token
+                    token,
                 );
                 sessionRef.current = null;
             }
@@ -277,7 +286,7 @@ const DocumentContent: FC = () => {
                 handleScroll();
             }, 5000);
         }
-        
+
         return () => {
             if (progressTimerRef.current) {
                 clearInterval(progressTimerRef.current);
@@ -303,11 +312,15 @@ const DocumentContent: FC = () => {
             <div className="flex flex-col gap-4">
                 {isLogin && (
                     <div className="p-1">
-                        <LearningProgress_components 
-                            progress={learningRecord?.progress || 0} 
-                            status={(learningRecord?.status as "learning" | "completed") || "learning"}
+                        <LearningProgress_components
+                            progress={learningRecord?.progress || 0}
+                            status={
+                                (learningRecord?.status as
+                                    | "learning"
+                                    | "completed") || "learning"
+                            }
                         />
-                    </div> 
+                    </div>
                 )}
                 <Template_Page
                     children={
@@ -315,7 +328,6 @@ const DocumentContent: FC = () => {
                             ref={contentRef}
                             onScroll={handleScroll}
                             className={`${isDark ? "markdown-body-dark" : "markdown-body"} p-3 overflow-auto max-h-[calc(100vh-95px)]`}
-                            
                         >
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {docContent?.content}
