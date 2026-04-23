@@ -37,6 +37,19 @@ const LearningHeatmap_components: FC = () => {
         };
     }, [token, isLogin]);
 
+    // 计算单元格大小（响应式）
+    const getCellSize = () => {
+        if (typeof window !== 'undefined' && window.innerWidth < 640) {
+            return 10; // 小屏 10px
+        }
+        return 14;
+    };
+
+    const cellSize = getCellSize();
+    const gap = Math.max(2, Math.min(4, cellSize < 12 ? 2 : 4)); // 间距随单元格自适应
+    const rowHeight = cellSize + gap; // 每行占用的总高度（行高 = 单元格 + 间距）
+    const weekWidth = cellSize + gap; // 每周总宽度
+
     // 按周分组数据
     const getWeeksData = () => {
         const weeks: HeatmapData[][] = [];
@@ -111,7 +124,11 @@ const LearningHeatmap_components: FC = () => {
 
     const getMonthLabels = () => {
         const months: { index: number; label: string }[] = [];
-        const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+        // 窄屏使用简短标签（如 "1" 代替 "1月"），宽屏使用完整标签
+        const isNarrow = typeof window !== 'undefined' && window.innerWidth < 640;
+        const monthNames = isNarrow
+            ? ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+            : ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
 
         weeks.forEach((week, weekIndex) => {
             // 取每周的中间那天来判断月份
@@ -156,9 +173,9 @@ const LearningHeatmap_components: FC = () => {
     return (
         <Card
             title={
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center flex-wrap gap-1">
                     <span>学习热力图</span>
-                    <span className="text-sm text-gray-500 font-normal">
+                    <span className="text-xs sm:text-sm text-gray-500 font-normal">
                         过去一年的学习活跃度
                     </span>
                 </div>
@@ -166,7 +183,7 @@ const LearningHeatmap_components: FC = () => {
             className="w-full"
         >
             {/* 统计信息 */}
-            <div className="flex gap-6 mb-4 text-sm">
+            <div className="flex flex-wrap gap-3 sm:gap-6 mb-4 text-xs sm:text-sm">
                 <div>
                     <span className="text-gray-500">活跃天数: </span>
                     <span className="font-semibold">{stats.activeDays}</span>
@@ -178,62 +195,109 @@ const LearningHeatmap_components: FC = () => {
             </div>
 
             {/* 热力图 */}
-            <div className="overflow-x-auto pb-2">
-                <div className="inline-block min-w-full">
-                    {/* 月份标签 */}
-                    <div className="flex mb-2" style={{ marginLeft: '32px', height: '20px' }}>
-                        {monthLabels.map((m) => (
-                            <div
-                                key={m.index}
-                                className="text-xs text-gray-500 absolute"
+            <div className="overflow-x-auto pb-2 -mx-2 px-2">
+                <div className="inline-block">
+                    {/* 月份标签 + 格子区域 flex row */}
+                    <div className="flex">
+                        {/* 星期标签列 - 使用与网格行一致的高度 */}
+                        <div
+                            className="flex flex-col items-center mr-1 sm:mr-2 text-[10px] sm:text-xs text-gray-500 shrink-0 justify-start pt-0"
+                            style={{ paddingTop: '18px' /* 与月份标签行高度对齐 */ }}
+                        >
+                            {/* 周一：第0行，高度 = rowHeight（包含间隙） */}
+                            <span
                                 style={{
-                                    left: `${m.index * 18 + 32}px`, // 18px是每周的宽度(14+4间隙)
-                                    whiteSpace: 'nowrap',
+                                    height: `${rowHeight}px`,
+                                    lineHeight: `${rowHeight}px`,
+                                    display: 'block',
                                 }}
                             >
-                                {m.label}
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="flex" style={{ marginTop: '24px' }}>
-                        {/* 星期标签 */}
-                        <div className="flex flex-col justify-around mr-2 text-xs text-gray-500" style={{ height: '112px' }}>
-                            <span style={{ height: '14px', lineHeight: '14px' }}>一</span>
-                            <span style={{ height: '14px', lineHeight: '14px' }}>三</span>
-                            <span style={{ height: '14px', lineHeight: '14px' }}>五</span>
+                                一
+                            </span>
+                            {/* 周三：第2行 */}
+                            <span
+                                style={{
+                                    height: `${rowHeight}px`,
+                                    lineHeight: `${rowHeight}px`,
+                                    display: 'block',
+                                }}
+                            >
+                                三
+                            </span>
+                            {/* 周五：第4行，最后一行不需要底部间隙，但统一使用 rowHeight 保持对齐到单元格中心 */}
+                            <span
+                                style={{
+                                    height: `${rowHeight}px`,
+                                    lineHeight: `${rowHeight}px`,
+                                    display: 'block',
+                                }}
+                            >
+                                五
+                            </span>
                         </div>
 
-                        {/* 热力格子 */}
-                        <div className="flex gap-1">
-                            {weeks.map((week, weekIndex) => (
-                                <div key={weekIndex} className="flex flex-col gap-1">
-                                    {week.map((day, dayIndex) => (
-                                        <Tooltip
-                                            key={`${weekIndex}-${dayIndex}`}
-                                            title={`${day.date}: ${getLevelText(day.level)} (${day.count}次)`}
-                                        >
-                                            <div
-                                                className="w-3.5 h-3.5 rounded-sm cursor-pointer transition-all hover:ring-2 hover:ring-blue-400"
-                                                style={{
-                                                    backgroundColor: getColor(day.level),
-                                                }}
-                                            />
-                                        </Tooltip>
-                                    ))}
-                                </div>
-                            ))}
+                        {/* 右侧区域：月份标签 + 格子 */}
+                        <div className="flex flex-col">
+                            {/* 月份标签 - 每个标签宽度 = weekWidth，与网格列对齐 */}
+                            <div className="flex gap-1.5" style={{ height: '18px', marginBottom: '2px' }}>
+                                {monthLabels.map((m) => (
+                                    <div
+                                        key={m.index}
+                                        className="text-[10px] sm:text-xs text-gray-500 whitespace-nowrap"
+                                        style={{
+                                            width: `${weekWidth}px`,
+                                            overflow: 'visible',
+                                        }}
+                                    >
+                                        {m.label}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* 热力格子 - 每列使用 gap 布局 */}
+                            <div className="flex">
+                                {weeks.map((week, weekIndex) => (
+                                    <div
+                                        key={weekIndex}
+                                        className="flex flex-col"
+                                        style={{
+                                            gap: `${gap}px`,
+                                            marginRight: weekIndex < weeks.length - 1 ? `${gap}px` : '0',
+                                        }}
+                                    >
+                                        {week.map((day, dayIndex) => (
+                                            <Tooltip
+                                                key={`${weekIndex}-${dayIndex}`}
+                                                title={`${day.date}: ${getLevelText(day.level)} (${day.count}次)`}
+                                            >
+                                                <div
+                                                    className="rounded-sm cursor-pointer transition-all hover:ring-2 hover:ring-blue-400 shrink-0"
+                                                    style={{
+                                                        width: `${cellSize}px`,
+                                                        height: `${cellSize}px`,
+                                                        backgroundColor: getColor(day.level),
+                                                    }}
+                                                />
+                                            </Tooltip>
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
                     {/* 图例 */}
-                    <div className="flex items-center gap-2 mt-4 text-xs text-gray-500">
+                    <div className="flex items-center gap-1 sm:gap-2 mt-3 text-[10px] sm:text-xs text-gray-500">
                         <span>少</span>
                         {[0, 1, 2, 3, 4].map((level) => (
                             <div
                                 key={level}
-                                className="w-3.5 h-3.5 rounded-sm"
-                                style={{ backgroundColor: getColor(level) }}
+                                className="rounded-sm"
+                                style={{
+                                    width: `${cellSize}px`,
+                                    height: `${cellSize}px`,
+                                    backgroundColor: getColor(level),
+                                }}
                             />
                         ))}
                         <span>多</span>

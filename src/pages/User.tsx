@@ -9,6 +9,7 @@ import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
 import { Md5 } from "ts-md5";
 import LearningStats_components from "../components/LearningStats_components";
 import RecentLearning_components from "../components/RecentLearning_components";
+import LearningHeatmap_components from "../components/LearningHeatmap_components";
 
 const User: FC = () => {
     const {
@@ -364,6 +365,7 @@ const User: FC = () => {
             children: (
                 <div className="flex flex-col gap-4">
                     <LearningStats_components />
+                    <LearningHeatmap_components />
                     <RecentLearning_components />
                 </div>
             ),

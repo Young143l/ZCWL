@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getRecentLearning, type LearningRecord } from "../api/Learning_api";
 import { getDoc, type DocInfo, type DocDir } from "../api/Doc_api";
 import useLogin from "../status/Login_status";
+import useIsDark from "../status/IsDark_status";
 
 interface ExtendedLearningRecord extends LearningRecord {
     docName?: string;
@@ -14,6 +15,7 @@ interface ExtendedLearningRecord extends LearningRecord {
 
 const RecentLearning: FC = () => {
     const { token } = useLogin();
+    const { isDark } = useIsDark();
     const nav = useNavigate();
     const [records, setRecords] = useState<ExtendedLearningRecord[]>([]);
     const [loading, setLoading] = useState(true);
@@ -110,7 +112,7 @@ const RecentLearning: FC = () => {
 
     if (loading) {
         return (
-            <Card title="章节学习记录" className="recent-learning-card">
+            <Card title="章节学习记录" className={`recent-learning-card ${isDark ? "dark" : ""}`}>
                 <div className="flex justify-center items-center py-8">
                     <Spin />
                 </div>
@@ -120,7 +122,7 @@ const RecentLearning: FC = () => {
 
     if (records.length === 0) {
         return (
-            <Card title="章节学习记录" className="recent-learning-card">
+            <Card title="章节学习记录" className={`recent-learning-card ${isDark ? "dark" : ""}`}>
                 <Empty description="暂无学习记录" />
             </Card>
         );
@@ -150,10 +152,10 @@ const RecentLearning: FC = () => {
                 {Object.entries(groupedByDoc).map(([docId, docGroup]) => (
                     <div
                         key={docId}
-                        className="border border-gray-200 rounded-lg p-4"
+                        className={`border rounded-lg p-4 ${isDark ? "border-gray-700 bg-[#1a1a1a]" : "border-gray-200"}`}
                     >
                         <div className="flex items-center justify-between mb-3">
-                            <h3 className="font-medium text-lg">
+                            <h3 className={`font-medium text-lg ${isDark ? "text-gray-100" : "text-gray-800"}`}>
                                 {docGroup.docName}
                             </h3>
                             <Tag color="blue">
@@ -164,11 +166,11 @@ const RecentLearning: FC = () => {
                             {docGroup.chapters.map((record) => (
                                 <div
                                     key={`${record.docId}-${record.chapterId}`}
-                                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                    className={`flex items-center justify-between p-3 rounded-lg transition-colors ${isDark ? "bg-[#252525] hover:bg-[#303030]" : "bg-gray-50 hover:bg-gray-100"}`}
                                 >
                                     <div className="flex items-center gap-3 flex-1">
                                         <div className="flex flex-col gap-1 min-w-0">
-                                            <span className="font-medium text-sm truncate">
+                                            <span className={`font-medium text-sm truncate ${isDark ? "text-gray-200" : "text-gray-800"}`}>
                                                 {record.chapterName ||
                                                     `章节 ${record.chapterId}`}
                                             </span>
@@ -209,7 +211,7 @@ const RecentLearning: FC = () => {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <span className="text-gray-400 text-xs whitespace-nowrap">
+                                        <span className={`text-xs whitespace-nowrap ${isDark ? "text-gray-500" : "text-gray-400"}`}>
                                             {formatDate(record.lastAccessTime)}
                                         </span>
                                         <Button
@@ -231,6 +233,7 @@ const RecentLearning: FC = () => {
             </div>
         </Card>
     );
+
 };
 
 export default RecentLearning;

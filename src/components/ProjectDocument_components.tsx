@@ -11,7 +11,7 @@ import useIsDark from "../status/IsDark_status";
 const ProjectDocument_components: FC<{ pName: string }> = ({ pName }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [leanDoc, setLeanDoc] = useState<string | null>(null);
-    const {isDark}=useIsDark();
+    const { isDark } = useIsDark();
     useEffect(() => {
         getProjectDoc(pName).then((res) => {
             if (res.ok) {
@@ -30,7 +30,9 @@ const ProjectDocument_components: FC<{ pName: string }> = ({ pName }) => {
                 }}
                 footer={null}
             >
-                <div className={`${isDark?"markdown-body-dark":"markdown-body"}  h-120 overflow-auto`}>
+                <div
+                    className={`${isDark ? "markdown-body-dark" : "markdown-body"}  h-120 overflow-auto`}
+                >
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {leanDoc}
                     </ReactMarkdown>
