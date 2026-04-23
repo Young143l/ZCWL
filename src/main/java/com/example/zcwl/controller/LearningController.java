@@ -155,6 +155,17 @@ public class LearningController {
     }
 
     @PreAuthorize("isAuthenticated()")
+    @GetMapping("/heatmap")
+    public ResponseEntity<Map<String, Object>> getHeatmap(Authentication authentication) {
+        String userId = authentication.getName();
+        List<Map<String, Object>> heatmapData = learningService.getHeatmap(userId);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("heatmap", heatmapData);
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getUserStats(Authentication authentication) {
         String userId = authentication.getName();

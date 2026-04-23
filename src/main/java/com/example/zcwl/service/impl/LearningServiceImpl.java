@@ -185,6 +185,58 @@ public class LearningServiceImpl implements LearningService {
         return result;
     }
 
+    @Override
+    public List<Map<String, Object>> getHeatmap(String userId) {
+        // 获取用户所有学习记录
+        List<LearningRecord> records = learningRecordRepository.findByUserId(userId);
+        
+        // 计算过去365天的时间范围
+        LocalDate today = LocalDate.now();
+        LocalDate oneYearAgo = today.minusDays(364);
+        
+        // 按日期统计学习活动次数（使用lastAccessTime的日期部分）
+        Map<LocalDate, Integer> dateCountMap = new HashMap<>();
+        for (LearningRecord record : records) {
+            if (record.getLastAccessTime() != null) {
+                LocalDate accessDate = record.getLastAccessTime().toLocalDate();
+                // 只统计过去365天内的记录
+                if (!accessDate.isBefore(oneYearAgo) && !accessDate.isAfter(today)) {
+                    dateCountMap.merge(accessDate, 1, Integer::sum);
+                }
+            }
+        }
+        
+        // 生成365天的数据，填充没有活动的日期
+        List<Map<String, Object>> heatmapData = new ArrayList<>();
+        for (int i = 364; i >= 0; i--) {
+            LocalDate date = today.minusDays(i);
+            int count = dateCountMap.getOrDefault(date, 0);
+            int level = calculateLevel(count);
+            
+            Map<String, Object> dayData = new HashMap<>();
+            dayData.put("date", date.toString()); // LocalDate.toString() returns "yyyy-MM-dd"
+            dayData.put("count", count);
+            dayData.put("level", level);
+            
+            heatmapData.add(dayData);
+        }
+        
+        return heatmapData;
+    }
+    
+    /**
+     * 根据学习次数计算热力等级 (0-4)
+     * 与前端组件中的颜色等级对应：
+     * 0 = 无学习, 1 = 轻度学习, 2 = 中等学习, 3 = 较高学习, 4 = 活跃学习
+     */
+    private int calculateLevel(int count) {
+        if (count <= 0) return 0;
+        if (count == 1) return 1;
+        if (count <= 3) return 2;
+        if (count <= 6) return 3;
+        return 4;
+    }
+
     private void updateUserStatsOnStart(String userId) {
         Optional<UserLearningStats> statsOpt = userLearningStatsRepository.findById(userId);
         UserLearningStats stats;

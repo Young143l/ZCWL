@@ -24,4 +24,6 @@ public interface LearningService {
     List<LearningRecord> getDocChapterProgress(String userId, Integer docId);
     
     List<Map<String, Object>> getAllDocProgress(String userId);
+
+    List<Map<String, Object>> getHeatmap(String userId);
 }
