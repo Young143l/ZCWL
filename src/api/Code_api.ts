@@ -300,3 +300,60 @@ export const delCodeCP: (
         return { ok: false, message: e };
     }
 };
+
+/** ==================== AI 内联代码补全 API ==================== */
+
+export interface CompletionRequest {
+    language: string;
+    prefixCode: string;
+    suffixCode: string;
+    currentLineContent: string;
+    fullCode: string;
+    cpId?: string;
+    sfId?: string;
+}
+
+export interface CompletionResponse {
+    completion: string;
+    cached?: boolean;
+    error?: string;
+}
+
+/**
+ * CP 代码补全
+ * 调用后端 AI 服务获取代码补全建议
+ */
+export const getCodeCompletion: (
+    token: string,
+    request: CompletionRequest,
+    isSF?: boolean,
+) => Promise<{ ok: boolean; completion: string } | { ok: boolean; error: string }> = async (
+    token: string,
+    request: CompletionRequest,
+    isSF = false,
+) => {
+    try {
+        const endpoint = isSF ? "/code/sf/completion" : "/code/cp/completion";
+        const res = await fetch(
+            import.meta.env.VITE_BACK_END + endpoint,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(request),
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json: CompletionResponse = await res.json();
+        if (json.error) {
+            return { ok: false, error: json.error };
+        }
+        return { ok: true, completion: json.completion };
+    } catch (e: unknown) {
+        return { ok: false, error: String(e) };
+    }
+};

@@ -11,6 +11,7 @@ import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import CP_Ask_components from "../../components/CP_Ask_components";
 import useAIChatDoc from "../../status/AIChatDoc_status";
 import useIsDark from "../../status/IsDark_status";
+import { registerInlineCompletion } from "../../hooks/useInlineCompletion";
 
 export type CodeType = "python";
 
@@ -35,6 +36,7 @@ const CodeCP: FC = () => {
     const [messageApi, contextHolder] = message.useMessage();
     const { setCode: setAIChatCode, setIsAIChatOpen } = useAIChatDoc();
     const editorRef = useRef<Parameters<OnMount>[1] | null>(null);
+    const completionDisposableRef = useRef<{ dispose: () => void } | null>(null);
     const { isDark } = useIsDark();
     useEffect(() => {
         getCodeCP(token, cp_id as string).then((res) => {
@@ -51,7 +53,33 @@ const CodeCP: FC = () => {
 
     const handleEditorMount: OnMount = (editor) => {
         editorRef.current = editor;
+        const monacoInstance = editorWillMountRef.current;
+        if (monacoInstance) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            completionDisposableRef.current = registerInlineCompletion(monacoInstance as any, editor as any, token, () => cp.type, cp_id, false);
+        }
     };
+
+    const editorWillMountRef = useRef<Monaco | null>(null);
+    const handleEditorBeforeMount = (monaco: Monaco) => {
+        handleEditorWillMount(monaco);
+        editorWillMountRef.current = monaco;
+    };
+
+    // 语言切换时重新注册快捷键
+    useEffect(() => {
+        const ed = editorRef.current;
+        const monacoInstance = editorWillMountRef.current;
+        if (!ed || !monacoInstance) return;
+
+        // 先清理旧的
+        if (completionDisposableRef.current) {
+            completionDisposableRef.current.dispose();
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        completionDisposableRef.current = registerInlineCompletion(monacoInstance as any, ed as any, token, () => cp.type, cp_id, false);
+    }, [cp.type, token, cp_id]);
 
     const getSelectedContent = () => {
         const editor = editorRef.current;
@@ -169,7 +197,7 @@ const CodeCP: FC = () => {
                                                         : "github-light"
                                                 }
                                                 beforeMount={
-                                                    handleEditorWillMount
+                                                    handleEditorBeforeMount
                                                 }
                                                 onMount={handleEditorMount}
                                                 language={cp.type}

@@ -16,6 +16,7 @@ import useLogin from "../status/Login_status";
 import { useNavigate } from "react-router-dom";
 import useAIChatDoc from "../status/AIChatDoc_status";
 import useIsDark from "../status/IsDark_status";
+import { registerInlineCompletion } from "../hooks/useInlineCompletion";
 
 type Methods =
     | "log"
@@ -84,19 +85,49 @@ const SF_Editor_components: FC<{
     const nav = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
     const { isDark } = useIsDark();
-    const editorRef = useRef<Parameters<OnMount>[1]>(null);
+    const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
+    const completionDisposableRef = useRef<{ dispose: () => void } | null>(null);
+    const monacoRef = useRef<Monaco | null>(null);
 
     const handleEditorWillMount = (monaco: Monaco) => {
         monaco.editor.defineTheme("github-light", github);
+        monacoRef.current = monaco;
     };
     const handleEditorMount: OnMount = (editor) => {
         editorRef.current = editor;
+        const monacoInstance = monacoRef.current;
+        if (monacoInstance) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            completionDisposableRef.current = registerInlineCompletion(monacoInstance as any, editor as any, token, () => cur, sf.sfId, true);
+        }
     };
+
+    // 语言切换时重新注册快捷键
+    useEffect(() => {
+        const ed = editorRef.current;
+        const monacoInstance = monacoRef.current;
+        if (!ed || !monacoInstance) return;
+
+        // 先清理旧的
+        if (completionDisposableRef.current) {
+            completionDisposableRef.current.dispose();
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        completionDisposableRef.current = registerInlineCompletion(monacoInstance as any, ed as any, token, () => cur, sf.sfId, true);
+
+        return () => {
+            if (completionDisposableRef.current) {
+                completionDisposableRef.current.dispose();
+            }
+        };
+    }, [cur, token, sf.sfId]);
     const getSelectedContent = () => {
         const editor = editorRef.current;
-        // if (!editor) return;
+        if (!editor) return;
 
         const selection = editor.getSelection();
+        if(!selection) return;
         const selectedText = editor.getModel()?.getValueInRange(selection);
         // console.log(selectedText);
 
@@ -104,7 +135,7 @@ const SF_Editor_components: FC<{
             messageApi.error("请选中部分代码");
             return;
         } else {
-            setCode(selectedText);
+            setCode(selectedText as string);
             messageApi.success("添加成功");
             setTimeout(() => {
                 setIsAIChatOpen(true);
