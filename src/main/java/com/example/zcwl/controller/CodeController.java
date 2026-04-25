@@ -4,8 +4,10 @@ import com.example.zcwl.entity.SimpleFrontendProject;
 import com.example.zcwl.entity.ConsoleProject;
 import com.example.zcwl.service.SimpleFrontendProjectService;
 import com.example.zcwl.service.ConsoleProjectService;
+import com.example.zcwl.service.CompletionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -27,11 +29,13 @@ public class CodeController {
     private static final Logger logger = LoggerFactory.getLogger(CodeController.class);
     private final SimpleFrontendProjectService simpleFrontendProjectService;
     private final ConsoleProjectService consoleProjectService;
+    private final CompletionService completionService;
 
     @Autowired
-    public CodeController(SimpleFrontendProjectService simpleFrontendProjectService, ConsoleProjectService consoleProjectService) {
+    public CodeController(SimpleFrontendProjectService simpleFrontendProjectService, ConsoleProjectService consoleProjectService, CompletionService completionService) {
         this.simpleFrontendProjectService = simpleFrontendProjectService;
         this.consoleProjectService = consoleProjectService;
+        this.completionService = completionService;
     }
 
     /**
@@ -704,6 +708,112 @@ public class CodeController {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "删除项目失败: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    // ==================== AI 内联代码补全接口 ====================
+
+    /**
+     * CP 的代码补全接口（非流式）
+     * 接口：POST /code/cp/completion
+     * 请求体：{"language": "python", "prefixCode": "...", "suffixCode": "...", "currentLineContent": "...", "fullCode": "...", "cpId": "..."}
+     */
+    @PostMapping("/cp/completion")
+    public ResponseEntity<Map<String, Object>> getCpCompletion(
+            @RequestBody Map<String, Object> request) {
+        logger.debug("CP代码补全请求: {}", request);
+        try {
+            String language = (String) request.getOrDefault("language", "python");
+            String prefixCode = (String) request.getOrDefault("prefixCode", "");
+            String suffixCode = (String) request.getOrDefault("suffixCode", "");
+            String currentLineContent = (String) request.getOrDefault("currentLineContent", "");
+            String fullCode = (String) request.getOrDefault("fullCode", "");
+
+            Map<String, Object> result = completionService.getCompletion(
+                    language, prefixCode, suffixCode, currentLineContent, fullCode);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("CP代码补全失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("completion", "");
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * CP 的代码补全接口（流式 SSE）
+     * 接口：POST /code/cp/completion/stream
+     * 请求体：{"language": "python", "prefixCode": "...", "suffixCode": "...", "currentLineContent": "...", "fullCode": "...", "cpId": "..."}
+     */
+    @PostMapping(value = "/cp/completion/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> getCpCompletionStream(
+            @RequestBody Map<String, Object> request) {
+        logger.debug("CP流式代码补全请求");
+        try {
+            String language = (String) request.getOrDefault("language", "python");
+            String prefixCode = (String) request.getOrDefault("prefixCode", "");
+            String suffixCode = (String) request.getOrDefault("suffixCode", "");
+            String currentLineContent = (String) request.getOrDefault("currentLineContent", "");
+            String fullCode = (String) request.getOrDefault("fullCode", "");
+
+            return completionService.getCompletionStream(
+                    language, prefixCode, suffixCode, currentLineContent, fullCode);
+        } catch (Exception e) {
+            logger.error("CP流式代码补全失败", e);
+            return Flux.just("data: {\"type\": \"error\", \"text\": \"" + e.getMessage() + "\"}\n\n");
+        }
+    }
+
+    /**
+     * SF 的代码补全接口（非流式）
+     * 接口：POST /code/sf/completion
+     * 请求体：{"language": "html/css/javascript", "prefixCode": "...", "suffixCode": "...", "currentLineContent": "...", "fullCode": "...", "sfId": "..."}
+     */
+    @PostMapping("/sf/completion")
+    public ResponseEntity<Map<String, Object>> getSfCompletion(
+            @RequestBody Map<String, Object> request) {
+        logger.debug("SF代码补全请求: {}", request);
+        try {
+            String language = (String) request.getOrDefault("language", "html");
+            String prefixCode = (String) request.getOrDefault("prefixCode", "");
+            String suffixCode = (String) request.getOrDefault("suffixCode", "");
+            String currentLineContent = (String) request.getOrDefault("currentLineContent", "");
+            String fullCode = (String) request.getOrDefault("fullCode", "");
+
+            Map<String, Object> result = completionService.getCompletion(
+                    language, prefixCode, suffixCode, currentLineContent, fullCode);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("SF代码补全失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("completion", "");
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * SF 的代码补全接口（流式 SSE）
+     * 接口：POST /code/sf/completion/stream
+     * 请求体：{"language": "html/css/javascript", "prefixCode": "...", "suffixCode": "...", "currentLineContent": "...", "fullCode": "...", "sfId": "..."}
+     */
+    @PostMapping(value = "/sf/completion/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> getSfCompletionStream(
+            @RequestBody Map<String, Object> request) {
+        logger.debug("SF流式代码补全请求");
+        try {
+            String language = (String) request.getOrDefault("language", "html");
+            String prefixCode = (String) request.getOrDefault("prefixCode", "");
+            String suffixCode = (String) request.getOrDefault("suffixCode", "");
+            String currentLineContent = (String) request.getOrDefault("currentLineContent", "");
+            String fullCode = (String) request.getOrDefault("fullCode", "");
+
+            return completionService.getCompletionStream(
+                    language, prefixCode, suffixCode, currentLineContent, fullCode);
+        } catch (Exception e) {
+            logger.error("SF流式代码补全失败", e);
+            return Flux.just("data: {\"type\": \"error\", \"text\": \"" + e.getMessage() + "\"}\n\n");
         }
     }
 
