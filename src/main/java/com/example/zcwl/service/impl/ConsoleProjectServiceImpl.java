@@ -124,6 +124,25 @@ public class ConsoleProjectServiceImpl implements ConsoleProjectService {
     }
 
     @Override
+    public ConsoleProject saveCpCode(String cpId, String code) {
+        logger.debug("手动保存CP项目 {} 的代码", cpId);
+        
+        // 查找项目
+        Optional<ConsoleProject> projectOptional = consoleProjectRepository.findByCpId(cpId);
+        if (projectOptional.isEmpty()) {
+            throw new IllegalArgumentException("项目不存在");
+        }
+        
+        ConsoleProject project = projectOptional.get();
+        
+        // 直接更新代码，不调用AI
+        project.setCode(code);
+        project.setUpdatedAt(LocalDateTime.now());
+        
+        return consoleProjectRepository.save(project);
+    }
+
+    @Override
     public Optional<ConsoleProject> getCpProjectById(String cpId) {
         logger.debug("获取控制台项目 {} 的信息", cpId);
         return consoleProjectRepository.findByCpId(cpId);

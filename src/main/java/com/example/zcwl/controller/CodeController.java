@@ -711,6 +711,111 @@ public class CodeController {
         }
     }
 
+    /**
+     * 手动保存SF项目代码（不调用AI，直接将当前编辑器的代码保存到数据库）
+     * 接口：POST /code/sf/{id}/save
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 请求体：{"code":{"html":"", "css":"", "javascript":""}}
+     * 响应：成功(200 OK)：{"sfId":"", "code":{"html":"", "css":"", "javascript":""}}
+     */
+    @PostMapping("/sf/{id}/save")
+    public ResponseEntity<Map<String, Object>> saveSfCode(
+            @PathVariable String id,
+            @RequestBody Map<String, Object> request) {
+        logger.debug("手动保存SF项目 {} 的代码", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 验证请求体
+            if (request == null || !request.containsKey("code") || request.get("code") == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "code参数不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            Map<String, String> code = (Map<String, String>) request.get("code");
+            // 处理前端可能传递的js字段
+            if (code != null) {
+                if (code.containsKey("js") && !code.containsKey("javascript")) {
+                    code.put("javascript", code.get("js"));
+                }
+            } else {
+                code = new HashMap<>();
+            }
+            
+            // 调用服务层保存代码（不调用AI）
+            SimpleFrontendProject updatedProject = simpleFrontendProjectService.saveSfCode(id, code);
+            
+            // 构建响应
+            return getMapResponseEntity(updatedProject);
+        } catch (IllegalArgumentException e) {
+            logger.error("保存代码失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("保存代码失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "保存代码失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 手动保存CP项目代码（不调用AI，直接将当前编辑器的代码保存到数据库）
+     * 接口：POST /code/cp/{id}/save
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 请求体：{"code":""}
+     * 响应：成功(200 OK)：{"cpId":"", "code":""}
+     */
+    @PostMapping("/cp/{id}/save")
+    public ResponseEntity<Map<String, Object>> saveCpCode(
+            @PathVariable String id,
+            @RequestBody Map<String, Object> request) {
+        logger.debug("手动保存CP项目 {} 的代码", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 验证请求体
+            if (request == null || !request.containsKey("code") || request.get("code") == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "code参数不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            String code = request.get("code").toString();
+            
+            // 调用服务层保存代码（不调用AI）
+            ConsoleProject updatedProject = consoleProjectService.saveCpCode(id, code);
+            
+            // 构建响应
+            Map<String, Object> response = new HashMap<>();
+            response.put("cpId", updatedProject.getCpId());
+            response.put("code", updatedProject.getCode() != null ? updatedProject.getCode() : "");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            logger.error("保存代码失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("保存代码失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "保存代码失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
     // ==================== AI 内联代码补全接口 ====================
 
     /**

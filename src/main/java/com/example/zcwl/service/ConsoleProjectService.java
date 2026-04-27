@@ -38,6 +38,14 @@ public interface ConsoleProjectService {
     ConsoleProject generateCodeInCpProject(String cpId, String code, String message, List<String> selectId);
 
     /**
+     * 手动保存CP项目代码（不调用AI，直接将当前编辑器的代码保存到数据库）
+     * @param cpId 项目唯一标识符
+     * @param code 要保存的代码
+     * @return 更新后的项目
+     */
+    ConsoleProject saveCpCode(String cpId, String code);
+
+    /**
      * 获取指定ID的控制台项目相关信息
      * @param cpId 项目唯一标识符
      * @return 项目信息

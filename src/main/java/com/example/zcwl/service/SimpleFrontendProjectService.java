@@ -38,6 +38,14 @@ public interface SimpleFrontendProjectService {
     SimpleFrontendProject generateCodeInSfProject(String sfId, Map<String, String> code, String message, List<String> selectId);
 
     /**
+     * 手动保存SF项目代码（不调用AI，直接将当前编辑器的代码保存到数据库）
+     * @param sfId 项目唯一标识符
+     * @param code 要保存的代码（包含 html, css, javascript）
+     * @return 更新后的项目
+     */
+    SimpleFrontendProject saveSfCode(String sfId, Map<String, String> code);
+
+    /**
      * 获取指定ID的简易前端项目相关信息
      * @param sfId 项目唯一标识符
      * @return 项目信息

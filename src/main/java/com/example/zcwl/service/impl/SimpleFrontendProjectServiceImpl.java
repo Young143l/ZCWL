@@ -304,6 +304,27 @@ public class SimpleFrontendProjectServiceImpl implements SimpleFrontendProjectSe
     }
 
     @Override
+    public SimpleFrontendProject saveSfCode(String sfId, Map<String, String> code) {
+        logger.debug("手动保存SF项目 {} 的代码", sfId);
+        
+        // 查找项目
+        Optional<SimpleFrontendProject> projectOptional = simpleFrontendProjectRepository.findBySfId(sfId);
+        if (projectOptional.isEmpty()) {
+            throw new IllegalArgumentException("项目不存在");
+        }
+        
+        SimpleFrontendProject project = projectOptional.get();
+        
+        // 直接更新代码，不调用AI
+        project.setHtml(code.getOrDefault("html", ""));
+        project.setCss(code.getOrDefault("css", ""));
+        project.setJavascript(code.getOrDefault("javascript", ""));
+        project.setUpdatedAt(LocalDateTime.now());
+        
+        return simpleFrontendProjectRepository.save(project);
+    }
+
+    @Override
     public Optional<SimpleFrontendProject> getSfProjectById(String sfId) {
         logger.debug("获取简易前端项目 {} 的信息", sfId);
         return simpleFrontendProjectRepository.findBySfId(sfId);
