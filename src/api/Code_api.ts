@@ -301,6 +301,86 @@ export const delCodeCP: (
     }
 };
 
+/**
+ * 手动保存SF项目代码（不调用AI，直接将当前编辑器的代码保存到数据库）
+ * 接口：POST /code/sf/:id/save
+ * 请求体：{"code":{"html":"", "css":"", "javascript":""}}
+ */
+export const saveCodeSF: (
+    token: string,
+    code: code,
+    sfId: string,
+) => Promise<
+    { ok: boolean; message: unknown } | { ok: boolean; code: code }
+> = async (
+    token: string,
+    code: code,
+    sfId: string,
+) => {
+    try {
+        const res = await fetch(
+            import.meta.env.VITE_BACK_END + `/code/sf/${sfId}/save`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    code: code,
+                }),
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json: { sfId: string; code: code } = await res.json();
+        return { ok: true, code: json.code };
+    } catch (e: unknown) {
+        return { ok: false, message: e };
+    }
+};
+
+/**
+ * 手动保存CP项目代码（不调用AI，直接将当前编辑器的代码保存到数据库）
+ * 接口：POST /code/cp/:id/save
+ * 请求体：{"code":""}
+ */
+export const saveCodeCP: (
+    token: string,
+    code: string,
+    cpId: string,
+) => Promise<
+    { ok: boolean; message: unknown } | { ok: boolean; code: string }
+> = async (
+    token: string,
+    code: string,
+    cpId: string,
+) => {
+    try {
+        const res = await fetch(
+            import.meta.env.VITE_BACK_END + `/code/cp/${cpId}/save`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    code: code,
+                }),
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json: { cpId: string; code: string } = await res.json();
+        return { ok: true, code: json.code };
+    } catch (e: unknown) {
+        return { ok: false, message: e };
+    }
+};
+
 /** ==================== AI 内联代码补全 API ==================== */
 
 export interface CompletionRequest {

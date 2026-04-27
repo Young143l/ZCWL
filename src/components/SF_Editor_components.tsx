@@ -8,10 +8,11 @@ import {
     DeleteOutlined,
     ReloadOutlined,
     PlusOutlined,
+    SaveOutlined,
 } from "@ant-design/icons";
 import github from "../../public/GitHub Light.json";
 import { Console } from "console-feed";
-import { delCodeSF } from "../api/Code_api";
+import { delCodeSF, saveCodeSF } from "../api/Code_api";
 import useLogin from "../status/Login_status";
 import { useNavigate } from "react-router-dom";
 import useAIChatDoc from "../status/AIChatDoc_status";
@@ -84,6 +85,7 @@ const SF_Editor_components: FC<{
     ];
     const nav = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
+    const [saving, setSaving] = useState(false);
     const { isDark } = useIsDark();
     const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
     const completionDisposableRef = useRef<{ dispose: () => void } | null>(null);
@@ -101,6 +103,44 @@ const SF_Editor_components: FC<{
             completionDisposableRef.current = registerInlineCompletion(monacoInstance as any, editor as any, token, () => cur, sf.sfId, true);
         }
     };
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            const res = await saveCodeSF(token, sf.code, sf.sfId);
+            if (res.ok) {
+                messageApi.success("保存成功");
+            } else {
+                messageApi.error("保存失败");
+            }
+        } catch {
+            messageApi.error("保存失败");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Ctrl+S / Cmd+S 保存快捷键
+    useEffect(() => {
+        const ed = editorRef.current;
+        if (!ed) return;
+
+        const keyDisposable = ed.addAction({
+            id: "manual-save",
+            label: "手动保存",
+            keybindings: [
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (window as any).monaco?.KeyMod?.CtrlCmd | (window as any).monaco?.KeyCode?.KeyS,
+            ],
+            run: () => {
+                handleSave();
+            },
+        });
+
+        return () => {
+            keyDisposable?.dispose();
+        };
+    }, [token, sf.code, sf.sfId]);
 
     // 语言切换时重新注册快捷键
     useEffect(() => {
@@ -205,6 +245,14 @@ const SF_Editor_components: FC<{
                             className="bg-[#00000000]!"
                         />
                     </div>
+                    <Button
+                        color="primary"
+                        icon={<SaveOutlined />}
+                        variant="text"
+                        onClick={handleSave}
+                        loading={saving}
+                        title="手动保存 (Ctrl+S)"
+                    />
                     <Popconfirm
                         title="删除此项目"
                         description={`您确定要删除${sf.name}吗？`}
@@ -322,18 +370,16 @@ const SF_Editor_components: FC<{
                             renderLineHighlight: "all",
                             wordWrap: "on",
                         }}
-                        value={sf.code[cur]}
+                        value={sf.code[cur] ?? ""}
                         onChange={(value: string | undefined) => {
-                            if (value !== undefined) {
-                                setSf((prevStatus) => ({
-                                    ...prevStatus,
-                                    code: {
-                                        ...prevStatus.code,
-                                        [cur]: value,
-                                    },
-                                }));
-                                setIsSelect(false);
-                            }
+                            setSf((prevStatus) => ({
+                                ...prevStatus,
+                                code: {
+                                    ...prevStatus.code,
+                                    [cur]: value ?? "",
+                                },
+                            }));
+                            setIsSelect(false);
                             // console.log(editorRef.current.getPosition())
                         }}
                     />

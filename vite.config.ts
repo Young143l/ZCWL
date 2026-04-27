@@ -103,7 +103,7 @@ export default defineConfig({
     // 性能优化配置
     esbuild: {
         // 删除 console 和 debugger（与 terser 配合）
-        // drop: ["console", "debugger"],
+        drop: ["console", "debugger"],
         // 启用 tree shaking
         treeShaking: true,
     },

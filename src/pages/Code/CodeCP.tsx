@@ -5,9 +5,9 @@ import { Editor, type Monaco, type OnMount } from "@monaco-editor/react";
 import github from "../../../public/GitHub Light.json";
 import Console_components from "../../components/Console_components";
 import { useParams, useNavigate } from "react-router-dom";
-import { getCodeCP, delCodeCP } from "../../api/Code_api";
+import { getCodeCP, delCodeCP, saveCodeCP } from "../../api/Code_api";
 import useLogin from "../../status/Login_status";
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, PlusOutlined, SaveOutlined } from "@ant-design/icons";
 import CP_Ask_components from "../../components/CP_Ask_components";
 import useAIChatDoc from "../../status/AIChatDoc_status";
 import useIsDark from "../../status/IsDark_status";
@@ -34,6 +34,7 @@ const CodeCP: FC = () => {
     const { token } = useLogin();
     const nav = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
+    const [saving, setSaving] = useState(false);
     const { setCode: setAIChatCode, setIsAIChatOpen } = useAIChatDoc();
     const editorRef = useRef<Parameters<OnMount>[1] | null>(null);
     const completionDisposableRef = useRef<{ dispose: () => void } | null>(null);
@@ -65,6 +66,44 @@ const CodeCP: FC = () => {
         handleEditorWillMount(monaco);
         editorWillMountRef.current = monaco;
     };
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            const res = await saveCodeCP(token, cp.code, cp_id as string);
+            if (res.ok) {
+                messageApi.success("保存成功");
+            } else {
+                messageApi.error("保存失败");
+            }
+        } catch {
+            messageApi.error("保存失败");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Ctrl+S / Cmd+S 保存快捷键
+    useEffect(() => {
+        const ed = editorRef.current;
+        if (!ed) return;
+
+        const keyDisposable = ed.addAction({
+            id: "manual-save",
+            label: "手动保存",
+            keybindings: [
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (window as any).monaco?.KeyMod?.CtrlCmd | (window as any).monaco?.KeyCode?.KeyS,
+            ],
+            run: () => {
+                handleSave();
+            },
+        });
+
+        return () => {
+            keyDisposable?.dispose();
+        };
+    }, [token, cp.code, cp_id]);
 
     // 语言切换时重新注册快捷键
     useEffect(() => {
@@ -166,6 +205,14 @@ const CodeCP: FC = () => {
                                                 <div className="flex gap-1">
                                                     <Button
                                                         color="primary"
+                                                        icon={<SaveOutlined />}
+                                                        variant="text"
+                                                        onClick={handleSave}
+                                                        loading={saving}
+                                                        title="手动保存 (Ctrl+S)"
+                                                    />
+                                                    <Button
+                                                        color="primary"
                                                         icon={<PlusOutlined />}
                                                         variant="text"
                                                         onClick={
@@ -214,7 +261,7 @@ const CodeCP: FC = () => {
                                                     setCP((prev) => {
                                                         return {
                                                             ...prev,
-                                                            code: val as string,
+                                                            code: val ?? "",
                                                         };
                                                     });
                                                 }}
