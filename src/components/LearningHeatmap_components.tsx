@@ -46,9 +46,7 @@ const LearningHeatmap_components: FC = () => {
     };
 
     const cellSize = getCellSize();
-    const gap = Math.max(2, Math.min(4, cellSize < 12 ? 2 : 4)); // 间距随单元格自适应
-    const rowHeight = cellSize + gap; // 每行占用的总高度（行高 = 单元格 + 间距）
-    const weekWidth = cellSize + gap; // 每周总宽度
+    const gap = Math.max(2, Math.min(4, cellSize < 12 ? 2 : 4));
 
     // 按周分组数据
     const getWeeksData = () => {
@@ -197,93 +195,74 @@ const LearningHeatmap_components: FC = () => {
             {/* 热力图 */}
             <div className="overflow-x-auto pb-2 -mx-2 px-2">
                 <div className="inline-block">
-                    {/* 月份标签 + 格子区域 flex row */}
-                    <div className="flex">
-                        {/* 星期标签列 - 使用与网格行一致的高度 */}
-                        <div
-                            className="flex flex-col items-center mr-1 sm:mr-2 text-[10px] sm:text-xs text-gray-500 shrink-0 justify-start pt-0"
-                            style={{ paddingTop: '18px' /* 与月份标签行高度对齐 */ }}
-                        >
-                            {/* 周一：第0行，高度 = rowHeight（包含间隙） */}
-                            <span
-                                style={{
-                                    height: `${rowHeight}px`,
-                                    lineHeight: `${rowHeight}px`,
-                                    display: 'block',
-                                }}
-                            >
-                                一
-                            </span>
-                            {/* 周三：第2行 */}
-                            <span
-                                style={{
-                                    height: `${rowHeight}px`,
-                                    lineHeight: `${rowHeight}px`,
-                                    display: 'block',
-                                }}
-                            >
-                                三
-                            </span>
-                            {/* 周五：第4行，最后一行不需要底部间隙，但统一使用 rowHeight 保持对齐到单元格中心 */}
-                            <span
-                                style={{
-                                    height: `${rowHeight}px`,
-                                    lineHeight: `${rowHeight}px`,
-                                    display: 'block',
-                                }}
-                            >
-                                五
-                            </span>
-                        </div>
+                    {/* 使用 grid 布局精确对齐 */}
+                    <div
+                        className="grid gap-0"
+                        style={{
+                            gridTemplateColumns: `20px repeat(${weeks.length}, ${cellSize}px)`,
+                            gridTemplateRows: `18px repeat(7, ${cellSize}px)`,
+                            gap: `${gap}px`,
+                        }}
+                    >
+                        {/* 左上角空格子 */}
+                        <div />
 
-                        {/* 右侧区域：月份标签 + 格子 */}
-                        <div className="flex flex-col">
-                            {/* 月份标签 - 每个标签宽度 = weekWidth，与网格列对齐 */}
-                            <div className="flex gap-1.5" style={{ height: '18px', marginBottom: '2px' }}>
-                                {monthLabels.map((m) => (
-                                    <div
-                                        key={m.index}
-                                        className="text-[10px] sm:text-xs text-gray-500 whitespace-nowrap"
-                                        style={{
-                                            width: `${weekWidth}px`,
-                                            overflow: 'visible',
-                                        }}
+                        {/* 月份标签行 */}
+                        {weeks.map((_, weekIndex) => (
+                            <div
+                                key={weekIndex}
+                                className="text-[10px] sm:text-xs text-gray-500 whitespace-nowrap"
+                                style={{
+                                    gridColumn: weekIndex + 2,
+                                    gridRow: 1,
+                                    width: `${cellSize}px`,
+                                }}
+                            >
+                                {monthLabels.find(m => m.index === weekIndex)?.label || ''}
+                            </div>
+                        ))}
+
+                        {/* 星期标签列 */}
+                        {['一', '二', '三', '四', '五', '六', '日'].map((day, dayIndex) => (
+                            <div
+                                key={day}
+                                className="text-[10px] sm:text-xs text-gray-500 flex items-center"
+                                style={{
+                                    gridColumn: 1,
+                                    gridRow: dayIndex + 2,
+                                    width: `${cellSize}px`,
+                                    height: `${cellSize}px`,
+                                }}
+                            >
+                                {day}
+                            </div>
+                        ))}
+
+                        {/* 热力格子 */}
+                        {weeks.map((week, weekIndex) => (
+                            <div
+                                key={weekIndex}
+                                className="contents"
+                                style={{ gridColumn: weekIndex + 2 }}
+                            >
+                                {week.map((day, dayIndex) => (
+                                    <Tooltip
+                                        key={`${weekIndex}-${dayIndex}`}
+                                        title={`${day.date}: ${getLevelText(day.level)} (${day.count}次)`}
                                     >
-                                        {m.label}
-                                    </div>
+                                        <div
+                                            className="rounded-sm cursor-pointer transition-all hover:ring-2 hover:ring-blue-400"
+                                            style={{
+                                                width: `${cellSize}px`,
+                                                height: `${cellSize}px`,
+                                                backgroundColor: getColor(day.level),
+                                                gridRow: dayIndex + 2,
+                                            }}
+                                        />
+                                    </Tooltip>
                                 ))}
                             </div>
-
-                            {/* 热力格子 - 每列使用 gap 布局 */}
-                            <div className="flex">
-                                {weeks.map((week, weekIndex) => (
-                                    <div
-                                        key={weekIndex}
-                                        className="flex flex-col"
-                                        style={{
-                                            gap: `${gap}px`,
-                                            marginRight: weekIndex < weeks.length - 1 ? `${gap}px` : '0',
-                                        }}
-                                    >
-                                        {week.map((day, dayIndex) => (
-                                            <Tooltip
-                                                key={`${weekIndex}-${dayIndex}`}
-                                                title={`${day.date}: ${getLevelText(day.level)} (${day.count}次)`}
-                                            >
-                                                <div
-                                                    className="rounded-sm cursor-pointer transition-all hover:ring-2 hover:ring-blue-400 shrink-0"
-                                                    style={{
-                                                        width: `${cellSize}px`,
-                                                        height: `${cellSize}px`,
-                                                        backgroundColor: getColor(day.level),
-                                                    }}
-                                                />
-                                            </Tooltip>
-                                        ))}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        ))}
                     </div>
 
                     {/* 图例 */}

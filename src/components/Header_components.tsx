@@ -132,14 +132,22 @@ const Header_components: FC = () => {
             <div className="flex justify-between items-center h-full md:w-5/6 w-full pl-5 pr-5 md:pl-0 md:pr-0">
                 {/* Logo */}
                 <Link to={"/"}>
-                    <img
-                        src={
-                            (isCdn ? cdn : "/public/") +
-                            (isDark ? "logodark.svg" : "logo.svg")
-                        }
-                        alt="Logo"
-                        className="h-8 w-24 object-contain"
-                    />
+                    <div className="flex items-center">
+                        <img
+                            src={
+                                (isCdn ? cdn : "/public/") +
+                                (isDark ? "logodark.svg" : "logo.svg")
+                            }
+                            alt="Logo"
+                            className="h-8 w-24 object-contain"
+                        />
+                        <div className={`h-5 w-px ${!isDark?"bg-gray-300":"bg-gray-600"} mx-2`}></div>
+                        <span
+                            className={`font-bold text-2xl ${isDark ? "text-white" : "text-black"}`}
+                        >
+                            智码启行
+                        </span>
+                    </div>
                 </Link>
                 {/* 导航栏 */}
                 <div className="hidden md:block flex-1 ">

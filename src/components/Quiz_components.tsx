@@ -27,6 +27,7 @@ import {
 } from "@ant-design/icons";
 import { generateQuiz, gradeQuiz, type QuizQuestion } from "../api/Quiz_api";
 import useLogin from "../status/Login_status";
+import useIsDark from "../status/IsDark_status";
 
 const { Text, Title, Paragraph } = Typography;
 
@@ -55,6 +56,7 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
     } | null>(null);
     const [messageApi, contextHolder] = message.useMessage();
     const { token } = useLogin();
+    const { isDark } = useIsDark();
 
     // 重置状态
     const resetQuiz = useCallback(() => {
@@ -281,7 +283,7 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
                                                 <Radio
                                                     key={key}
                                                     value={key}
-                                                    className="p-2 rounded hover:bg-gray-50 w-full"
+                                                    className={`p-2 rounded w-full ${isDark ? "hover:bg-gray-800" : "hover:bg-gray-50"}`}
                                                 >
                                                     <Text>
                                                         <Text strong>

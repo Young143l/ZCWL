@@ -322,7 +322,8 @@ const SF_Ask_components: FC<SF_Ask> = ({
                             setUserMessage(e.target.value);
                         }}
                     ></textarea>
-                    <div className="flex justify-end">
+                    <div className="flex justify-between items-baseline">
+                        <span className="font-medium! text-gray-500! text-[0.75rem]">ⓘ 编辑器中 Alt + \ 调用AI补全</span>
                         <Button
                             onClick={() => {
                                 handleAsk();

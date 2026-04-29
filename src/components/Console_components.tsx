@@ -39,7 +39,7 @@ const Console_components: FC<ConsoleProps> = ({ cpId, token, code }) => {
         // 开发环境直接使用本地服务器，不走 /api 代理
         const wsBaseUrl = import.meta.env.DEV
             ? `ws://${window.location.host}`
-            : "wss://zcwl.young143.top";
+            : "wss://cfww.young143.top";
         const wsUrl = `${wsBaseUrl}/ws/code/cp/${cpId}?token=${token}`;
         const ws = new WebSocket(wsUrl);
 

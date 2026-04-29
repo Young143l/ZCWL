@@ -88,7 +88,7 @@ const LoginPage = () => {
                     <h2
                         className={`text-2xl font-bold text-center ${isDark ? "text-gray-100" : "text-gray-800"} mb-6`}
                     >
-                        登录智创未来
+                        登录智码启行
                     </h2>
 
                     <Form name="login" onFinish={finish}>
