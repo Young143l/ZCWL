@@ -27,7 +27,7 @@ const FloatTools_components: FC = () => {
     const docId = d_id ? parseInt(d_id) : 0;
     const chapterId = c_id ? parseInt(c_id) : null;
     // 检查是否在文档阅读页面（有 docId）
-    const isDocPage = docId > 0;
+    const isDocPage = docId > 0&&c_id!=null;
 
     return (
         <>

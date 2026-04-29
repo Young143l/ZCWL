@@ -166,15 +166,15 @@ const RecentLearning: FC = () => {
                             {docGroup.chapters.map((record) => (
                                 <div
                                     key={`${record.docId}-${record.chapterId}`}
-                                    className={`flex items-center justify-between p-3 rounded-lg transition-colors ${isDark ? "bg-[#252525] hover:bg-[#303030]" : "bg-gray-50 hover:bg-gray-100"}`}
+                                    className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg transition-colors gap-2 sm:gap-3 ${isDark ? "bg-[#252525] hover:bg-[#303030]" : "bg-gray-50 hover:bg-gray-100"}`}
                                 >
-                                    <div className="flex items-center gap-3 flex-1">
-                                        <div className="flex flex-col gap-1 min-w-0">
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                        <div className="flex flex-col gap-1 min-w-0 flex-1">
                                             <span className={`font-medium text-sm truncate ${isDark ? "text-gray-200" : "text-gray-800"}`}>
                                                 {record.chapterName ||
                                                     `章节 ${record.chapterId}`}
                                             </span>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 flex-wrap">
                                                 <Progress
                                                     percent={
                                                         record.progress || 0
@@ -191,7 +191,7 @@ const RecentLearning: FC = () => {
                                                         "100%": "#87d068",
                                                     }}
                                                     className="flex-1"
-                                                    style={{ width: "150px" }}
+                                                    style={{ width: "100px" }}
                                                 />
                                                 <Tag
                                                     color={
@@ -210,7 +210,7 @@ const RecentLearning: FC = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 justify-end">
                                         <span className={`text-xs whitespace-nowrap ${isDark ? "text-gray-500" : "text-gray-400"}`}>
                                             {formatDate(record.lastAccessTime)}
                                         </span>
