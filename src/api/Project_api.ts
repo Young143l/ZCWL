@@ -196,6 +196,76 @@ export const askProject: (
     }
 };
 
+export const askProjectStream: (
+    id: string,
+    ask: string,
+    codeSnap: { fileName: string; lineStart: number; lineEnd: number }[],
+    onChunk: (text: string) => void,
+) => Promise<{ ok: true } | { ok: false; message: unknown }> = async (
+    id: string,
+    ask: string,
+    codeSnap: { fileName: string; lineStart: number; lineEnd: number }[],
+    onChunk: (text: string) => void,
+) => {
+    try {
+        const res = await fetch(
+            `${import.meta.env.VITE_MCP_SERVER}/ask/${encodeURIComponent(id)}/stream`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    ask: ask,
+                    codeSnap: codeSnap,
+                }),
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        if (!res.body) {
+            throw new Error("Response body is null");
+        }
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+
+        const read = () => {
+            reader.read().then(({ done, value }) => {
+                if (done) return;
+
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split("\n");
+
+                for (const line of lines) {
+                    if (line.startsWith("data: ")) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            if (data.text && data.text.trim()) {
+                                onChunk(data.text);
+                            }
+                            if (data.error) {
+                                throw new Error(data.error);
+                            }
+                        } catch {
+                            // 忽略解析错误
+                        }
+                    }
+                }
+
+                read();
+            }).catch((e: Error) => {
+                throw e;
+            });
+        };
+
+        read();
+        return { ok: true };
+    } catch (e: unknown) {
+        return { ok: false, message: e };
+    }
+};
+
 export const getProjectDoc: (
     id: string,
 ) => Promise<

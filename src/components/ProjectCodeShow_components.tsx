@@ -26,7 +26,7 @@ import remarkGfm from "remark-gfm";
 // import "github-markdown-css/github-markdown-light.css"
 // import "github-markdown-css/github-markdown.css";
 
-import { askProject } from "../api/Project_api";
+import { askProjectStream } from "../api/Project_api";
 import ProjectDocument_components from "./ProjectDocument_components";
 import useIsDark from "../status/IsDark_status";
 export interface PCSProps {
@@ -110,17 +110,28 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
     const handleAsk = async () => {
         setAskOver(false);
         setCurrentAsk(inputValue);
+        setAns("");
         console.log(codeSnap);
-        const res = await askProject(pName, currentAsk, codeSnap);
+        setInputValue("");
+        setCodeSnap([]);
+        const res = await askProjectStream(
+            pName,
+            inputValue,
+            codeSnap,
+            (text) => {
+                setAns((prev) => {
+                    setAskOver(true);
+                    return prev + text;
+                });
+            },
+        );
         if (res.ok) {
-            setAns(res.ans);
-            setAskOver(true);
-            setInputValue("");
-            setCodeSnap([]);
+            return;
         } else {
             messageApi.error({
                 content: "未知错误",
             });
+            setAskOver(true);
         }
     };
     const getSelectedContent = () => {
@@ -159,8 +170,12 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
                     <Splitter.Panel defaultSize="60%" min="40%" max="100%">
                         {filePath != "NOFILE" ? (
                             <>
-                                <div className={`flex h-8 items-center justify-between ${isDark ? 'bg-gray-700' : 'bg-gray-100'} rounded-t-lg p-5 mr-1 outline-1 ${isDark ? 'outline-gray-700' : 'outline-gray-100'} outline-2`}>
-                                    <span className={`ml-2 text-sm font-mono truncate ${isDark ? 'text-gray-200' : ''}`}>
+                                <div
+                                    className={`flex h-8 items-center justify-between ${isDark ? "bg-gray-700" : "bg-gray-100"} rounded-t-lg p-5 mr-1 outline-1 ${isDark ? "outline-gray-700" : "outline-gray-100"} outline-2`}
+                                >
+                                    <span
+                                        className={`ml-2 text-sm font-mono truncate ${isDark ? "text-gray-200" : ""}`}
+                                    >
                                         {filePath}
                                     </span>
                                     <div>
@@ -183,9 +198,13 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
                                     </div>
                                 </div>
 
-                                <div className={`relative h-[calc(100%-42px)] mr-1 ${isDark ? 'outline-gray-700' : 'outline-gray-100'} rounded-b-lg overflow-auto outline-2`}>
+                                <div
+                                    className={`relative h-[calc(100%-42px)] mr-1 ${isDark ? "outline-gray-700" : "outline-gray-100"} rounded-b-lg overflow-auto outline-2`}
+                                >
                                     {loading && (
-                                        <div className={`absolute inset-0 flex items-center justify-center bg-${isDark?"black":"white"}/80 z-10`}>
+                                        <div
+                                            className={`absolute inset-0 flex items-center justify-center bg-${isDark ? "black" : "white"}/80 z-10`}
+                                        >
                                             <Spin
                                                 indicator={
                                                     <LoadingOutlined spin />
@@ -229,7 +248,9 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
                             end: true,
                         }}
                     >
-                        <div className={`rounded-lg overflow-auto  h-full border-2 ${isDark?"border-gray-700":"border-gray-100"} ml-1 flex flex-col justify-between p-2 gap-2`}>
+                        <div
+                            className={`rounded-lg overflow-auto  h-full border-2 ${isDark ? "border-gray-700" : "border-gray-100"} ml-1 flex flex-col justify-between p-2 gap-2`}
+                        >
                             <div className="flex-1 overflow-auto">
                                 {currentAsk != "" ? (
                                     <div className="p-1">
