@@ -9,11 +9,15 @@ import { useParams } from "react-router-dom";
 import { getProject, getProjectFile } from "../../api/Project_api";
 import useLogin from "../../status/Login_status";
 import { LoadingOutlined } from "@ant-design/icons";
+import useIsMobile from "../../hooks/useIsMobile";
+import DesktopOnlyNotice from "../../components/DesktopOnlyNotice";
+
 type DirectoryTreeProps = GetProps<typeof Tree.DirectoryTree>;
 
 const Project: FC = () => {
     const { p_id } = useParams();
     const { token } = useLogin();
+    const isMobile = useIsMobile();
     const [dir, setDir] = useState<Dir>({
         folders: [],
         files: [],
@@ -64,6 +68,18 @@ const Project: FC = () => {
         };
         loadFile();
     }, [filePath, p_id, token]);
+
+    // 移动端显示提示
+    if (isMobile) {
+        return (
+            <Template_Page>
+                <DesktopOnlyNotice
+                    title="请使用电脑端访问"
+                    description="项目代码查看页面需要在电脑端访问以获得最佳体验。"
+                />
+            </Template_Page>
+        );
+    }
 
     return (
         <>

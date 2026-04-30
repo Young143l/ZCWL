@@ -60,8 +60,8 @@ export const newProject: (
             }),
         });
         if (!res.ok) {
-        const json = await res.json();
-console.log(json)
+            const json = await res.json();
+            console.log(json);
             throw new Error(`HTTP error! status: ${res.status}`);
         }
         const json: { id: string } = await res.json();
@@ -168,13 +168,9 @@ export const askProject: (
     id: string,
     ask: string,
     codeSnap: { fileName: string; lineStart: number; lineEnd: number }[],
-
-) => Promise<{ ok: true; ans: string } | { ok: false; message: unknown }> = async (
-    id: string,
-    ask: string,
-    codeSnap: CodeSnap[],
-
-) => {
+) => Promise<
+    { ok: true; ans: string } | { ok: false; message: unknown }
+> = async (id: string, ask: string, codeSnap: CodeSnap[]) => {
     try {
         const res = await fetch(
             import.meta.env.VITE_MCP_SERVER + `/ask/${id}`,
@@ -200,15 +196,16 @@ export const askProject: (
     }
 };
 
-
-
 export const getProjectDoc: (
     id: string,
 ) => Promise<
-    | { ok: true; doc: string }
-    | { ok: false; message: unknown }
+    { ok: true; doc: string } | { ok: false; message: unknown }
 > = async (id: string) => {
     try {
+        if (!id || id === "") {
+            throw new Error("ID is error!");
+        }
+
         const res = await fetch(
             import.meta.env.VITE_MCP_SERVER + `/doc/${id}`,
             {

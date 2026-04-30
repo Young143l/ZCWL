@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, type FC } from "react";
+import { useEffect, useState, useRef, useCallback, type FC } from "react";
 import Template_Page from "../Template_Page";
 import { Splitter, theme, Button, Popconfirm, message } from "antd";
 import { Editor, type Monaco, type OnMount } from "@monaco-editor/react";
@@ -38,7 +38,9 @@ const CodeCP: FC = () => {
     const { setCode: setAIChatCode, setIsAIChatOpen } = useAIChatDoc();
     const editorRef = useRef<Parameters<OnMount>[1] | null>(null);
     const completionDisposableRef = useRef<{ dispose: () => void } | null>(null);
+    const editorWillMountRef = useRef<Monaco | null>(null);
     const { isDark } = useIsDark();
+
     useEffect(() => {
         getCodeCP(token, cp_id as string).then((res) => {
             if (res.ok) {
@@ -61,13 +63,12 @@ const CodeCP: FC = () => {
         }
     };
 
-    const editorWillMountRef = useRef<Monaco | null>(null);
     const handleEditorBeforeMount = (monaco: Monaco) => {
         handleEditorWillMount(monaco);
         editorWillMountRef.current = monaco;
     };
 
-    const handleSave = async () => {
+    const handleSave = useCallback(async () => {
         setSaving(true);
         try {
             const res = await saveCodeCP(token, cp.code, cp_id as string);
@@ -81,7 +82,7 @@ const CodeCP: FC = () => {
         } finally {
             setSaving(false);
         }
-    };
+    }, [token, cp.code, cp_id, messageApi]);
 
     // Ctrl+S / Cmd+S 保存快捷键
     useEffect(() => {
@@ -103,7 +104,7 @@ const CodeCP: FC = () => {
         return () => {
             keyDisposable?.dispose();
         };
-    }, [token, cp.code, cp_id]);
+    }, [handleSave]);
 
     // 语言切换时重新注册快捷键
     useEffect(() => {
@@ -218,7 +219,6 @@ const CodeCP: FC = () => {
                                                         onClick={
                                                             getSelectedContent
                                                         }
-                                                        // title="添加选中代码到 AIChatDoc"
                                                     />
                                                     <Popconfirm
                                                         title="删除此项目"
