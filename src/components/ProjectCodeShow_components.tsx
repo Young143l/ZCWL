@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type FC } from "react";
+import { useMemo, useRef, useState, type FC, useEffect } from "react";
 import github from "../../public/GitHub Light.json";
 import { Editor, type Monaco, type OnMount } from "@monaco-editor/react";
 import {
@@ -112,9 +112,18 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
     const [codeSnap, setCodeSnap] = useState<CodeSnap[]>([]);
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
     const { isDark } = useIsDark();
+    const chatContainerRef = useRef<HTMLDivElement>(null);
     const handleEditorMount: OnMount = (editor) => {
         editorRef.current = editor;
     };
+
+    // 自动滚动到底部
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop =
+                chatContainerRef.current.scrollHeight;
+        }
+    }, [ans, chatHistory]);
 
     const handleAsk = async () => {
         const currentInput = inputValue;
@@ -144,12 +153,11 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
             fullQuestion,
             codeSnap,
             (text) => {
+                setIsLoading(false);
                 fullAns += text;
                 setAns(fullAns);
             },
         );
-
-        setIsLoading(false);
 
         if (res.ok) {
             // 问答完成，不自动添加到历史，等待下一次提问时再添加
@@ -276,9 +284,12 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
                         }}
                     >
                         <div
-                            className={`rounded-lg overflow-auto  h-full border-2 ${isDark ? "border-gray-700" : "border-gray-100"} ml-1 flex flex-col justify-between p-2 gap-2`}
+                            className={`rounded-lg overflow-hidden h-full border-2 ${isDark ? "border-gray-700" : "border-gray-100"} ml-1 flex flex-col justify-between p-2 gap-2`}
                         >
-                            <div className="flex-1 overflow-auto">
+                            <div
+                                ref={chatContainerRef}
+                                className="flex-1 overflow-auto"
+                            >
                                 {/* 历史对话 */}
                                 {chatHistory.map((chat, index) => (
                                     <div key={index} className="p-1">
@@ -454,9 +465,10 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
                                 />
                                 <div className="w-full pt-1 flex justify-between mt-1">
                                     <ProjectDocument_components pName={pName} />
-                                    <div className="flex gap-2 items-center justify-end">
+                                    <div className="flex gap-2 items-center justify-between">
                                         {/* 清空对话历史按钮 */}
-                                        {chatHistory.length > 0 ||currentAsk!==""&& (
+                                        {(currentAsk != "" ||
+                                            chatHistory.length > 0) && (
                                             <div className="w-full flex justify-end">
                                                 <Button
                                                     size="small"
