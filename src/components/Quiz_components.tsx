@@ -2,7 +2,7 @@ import {
     useState,
     useEffect,
     useCallback,
-    startTransition,
+    useRef,
     type FC,
 } from "react";
 import {
@@ -57,6 +57,9 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
     const [messageApi, contextHolder] = message.useMessage();
     const { token } = useLogin();
     const { isDark } = useIsDark();
+    
+    // 使用 ref 追踪已初始化的 key
+    const initRef = useRef<string>("");
 
     // 重置状态
     const resetQuiz = useCallback(() => {
@@ -86,22 +89,23 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
         setLoading(false);
     }, [docId, chapterId, token, messageApi]);
 
+    // 监听参数变化，重置初始化状态
+    useEffect(() => {
+        initRef.current = "";
+    }, [docId, chapterId]);
+
     // 组件挂载时自动生成题目
     useEffect(() => {
-        if (hasContent && questions.length === 0 && !loading) {
-            // 使用 startTransition 避免级联渲染警告
-            startTransition(() => {
+        const currentKey = `${docId}-${chapterId}`;
+        if (initRef.current !== currentKey && hasContent) {
+            initRef.current = currentKey;
+            // 使用 setTimeout 延迟调用，避免在 effect 中直接 setState
+            const timer = setTimeout(() => {
                 handleGenerate();
-            });
+            }, 0);
+            return () => clearTimeout(timer);
         }
-    }, [
-        docId,
-        chapterId,
-        hasContent,
-        handleGenerate,
-        loading,
-        questions.length,
-    ]);
+    }, [docId, chapterId, hasContent, handleGenerate]);
 
     // 选择答案
     const handleAnswerChange = (questionIndex: number, value: string) => {
@@ -113,9 +117,20 @@ const Quiz_components: FC<QuizProps> = ({ docId, chapterId, hasContent }) => {
         if (!token) return;
 
         // 检查是否所有题目都作答了
-        const unanswered = questions.findIndex((_, i) => !answers[i]);
-        if (unanswered !== -1) {
-            messageApi.warning(`第 ${unanswered + 1} 题还未作答`);
+        const unansweredIndexes: number[] = [];
+        questions.forEach((_, i) => {
+            if (!answers[i]) {
+                unansweredIndexes.push(i + 1);
+            }
+        });
+        
+        if (unansweredIndexes.length > 0) {
+            const count = unansweredIndexes.length;
+            if (count === 1) {
+                messageApi.warning(`第 ${unansweredIndexes[0]} 题还未作答`);
+            } else {
+                messageApi.warning(`还有 ${count} 道题未作答（第 ${unansweredIndexes.join("、")} 题）`);
+            }
             return;
         }
 
