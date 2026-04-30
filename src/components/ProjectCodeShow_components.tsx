@@ -20,6 +20,7 @@ import {
     LoadingOutlined,
     PlusOutlined,
     SendOutlined,
+    HistoryOutlined,
 } from "@ant-design/icons";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -41,6 +42,11 @@ export interface CodeSnap {
     fileName: string;
     lineStart: number;
     lineEnd: number;
+}
+
+export interface ChatMessage {
+    ask: string;
+    ans: string;
 }
 
 const ProjectCodeShow_components: FC<PCSProps> = ({
@@ -95,45 +101,66 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
         };
         return typeMap[ext] || "";
     }, [filePath]);
+
+    // 状态管理：历史问答数组、当前问答（问题和回答分开）
     const [currentAsk, setCurrentAsk] = useState<string>("");
-    const [askOver, setAskOver] = useState<boolean>(true);
     const [ans, setAns] = useState<string>("");
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>("");
     const [messageApi, contextHolder] = message.useMessage();
     const editorRef = useRef<Parameters<OnMount>[1]>(null);
     const [codeSnap, setCodeSnap] = useState<CodeSnap[]>([]);
+    const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
     const { isDark } = useIsDark();
     const handleEditorMount: OnMount = (editor) => {
         editorRef.current = editor;
     };
 
     const handleAsk = async () => {
-        setAskOver(false);
-        setCurrentAsk(inputValue);
+        const currentInput = inputValue;
+
+        // 如果当前有问答在进行中，先保存到历史
+        if (currentAsk !== "") {
+            setChatHistory((prev) => [...prev, { ask: currentAsk, ans: ans }]);
+        }
+
+        // 开始新的问答
+        setIsLoading(true);
+        setCurrentAsk(currentInput);
         setAns("");
         console.log(codeSnap);
         setInputValue("");
         setCodeSnap([]);
+
+        // 构建带有历史上下文的提问
+        const historyContext = chatHistory.map((h) => h.ask).join("\n");
+        const fullQuestion = historyContext
+            ? `之前的对话:\n${historyContext}\n\n当前问题: ${currentInput}`
+            : currentInput;
+
+        let fullAns = "";
         const res = await askProjectStream(
             pName,
-            inputValue,
+            fullQuestion,
             codeSnap,
             (text) => {
-                setAns((prev) => {
-                    setAskOver(true);
-                    return prev + text;
-                });
+                fullAns += text;
+                setAns(fullAns);
             },
         );
+
+        setIsLoading(false);
+
         if (res.ok) {
+            // 问答完成，不自动添加到历史，等待下一次提问时再添加
             return;
         } else {
             messageApi.error({
                 content: "未知错误",
             });
-            setAskOver(true);
         }
     };
+
     const getSelectedContent = () => {
         const editor = editorRef.current;
         // if (!editor) return;
@@ -252,10 +279,46 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
                             className={`rounded-lg overflow-auto  h-full border-2 ${isDark ? "border-gray-700" : "border-gray-100"} ml-1 flex flex-col justify-between p-2 gap-2`}
                         >
                             <div className="flex-1 overflow-auto">
-                                {currentAsk != "" ? (
+                                {/* 历史对话 */}
+                                {chatHistory.map((chat, index) => (
+                                    <div key={index} className="p-1">
+                                        <div className="w-full flex justify-end mb-2 pl-4 ">
+                                            <div className="rounded-xl rounded-br-none border-2 border-gray-300 overflow-hidden p-2 max-w-[85%]">
+                                                <div
+                                                    className={`${isDark ? "markdown-body-dark" : "markdown-body"}`}
+                                                >
+                                                    <ReactMarkdown
+                                                        remarkPlugins={[
+                                                            remarkGfm,
+                                                        ]}
+                                                    >
+                                                        {chat.ask}
+                                                    </ReactMarkdown>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="w-full flex justify-start mb-2 pr-4">
+                                            <div className="rounded-xl rounded-bl-none border-2 border-gray-300 overflow-hidden p-2 max-w-[85%]">
+                                                <div
+                                                    className={`${isDark ? "markdown-body-dark" : "markdown-body"}`}
+                                                >
+                                                    <ReactMarkdown
+                                                        remarkPlugins={[
+                                                            remarkGfm,
+                                                        ]}
+                                                    >
+                                                        {chat.ans}
+                                                    </ReactMarkdown>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                {/* 当前问答 */}
+                                {currentAsk !== "" && (
                                     <div className="p-1">
                                         <div className="w-full flex justify-end mb-2 pl-4 ">
-                                            <div className="rounded-xl rounded-br-none border-2 border-gray-300 overflow-hidden p-2">
+                                            <div className="rounded-xl rounded-br-none border-2 border-gray-300 overflow-hidden p-2 max-w-[85%]">
                                                 <div
                                                     className={`${isDark ? "markdown-body-dark" : "markdown-body"}`}
                                                 >
@@ -270,8 +333,10 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
                                             </div>
                                         </div>
                                         <div className="w-full flex justify-start mb-2 pr-4">
-                                            <div className="rounded-xl rounded-bl-none border-2 border-gray-300 overflow-hidden p-2">
-                                                {askOver ? (
+                                            <div className="rounded-xl rounded-bl-none border-2 border-gray-300 overflow-hidden p-2 max-w-[85%]">
+                                                {isLoading ? (
+                                                    <Spin />
+                                                ) : (
                                                     <div
                                                         className={`${isDark ? "markdown-body-dark" : "markdown-body"}`}
                                                     >
@@ -283,19 +348,20 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
                                                             {ans}
                                                         </ReactMarkdown>
                                                     </div>
-                                                ) : (
-                                                    <Spin />
                                                 )}
                                             </div>
                                         </div>
                                     </div>
-                                ) : (
-                                    <div className="w-full h-full flex justify-center items-center">
-                                        <span className="font-medium text-gray-400">
-                                            输入问题询问项目相关内容吧！
-                                        </span>
-                                    </div>
                                 )}
+                                {/* 空状态提示 */}
+                                {currentAsk === "" &&
+                                    chatHistory.length === 0 && (
+                                        <div className="w-full h-full flex justify-center items-center">
+                                            <span className="font-medium text-gray-400">
+                                                输入问题询问项目相关内容吧！
+                                            </span>
+                                        </div>
+                                    )}
                             </div>
                             <Divider size="small" />
 
@@ -372,12 +438,39 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
                                     onChange={(e) =>
                                         setInputValue(e.target.value)
                                     }
-                                    placeholder="请输入关于项目的问题"
+                                    onPressEnter={(e) => {
+                                        if (e.shiftKey) {
+                                            // Shift + Enter 换行，不做处理
+                                            return;
+                                        }
+                                        // Enter 发送
+                                        e.preventDefault();
+                                        if (!isLoading && inputValue !== "") {
+                                            handleAsk();
+                                        }
+                                    }}
+                                    placeholder="请输入关于项目的问题（Enter 发送，Shift+Enter 换行）"
                                     maxLength={2000}
                                 />
                                 <div className="w-full pt-1 flex justify-between mt-1">
                                     <ProjectDocument_components pName={pName} />
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 items-center justify-end">
+                                        {/* 清空对话历史按钮 */}
+                                        {chatHistory.length > 0 ||currentAsk!==""&& (
+                                            <div className="w-full flex justify-end">
+                                                <Button
+                                                    size="small"
+                                                    icon={<HistoryOutlined />}
+                                                    onClick={() => {
+                                                        setChatHistory([]);
+                                                        setCurrentAsk("");
+                                                        setAns("");
+                                                    }}
+                                                >
+                                                    清空对话
+                                                </Button>
+                                            </div>
+                                        )}
                                         <Button
                                             onClick={() => {
                                                 setInputValue("");
@@ -391,7 +484,7 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
                                                 handleAsk();
                                             }}
                                             disabled={
-                                                !askOver || inputValue == ""
+                                                isLoading || inputValue === ""
                                             }
                                         >
                                             <SendOutlined />
