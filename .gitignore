@@ -1,3 +1,5 @@
 venv/
 .trae/
 src/config.py
+src/__pycache__/
+.vscode/
