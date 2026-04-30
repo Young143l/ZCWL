@@ -84,7 +84,7 @@ class AgentService:
         self.agent_executor = AgentExecutor(
             agent=self.agent,
             tools=self.tools,
-            verbose=True,
+            verbose=False,
             handle_parsing_errors=True,
             max_iterations=20
         )
@@ -143,27 +143,33 @@ class AgentService:
         context: str = "",
         project_url: str = ""
     ) -> AsyncGenerator[str, None]:
+        """
+        流式输出AI回答
+        
+        直接使用LLM的流式功能，实现真正的逐字输出
+        """
         if not self._initialized:
             await self.initialize()
 
         try:
-            agent_input = {
-                "input": question,
-                "context": context or "无额外上下文"
-            }
+            # 构建提示消息
+            messages = [
+                ("system", f"""你是一个专业的项目代码助手，专门分析存储在七牛云 zcwl-project 存储空间中的项目。
 
-            async for chunk in self.agent_executor.astream(agent_input):
-                if "actions" in chunk:
-                    for action in chunk["actions"]:
-                        yield f"[调用工具: {action.tool}]\n"
-                elif "steps" in chunk:
-                    pass
-                elif "output" in chunk:
-                    output = chunk["output"]
-                    if isinstance(output, str):
-                        yield output
-                    else:
-                        yield str(output)
+重要规则：
+1. 用户已经在下方提供了项目文件列表、README内容和用户指定的代码片段
+2. 基于这些信息直接回答问题，除非必要，不要再次查询文件内容
+3. 只能使用 zcwl-project 存储空间
+
+当前上下文信息:
+{context}"""),
+                ("human", question)
+            ]
+            
+            # 使用LLM的流式输出
+            async for chunk in self.llm.astream(messages):
+                if chunk.content and chunk.content.strip():  # 过滤空内容
+                    yield chunk.content
 
         except Exception as e:
             yield f"处理请求时发生错误: {str(e)}"

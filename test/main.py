@@ -1,25 +1,34 @@
 """
-FastAPI主程序 - 提供问答API接口
+Test Main Program - 测试版本的主程序
 
-功能:
-1. 项目问答 (/ask/{id})
-2. 项目问答-流式输出 (/ask/{id}/stream)
-3. 生成项目文档-带缓存 (/doc/{id})
-4. 并行获取代码片段
+功能: 
+1. 加载并服务 test/index.html 前端页面
+2. 包含完整的 API 接口 (ask, doc 等)
+3. 独立运行,不影响原 src/main.py
+
+使用方法:
+    cd test
+    python main.py
 """
 
 import asyncio
 import os
+import sys
+
+# 添加项目根目录到 Python 路径,以便导入 src 模块
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
+
 from contextlib import asynccontextmanager
 from typing import List
 
-from src.agent_service import cleanup_agent_service, get_agent_service
-from src.config import config
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-import json
+
+from src.agent_service import cleanup_agent_service, get_agent_service
+from src.config import config
 
 
 DEFAULT_BUCKET = "zcwl-project"
@@ -115,13 +124,15 @@ async def lifespan(app: FastAPI):
     print("资源清理完成")
 
 
+# 创建 FastAPI 应用
 app = FastAPI(
-    title="七牛云 AI 助手",
-    description="项目问答和文档生成",
-    version="1.0.0",
+    title="七牛云 AI 助手 (Test)",
+    description="项目问答和文档生成 - 测试版本",
+    version="1.0.0-test",
     lifespan=lifespan
 )
 
+# 添加 CORS 中间件
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -139,7 +150,7 @@ async def project_ask(id: str, request: ProjectAskRequest):
         project_path = id if id.endswith('/') else id + '/'
 
         files, readme = await get_project_files(agent, project_path)
-        context = f"""注意：你只能操作 zcwl-project 这个存储空间！
+        context = f"""注意:你只能操作 zcwl-project 这个存储空间!
 项目 "{id}" 位于 zcwl-project 桶的 {project_path} 目录下。
 
 文件列表:
@@ -149,11 +160,8 @@ README:
 {readme}"""
 
         if request.codeSnap:
-            context += "\n\n===== 用户指定的代码片段（必须仔细分析这些代码）====="
-            
-            # 并行获取所有代码片段
-            async def fetch_code_snap(snap):
-                """获取单个代码片段"""
+            context += "\n\n===== 用户指定的代码片段(必须仔细分析这些代码)====="
+            for snap in request.codeSnap:
                 try:
                     filename = snap.fileName.lstrip('/')
                     key = project_path + filename
@@ -164,20 +172,9 @@ README:
                     if isinstance(result, str):
                         lines = result.split('\n')
                         start, end = max(0, snap.lineStart-1), min(len(lines), snap.lineEnd)
-                        return f"\n\n【{filename} 第{snap.lineStart}-{snap.lineEnd}行】\n" + '\n'.join(lines[start:end])
+                        context += f"\n\n【{filename} 第{snap.lineStart}-{snap.lineEnd}行】\n" + '\n'.join(lines[start:end])
                 except Exception as e:
-                    return f"\n读取失败 {filename}: {e}"
-                return ""
-            
-            # 使用 asyncio.gather 并行获取所有片段
-            code_tasks = [fetch_code_snap(snap) for snap in request.codeSnap]
-            code_results = await asyncio.gather(*code_tasks)
-            
-            # 按顺序合并结果
-            for code_text in code_results:
-                if code_text:
-                    context += code_text
-            
+                    context += f"\n读取失败: {e}"
             context += "\n\n===== 代码片段结束 ====="
 
         result = await agent.ask(question=request.ask, context=context, project_url=project_path)
@@ -190,13 +187,16 @@ README:
 @app.post("/ask/{id}/stream", summary="项目问答-流式输出")
 async def project_ask_stream(id: str, request: ProjectAskRequest):
     """询问项目相关问题-流式返回AI回答"""
+    from fastapi.responses import StreamingResponse
+    import json
+    
     async def generate():
         try:
             agent = await get_agent_service()
             project_path = id if id.endswith('/') else id + '/'
 
             files, readme = await get_project_files(agent, project_path)
-            context = f"""注意：你只能操作 zcwl-project 这个存储空间！
+            context = f"""注意:你只能操作 zcwl-project 这个存储空间!
 项目 "{id}" 位于 zcwl-project 桶的 {project_path} 目录下。
 
 文件列表:
@@ -206,7 +206,7 @@ README:
 {readme}"""
 
             if request.codeSnap:
-                context += "\n\n===== 用户指定的代码片段（必须仔细分析这些代码）====="
+                context += "\n\n===== 用户指定的代码片段(必须仔细分析这些代码)====="
                 
                 # 并行获取所有代码片段
                 async def fetch_code_snap(snap):
@@ -282,7 +282,7 @@ async def project_doc(id: str):
         print(f"[缓存未命中] 生成新文档: {project_path}")
         files, readme = await get_project_files(agent, project_path)
 
-        question = f"""请分析这个项目并生成学习文档，包括：
+        question = f"""请分析这个项目并生成学习文档,包括:
 1. 项目概述 2. 技术栈 3. 代码结构 4. 学习建议
 
 项目: {project_path}
@@ -294,7 +294,7 @@ README: {readme}"""
         
         # 3. 保存到缓存
         try:
-            await agent.call_mcp_tool(
+            result = await agent.call_mcp_tool(
                 "upload_text_data",
                 {
                     "bucket": DEFAULT_BUCKET,
@@ -303,7 +303,7 @@ README: {readme}"""
                     "overwrite": True
                 }
             )
-            print(f"[缓存已保存] {cache_key}")
+            print(f"[缓存已保存] {cache_key}, 结果: {result}")
         except Exception as e:
             print(f"[缓存保存失败] {e}")
             # 保存失败不影响返回结果
@@ -316,17 +316,20 @@ README: {readme}"""
 
 @app.get("/")
 async def root():
-    return {"name": "七牛云 AI 助手", "docs": "/docs"}
+    """根路径 - 重定向到 index.html"""
+    return FileResponse(os.path.join(os.path.dirname(__file__), "index.html"))
 
 
 @app.get("/index.html")
 async def frontend():
     """提供前端页面"""
-    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "index.html")
+    path = os.path.join(os.path.dirname(__file__), "index.html")
     return FileResponse(path) if os.path.exists(path) else {"error": "文件不存在"}
 
 
 if __name__ == "__main__":
     import uvicorn
-    print(f"启动: http://{config.host}:{config.port}")
-    uvicorn.run("src.main:app", host=config.host, port=config.port, reload=False)
+    print(f"启动测试服务: http://{config.host}:{config.port}")
+    print(f"前端页面: http://{config.host}:{config.port}/index.html")
+    print(f"API文档: http://{config.host}:{config.port}/docs")
+    uvicorn.run("main:app", host=config.host, port=config.port, reload=False)
