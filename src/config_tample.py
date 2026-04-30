@@ -8,9 +8,9 @@
 class Config:
     """七牛云配置类 - 集中管理所有配置项"""
 
-    ak: str = "sn7675RwExFlusIAXMOueAN2Lk8SmhjsdsIbjB6P"
-    sk: str = "O6EJ5weKrxi9Md7pub78DzrvAZsE9Euui2J18Frh"
-    qiniu_kado_url: str = "zcwl-project.young143.top"
+    ak: str = ""
+    sk: str = ""
+    qiniu_kado_url: str = ""
 
     region_name: str = "z0"
     endpoint_url: str = "https://s3-cn-east-1.qiniucs.com"
