@@ -133,12 +133,15 @@ const AIChatDoc_components: FC = () => {
                     setAns(t.toString(), buffer);
                 });
             }
-
             // 流式输出完成后，设置RAG溯源信息
+            // 设置 RAG 距离阈值常量（distance 越小相似度越高）
+            const RAG_DISTANCE_THRESHOLD = 0.55;
             try {
                 const ragResults = await ragPromise;
-                if (ragResults.length > 0) {
-                    setSources(ragResults);
+                // 过滤出所有 distance 小于阈值的结果
+                const filteredResults = ragResults.filter(r => r.distance < RAG_DISTANCE_THRESHOLD);
+                if (filteredResults.length > 0) {
+                    setSources(filteredResults);
                 }
             } catch (e) {
                 console.error("RAG search failed:", e);
