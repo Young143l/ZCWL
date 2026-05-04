@@ -1,6 +1,6 @@
 import { type Monaco, Editor, type OnMount } from "@monaco-editor/react";
 import { Menu, Button, Popover, Popconfirm, Modal, theme, message } from "antd";
-import { type FC, useEffect, useRef, useState } from "react";
+import { type FC, useCallback, useEffect, useRef, useState } from "react";
 import { type SF } from "../pages/Code/CodeSF";
 import {
     SelectOutlined,
@@ -104,7 +104,7 @@ const SF_Editor_components: FC<{
         }
     };
 
-    const handleSave = async () => {
+    const handleSave = useCallback(async () => {
         setSaving(true);
         try {
             const res = await saveCodeSF(token, sf.code, sf.sfId);
@@ -118,7 +118,7 @@ const SF_Editor_components: FC<{
         } finally {
             setSaving(false);
         }
-    };
+    }, [token, sf.code, sf.sfId, messageApi]);
 
     // Ctrl+S / Cmd+S 保存快捷键
     useEffect(() => {
@@ -140,7 +140,7 @@ const SF_Editor_components: FC<{
         return () => {
             keyDisposable?.dispose();
         };
-    }, [token, sf.code, sf.sfId]);
+    }, [handleSave]);
 
     // 语言切换时重新注册快捷键
     useEffect(() => {
