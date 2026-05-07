@@ -1,13 +1,13 @@
 # AGENTS.md
 
 ## Dev Commands
-- `pnpm run dev` — dev server (proxies `/api` → `localhost:8080`, `/mcp` → `localhost:8001`, `/ws` → `ws://localhost:8080`)
-- `pnpm run build` — runs `tsc -b && vite build` (typecheck before build)
-- `pnpm run lint` — ESLint
-- `pnpm run preview` — preview build
+- `bun run dev` — dev server (proxies `/api` → `localhost:8080`, `/mcp` → `localhost:8001`, `/ws` → `ws://localhost:8080`)
+- `bun run build` — runs `tsc -b && vite build` (typecheck before build)
+- `bun run lint` — ESLint
+- `bun run preview` — preview build
 
 ## Setup
-- **pnpm is required** (`preinstall` enforces it, engine check `>=8`)
+- **bun is required** (`preinstall` enforces it, engine check `>=1.0`)
 - Copy `.env.template` to `.env` and fill `VITE_BACK_END` and `VITE_MCP_SERVER`
 
 ## Tech Stack & Config
