@@ -7,11 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "preinstall": "npx only-allow pnpm"
+    "preview": "vite preview"
   },
   "engines": {
-    "pnpm": ">=8"
+    "bun": ">=1.0"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.1",
