@@ -2,7 +2,6 @@
   "name": "zcwl_ai_rag",
   "version": "1.0.0",
   "description": "",
-  "license": "",
   "author": "Young143",
   "type": "commonjs",
   "main": "dist/index.js",

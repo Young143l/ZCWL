@@ -65,7 +65,13 @@ export class DocProcessor {
                 console.log(`文档有 ${docInfo.docDir.length} 个章节`);
 
                 // 处理每个章节
-                for (const chapter of docInfo.docDir) {
+                for (const chapter of docInfo.docDir.sort((a, b) => {
+                    if (a.id > b.id) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                })) {
                     try {
                         const content = await this.apiClient.getDocContent(
                             doc.id,
