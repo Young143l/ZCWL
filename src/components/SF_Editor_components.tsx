@@ -1,4 +1,4 @@
-import { type Monaco, Editor, type OnMount } from "@monaco-editor/react";
+import { Editor, type OnMount } from "@monaco-editor/react";
 import { Menu, Button, Popover, Popconfirm, Modal, theme, message } from "antd";
 import { type FC, useCallback, useEffect, useRef, useState } from "react";
 import { type SF } from "../pages/Code/CodeSF";
@@ -10,7 +10,6 @@ import {
     PlusOutlined,
     SaveOutlined,
 } from "@ant-design/icons";
-import github from "../../public/GitHub Light.json";
 import { Console } from "console-feed";
 import { delCodeSF, saveCodeSF } from "../api/Code_api";
 import useLogin from "../status/Login_status";
@@ -89,19 +88,11 @@ const SF_Editor_components: FC<{
     const { isDark } = useIsDark();
     const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
     const completionDisposableRef = useRef<{ dispose: () => void } | null>(null);
-    const monacoRef = useRef<Monaco | null>(null);
 
-    const handleEditorWillMount = (monaco: Monaco) => {
-        monaco.editor.defineTheme("github-light", github);
-        monacoRef.current = monaco;
-    };
-    const handleEditorMount: OnMount = (editor) => {
+    const handleEditorMount: OnMount = (editor, monaco) => {
         editorRef.current = editor;
-        const monacoInstance = monacoRef.current;
-        if (monacoInstance) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            completionDisposableRef.current = registerInlineCompletion(monacoInstance as any, editor as any, token, () => cur, sf.sfId, true);
-        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        completionDisposableRef.current = registerInlineCompletion(monaco as any, editor as any, token, () => cur, sf.sfId, true);
     };
 
     const handleSave = useCallback(async () => {
@@ -145,16 +136,20 @@ const SF_Editor_components: FC<{
     // 语言切换时重新注册快捷键
     useEffect(() => {
         const ed = editorRef.current;
-        const monacoInstance = monacoRef.current;
-        if (!ed || !monacoInstance) return;
+        if (!ed) return;
 
         // 先清理旧的
         if (completionDisposableRef.current) {
             completionDisposableRef.current.dispose();
         }
 
+        // 从编辑器实例获取 Monaco 实例
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        completionDisposableRef.current = registerInlineCompletion(monacoInstance as any, ed as any, token, () => cur, sf.sfId, true);
+        const monacoInstance = (window as any).monaco;
+        if (!monacoInstance) return;
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        completionDisposableRef.current = registerInlineCompletion(monacoInstance, ed as any, token, () => cur, sf.sfId, true);
 
         return () => {
             if (completionDisposableRef.current) {
@@ -358,8 +353,7 @@ const SF_Editor_components: FC<{
                 >
                     <Editor
                         height="100%"
-                        theme={isDark ? "vs-dark" : "github-light"}
-                        beforeMount={handleEditorWillMount}
+                        theme={isDark ? "vs-dark" : "vs"}
                         language={cur}
                         onMount={handleEditorMount}
                         options={{

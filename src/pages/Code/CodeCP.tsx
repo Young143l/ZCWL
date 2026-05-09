@@ -1,8 +1,7 @@
 import { useEffect, useState, useRef, useCallback, type FC } from "react";
 import Template_Page from "../Template_Page";
 import { Splitter, theme, Button, Popconfirm, message } from "antd";
-import { Editor, type Monaco, type OnMount } from "@monaco-editor/react";
-import github from "../../../public/GitHub Light.json";
+import { Editor, type OnMount } from "@monaco-editor/react";
 import Console_components from "../../components/Console_components";
 import { useParams, useNavigate } from "react-router-dom";
 import { getCodeCP, delCodeCP, saveCodeCP } from "../../api/Code_api";
@@ -38,7 +37,6 @@ const CodeCP: FC = () => {
     const { setCode: setAIChatCode, setIsAIChatOpen } = useAIChatDoc();
     const editorRef = useRef<Parameters<OnMount>[1] | null>(null);
     const completionDisposableRef = useRef<{ dispose: () => void } | null>(null);
-    const editorWillMountRef = useRef<Monaco | null>(null);
     const { isDark } = useIsDark();
 
     useEffect(() => {
@@ -50,22 +48,10 @@ const CodeCP: FC = () => {
         });
     }, [cp_id, token]);
 
-    const handleEditorWillMount = (monaco: Monaco) => {
-        monaco.editor.defineTheme("github-light", github);
-    };
-
-    const handleEditorMount: OnMount = (editor) => {
+    const handleEditorMount: OnMount = (editor, monaco) => {
         editorRef.current = editor;
-        const monacoInstance = editorWillMountRef.current;
-        if (monacoInstance) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            completionDisposableRef.current = registerInlineCompletion(monacoInstance as any, editor as any, token, () => cp.type, cp_id, false);
-        }
-    };
-
-    const handleEditorBeforeMount = (monaco: Monaco) => {
-        handleEditorWillMount(monaco);
-        editorWillMountRef.current = monaco;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        completionDisposableRef.current = registerInlineCompletion(monaco as any, editor as any, token, () => cp.type, cp_id, false);
     };
 
     const handleSave = useCallback(async () => {
@@ -109,16 +95,20 @@ const CodeCP: FC = () => {
     // 语言切换时重新注册快捷键
     useEffect(() => {
         const ed = editorRef.current;
-        const monacoInstance = editorWillMountRef.current;
-        if (!ed || !monacoInstance) return;
+        if (!ed) return;
 
         // 先清理旧的
         if (completionDisposableRef.current) {
             completionDisposableRef.current.dispose();
         }
 
+        // 从编辑器实例获取 Monaco 实例
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        completionDisposableRef.current = registerInlineCompletion(monacoInstance as any, ed as any, token, () => cp.type, cp_id, false);
+        const monacoInstance = (window as any).monaco;
+        if (!monacoInstance) return;
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        completionDisposableRef.current = registerInlineCompletion(monacoInstance, ed as any, token, () => cp.type, cp_id, false);
     }, [cp.type, token, cp_id]);
 
     const getSelectedContent = () => {
@@ -241,10 +231,7 @@ const CodeCP: FC = () => {
                                                 theme={
                                                     isDark
                                                         ? "vs-dark"
-                                                        : "github-light"
-                                                }
-                                                beforeMount={
-                                                    handleEditorBeforeMount
+                                                        : "vs"
                                                 }
                                                 onMount={handleEditorMount}
                                                 language={cp.type}

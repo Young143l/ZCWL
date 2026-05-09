@@ -1,6 +1,5 @@
 import { useMemo, useRef, useState, type FC, useEffect } from "react";
-import github from "../../public/GitHub Light.json";
-import { Editor, type Monaco, type OnMount } from "@monaco-editor/react";
+import { Editor, type OnMount } from "@monaco-editor/react";
 import {
     Button,
     Empty,
@@ -56,9 +55,6 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
     loading = false,
     pName,
 }) => {
-    const handleEditorWillMount = (monaco: Monaco) => {
-        monaco.editor.defineTheme("github-light", github);
-    };
     const pColor = theme.useToken().token.colorPrimaryBorder;
 
     const fileType = useMemo(() => {
@@ -251,9 +247,8 @@ const ProjectCodeShow_components: FC<PCSProps> = ({
                                     <Editor
                                         height="100%"
                                         theme={
-                                            isDark ? "vs-dark" : "github-light"
+                                            isDark ? "vs-dark" : "vs"
                                         }
-                                        beforeMount={handleEditorWillMount}
                                         onMount={handleEditorMount}
                                         language={fileType}
                                         options={{

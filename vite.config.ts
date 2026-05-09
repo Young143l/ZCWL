@@ -30,10 +30,18 @@ export default defineConfig({
                 ws: true,
             },
         },
+        // 开发服务器优化
+        host: 'localhost',
+        port: 3000,
+        open: true,
+        // 启用 HMR 严格模式，提高热更新准确性
+        hmr: {
+            overlay: true,
+        },
     },
     build: {
-        // 构建目标设为 es2021，减少不必要的转译和 polyfill
-        target: "es2021",
+        // 构建目标设为 es2022，与 tsconfig.app.json 保持一致，充分利用现代浏览器特性
+        target: "es2022",
         // 启用 CSS 代码分割
         cssCodeSplit: true,
         // CSS 压缩使用 lightningcss（Vite 内置支持，速度更快、压缩率更高）
@@ -51,26 +59,62 @@ export default defineConfig({
         // 代码分割配置
         rollupOptions: {
             output: {
-                // 手动代码分割策略
+                // 手动代码分割策略 - 优化分组，减少重复依赖
                 manualChunks(id: string) {
                     if (id.includes("node_modules")) {
+                        // Ant Design 相关
                         if (id.includes("antd") && !id.includes("@ant-design/icons")) {
                             return "ui-vendor";
                         }
                         if (id.includes("@ant-design/icons")) {
                             return "icon-vendor";
                         }
-                        if (id.includes("monaco-editor")) {
-                            return "editor-vendor";
+                        // Monaco Editor 相关 - 进一步细分
+                        if (id.includes("monaco-editor/esm/vs/language")) {
+                            // 语言相关功能单独分包
+                            if (id.includes("typescript")) {
+                                return "monaco-ts";
+                            }
+                            if (id.includes("javascript")) {
+                                return "monaco-js";
+                            }
+                            if (id.includes("json")) {
+                                return "monaco-json";
+                            }
+                            if (id.includes("html")) {
+                                return "monaco-html";
+                            }
+                            if (id.includes("css")) {
+                                return "monaco-css";
+                            }
+                            return "monaco-languages";
                         }
-                        if (id.includes("react-router-dom") || id.includes("zustand") || id.includes("react-device-detect")) {
+                        if (id.includes("monaco-editor/esm/vs/editor")) {
+                            // 编辑器核心功能
+                            return "monaco-editor-core";
+                        }
+                        if (id.includes("monaco-editor")) {
+                            // 其他 monaco 相关
+                            return "monaco-base";
+                        }
+                        // 路由和状态管理
+                        if (id.includes("react-router-dom") || id.includes("zustand")) {
                             return "router-state";
                         }
+                        // Markdown 渲染
                         if (id.includes("react-markdown") || id.includes("remark-gfm") || id.includes("github-markdown-css")) {
                             return "markdown-vendor";
                         }
-                        if (id.includes("console-feed") || id.includes("ts-md5") || id.includes("nprogress")) {
+                        // 工具库 - console-feed 单独分包以处理 eval 警告
+                        if (id.includes("console-feed")) {
+                            return "console-feed-vendor";
+                        }
+                        if (id.includes("ts-md5") || id.includes("nprogress") || id.includes("react-device-detect")) {
                             return "util-vendor";
+                        }
+                        // 其他大型依赖可以考虑单独分包
+                        if (id.includes("jsmind")) {
+                            return "mindmap-vendor";
                         }
                     }
                 },
@@ -92,8 +136,8 @@ export default defineConfig({
                 },
             },
         },
-        // 设置 chunk 大小警告阈值（monaco-editor ~3.8MB，antd ~1MB，调高避免无意义误报）
-        chunkSizeWarningLimit: 4000,
+        // 设置 chunk 大小警告阈值（monaco-editor 基础包 ~4.1MB，调高避免无意义误报）
+        chunkSizeWarningLimit: 5000,
         // 启用压缩后大小报告
         reportCompressedSize: true,
     },
@@ -112,8 +156,19 @@ export default defineConfig({
             "react-markdown",
             "remark-gfm",
             "console-feed",
+            "react-device-detect",
+            "github-markdown-css",
+            "nprogress",
+            "ts-md5",
+            "jsmind",
         ],
         // 排除某些依赖（如果有问题可以取消注释）
         // exclude: [],
+        // 启用 esbuild 预构建缓存，加快后续启动速度
+        force: false,
     },
+    // 静态资源处理优化
+    assetsInclude: ['**/*.md', '**/*.json'],
+    // 环境变量前缀，确保只有指定前缀的环境变量被暴露给客户端
+    envPrefix: ['VITE_', 'npm_'],
 });
