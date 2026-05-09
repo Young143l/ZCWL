@@ -125,7 +125,7 @@ const DocumentContent: FC = () => {
                 contentRef.current;
             const maxScroll = scrollHeight - clientHeight;
             // 修复进度计算，当滚动到底部时设置为100%
-            let progress = 0;
+            let progress;
             if (maxScroll > 0) {
                 progress = Math.floor((scrollTop / maxScroll) * 100);
                 // 当滚动到接近底部时，设置为100%

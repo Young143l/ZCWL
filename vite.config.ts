@@ -1,16 +1,14 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import svgr from "vite-plugin-svgr";
+import babel from '@rolldown/plugin-babel'
+import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [
-        react({
-            babel: {
-                plugins: [["babel-plugin-react-compiler"]],
-            },
-        }),
+        react(),
+        babel({ presets: [reactCompilerPreset()] }),
         tailwindcss(),
         svgr(),
     ],
@@ -42,8 +40,8 @@ export default defineConfig({
         cssMinify: "lightningcss",
         // 启用源码映射（生产环境建议关闭以提升加载速度）
         sourcemap: false,
-        // 压缩配置（使用 esbuild，速度更快）
-        minify: "esbuild",
+        // 压缩配置（使用 oxc，速度更快）
+        minify: "oxc",
         // 小于 4KB 的资源内联为 base64，减少 HTTP 请求
         assetsInlineLimit: 4096,
         // 模块预加载 polyfill，确保动态导入兼容性
@@ -52,31 +50,29 @@ export default defineConfig({
         },
         // 代码分割配置
         rollupOptions: {
-            // 启用 rollup 缓存以加速二次构建
-            cache: true,
             output: {
                 // 手动代码分割策略
-                manualChunks: {
-                    // UI 组件库单独打包
-                    "ui-vendor": ["antd"],
-                    // antd 图标单独打包（体积较大）
-                    "icon-vendor": ["@ant-design/icons"],
-                    // 编辑器相关库单独打包
-                    "editor-vendor": ["@monaco-editor/react", "monaco-editor"],
-                    // 路由和状态管理
-                    "router-state": [
-                        "react-router-dom",
-                        "zustand",
-                        "react-device-detect",
-                    ],
-                    // Markdown 相关
-                    "markdown-vendor": [
-                        "react-markdown",
-                        "remark-gfm",
-                        "github-markdown-css",
-                    ],
-                    // 控制台日志与工具
-                    "util-vendor": ["console-feed", "ts-md5", "nprogress"],
+                manualChunks(id: string) {
+                    if (id.includes("node_modules")) {
+                        if (id.includes("antd") && !id.includes("@ant-design/icons")) {
+                            return "ui-vendor";
+                        }
+                        if (id.includes("@ant-design/icons")) {
+                            return "icon-vendor";
+                        }
+                        if (id.includes("monaco-editor")) {
+                            return "editor-vendor";
+                        }
+                        if (id.includes("react-router-dom") || id.includes("zustand") || id.includes("react-device-detect")) {
+                            return "router-state";
+                        }
+                        if (id.includes("react-markdown") || id.includes("remark-gfm") || id.includes("github-markdown-css")) {
+                            return "markdown-vendor";
+                        }
+                        if (id.includes("console-feed") || id.includes("ts-md5") || id.includes("nprogress")) {
+                            return "util-vendor";
+                        }
+                    }
                 },
                 // 资源文件命名规则
                 chunkFileNames: "assets/js/[name]-[hash].js",
@@ -119,14 +115,5 @@ export default defineConfig({
         ],
         // 排除某些依赖（如果有问题可以取消注释）
         // exclude: [],
-    },
-    // 性能优化配置
-    esbuild: {
-        // 删除 console 和 debugger
-        drop: ["console", "debugger"],
-        // 启用 tree shaking
-        treeShaking: true,
-        // 设置字符集为 utf8，减小输出体积
-        charset: "utf8",
     },
 });

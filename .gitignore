@@ -25,5 +25,5 @@ dist-ssr
 
 #test
 .env
-test/*
-test
+# test/*
+# test

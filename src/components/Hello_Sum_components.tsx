@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FC } from "react";
+import { flushSync } from "react-dom";
 import Icon from "@ant-design/icons";
 import useLogin from "../status/Login_status";
 import MessageIcon from "../../public/message.svg?react";
@@ -18,7 +19,7 @@ const aWords: string[] = [
     "Technology is best when it brings people together.",
     "Simplicity is the ultimate form of sophistication.",
     "The computer was born to solve problems that did not exist before.",
-    "Code is like humor. When you have to explain it, it’s bad.",
+    "Code is like humor. When you have to explain it, it's bad.",
     "Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away.",
     "It's not that I'm so smart, it's just that I stay with problems longer.",
     "The only way to do great work is to love what you do.",
@@ -26,15 +27,16 @@ const aWords: string[] = [
     "Optimism is the faith that leads to achievement. Nothing can be done without hope and confidence.",
 ];
 
+// 使用固定的随机索引，避免在渲染时调用 Math.random()
+const randomWordIndex = Math.floor(Math.random() * 10);
+
 const Hello_Sum_components: FC<HS> = ({ AllCmd, title }) => {
     const { userName, isLogin } = useLogin();
     const [cmd, setCmd] = useState<string>("");
     const [time, setTime] = useState<string>(() => {
         return new Date().toLocaleTimeString();
     });
-    const aWord = useMemo(() => {
-        return aWords[Math.floor(Math.random() * 10)];
-    }, []);
+    const aWord = aWords[randomWordIndex];
     const [show, setShow] = useState<boolean>(false);
     const {isDark}=useIsDark()
     useEffect(() => {
@@ -60,7 +62,11 @@ const Hello_Sum_components: FC<HS> = ({ AllCmd, title }) => {
     }, [title]);
 
     useEffect(() => {
-        setCmd("");
+        // 重置 cmd 和 show 状态（使用 flushSync 确保同步更新）
+        flushSync(() => {
+            setCmd("");
+            setShow(false);
+        });
 
         const timers: number[] = [];
 
