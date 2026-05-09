@@ -16,7 +16,7 @@ class Config:
     endpoint_url: str = "https://s3-cn-east-1.qiniucs.com"
 
     api_key: str = ""
-    model_name: str = "deepseek/deepseek-v3.2-251201"
+    model_name: str = "qwen3-vl-30b-a3b-instruct"
     base_url: str = "https://api.qnaigc.com/v1"
 
     temperature: float = 0.7

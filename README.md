@@ -4,7 +4,7 @@
 
 ## 技术栈
 
-FastAPI + LangChain + MCP + Pydantic + 七牛云 Kodo + DeepSeek V3.2
+FastAPI + LangChain + MCP + Pydantic + 七牛云 Kodo +  Qwen
 
 ## 快速开始
 
