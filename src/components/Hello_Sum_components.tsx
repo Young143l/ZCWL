@@ -51,7 +51,7 @@ const Hello_Sum_components: FC<HS> = ({ AllCmd, title }) => {
     const proFile = useMemo(() => {
         switch (title) {
             case "Home":
-                return "Welcome to CFww !";
+                return "Welcome to Cfww !";
             case "Document":
                 return "Clean Docs,Clear Minds.";
             case "Project":
