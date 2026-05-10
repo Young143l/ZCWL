@@ -9,9 +9,11 @@ import {
     ReloadOutlined,
     PlusOutlined,
     SaveOutlined,
+    CloudOutlined,
+    CheckCircleOutlined,
 } from "@ant-design/icons";
 import { Console } from "console-feed";
-import { delCodeSF, saveCodeSF } from "../api/Code_api";
+import { delCodeSF, saveCodeSF, toggleDeploy } from "../api/Code_api";
 import useLogin from "../status/Login_status";
 import { useNavigate } from "react-router-dom";
 import useAIChatDoc from "../status/AIChatDoc_status";
@@ -85,6 +87,7 @@ const SF_Editor_components: FC<{
     const nav = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
     const [saving, setSaving] = useState(false);
+    const [deploying, setDeploying] = useState(false);
     const { isDark } = useIsDark();
     const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
     const completionDisposableRef = useRef<{ dispose: () => void } | null>(null);
@@ -162,7 +165,7 @@ const SF_Editor_components: FC<{
         if (!editor) return;
 
         const selection = editor.getSelection();
-        if(!selection) return;
+        if (!selection) return;
         const selectedText = editor.getModel()?.getValueInRange(selection);
         // console.log(selectedText);
 
@@ -220,6 +223,29 @@ const SF_Editor_components: FC<{
             window.removeEventListener("message", handleMessage);
         };
     }, []);
+
+    // 切换部署状态
+    const handleDeploy = async () => {
+        setDeploying(true);
+        try {
+            const res = await toggleDeploy(token, sf.sfId);
+            if (res.ok) {
+                const newStatus = res.isDeployed;
+                setSf((prev) => ({ ...prev, isDeployed: newStatus }));
+                if (newStatus) {
+                    messageApi.success("部署成功！可通过链接访问页面");
+                } else {
+                    messageApi.success("已取消部署");
+                }
+            } else {
+                messageApi.error("部署操作失败");
+            }
+        } catch {
+            messageApi.error("部署操作失败");
+        } finally {
+            setDeploying(false);
+        }
+    };
 
     return (
         <>
@@ -344,6 +370,24 @@ const SF_Editor_components: FC<{
                             getSelectedContent();
                         }}
                     />
+                    <Popover
+                        content={
+                            <>
+                                <p>部署状态: {sf.isDeployed ? "已部署" : "未部署"}</p>
+                                <a target="_blank" href={import.meta.env.VITE_BACK_END + `/code/sf/view/${sf.sfId}`}>点击访问</a>
+                            </>
+                        }
+                        placement="bottom"
+                    >
+                        <Button
+                            color={sf.isDeployed ? "green" : "primary"}
+                            icon={sf.isDeployed ? <CheckCircleOutlined /> : <CloudOutlined />}
+                            variant={sf.isDeployed ? "solid" : "text"}
+                            onClick={handleDeploy}
+                            loading={deploying}
+                            title={sf.isDeployed ? "已部署 (点击取消)" : "一键部署"}
+                        />
+                    </Popover>
                 </div>
                 <div
                     className="flex-1 border-2 rounded-xl overflow-hidden"

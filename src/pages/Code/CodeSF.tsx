@@ -19,6 +19,7 @@ export interface SF {
     sfId: string;
     name: string;
     code: code;
+    isDeployed?: boolean;
 }
 
 const CodeSF: FC = () => {

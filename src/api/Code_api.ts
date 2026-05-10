@@ -437,3 +437,57 @@ export const getCodeCompletion: (
         return { ok: false, error: String(e) };
     }
 };
+
+/** ==================== 部署相关 API ==================== */
+
+/**
+ * 切换部署状态
+ * 接口：POST /code/sf/{id}/deploy
+ */
+export const toggleDeploy = async (token: string, sfId: string) => {
+    try {
+        const res = await fetch(
+            import.meta.env.VITE_BACK_END + `/code/sf/${sfId}/deploy`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json: { isDeployed: boolean; sfId: string } = await res.json();
+        return { ok: true, isDeployed: json.isDeployed };
+    } catch (e) {
+        return { ok: false, message: e };
+    }
+};
+
+/**
+ * 获取部署状态
+ * 接口：GET /code/sf/{id}/deploy
+ */
+export const getDeployStatus = async (token: string, sfId: string) => {
+    try {
+        const res = await fetch(
+            import.meta.env.VITE_BACK_END + `/code/sf/${sfId}/deploy`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json: { isDeployed: boolean; sfId: string; projectName: string } = await res.json();
+        return { ok: true, ...json };
+    } catch (e) {
+        return { ok: false, message: e };
+    }
+};
