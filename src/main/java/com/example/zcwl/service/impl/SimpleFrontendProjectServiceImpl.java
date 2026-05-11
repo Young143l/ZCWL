@@ -757,4 +757,33 @@ public class SimpleFrontendProjectServiceImpl implements SimpleFrontendProjectSe
         logger.info("项目 {} 已成功删除", sfId);
         return true;
     }
+
+    @Override
+    public Boolean toggleDeploy(String sfId, String userId) {
+        logger.debug("切换部署状态: {}, 用户ID: {}", sfId, userId);
+        
+        // 查找项目
+        Optional<SimpleFrontendProject> projectOptional = simpleFrontendProjectRepository.findBySfId(sfId);
+        if (projectOptional.isEmpty()) {
+            throw new IllegalArgumentException("项目不存在");
+        }
+        
+        SimpleFrontendProject project = projectOptional.get();
+        
+        // 验证用户是否有权限操作该项目
+        if (!project.getUserId().equals(userId)) {
+            logger.warn("用户 {} 无权操作项目 {}", userId, sfId);
+            throw new SecurityException("无权操作该项目");
+        }
+        
+        // 切换部署状态
+        Boolean newStatus = !project.getIsDeployed();
+        project.setIsDeployed(newStatus);
+        project.setUpdatedAt(LocalDateTime.now());
+        
+        simpleFrontendProjectRepository.save(project);
+        logger.info("项目 {} 部署状态已切换为: {}", sfId, newStatus);
+        
+        return newStatus;
+    }
 }

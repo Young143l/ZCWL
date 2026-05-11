@@ -76,4 +76,12 @@ public interface SimpleFrontendProjectService {
      * @return 是否删除成功
      */
     boolean deleteSfProject(String sfId, String userId);
+
+    /**
+     * 切换部署状态
+     * @param sfId 项目唯一标识符
+     * @param userId 用户ID
+     * @return 切换后的部署状态
+     */
+    Boolean toggleDeploy(String sfId, String userId);
 }

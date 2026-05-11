@@ -95,33 +95,70 @@ public class QuizServiceImpl implements QuizService {
         Map<String, Object> result = new HashMap<>();
         
         if (questions == null || answers == null || questions.isEmpty() || answers.isEmpty()) {
+            result.put("ok", false);
             result.put("error", "题目或答案不能为空");
             return result;
         }
 
-        // 构建批改请求
-        Map<String, Object> requestBody = buildGradeRequest(questions, answers);
+        // 验证长度一致性
+        if (questions.size() != answers.size()) {
+            result.put("ok", false);
+            result.put("error", "题目数量与答案数量不一致");
+            return result;
+        }
 
         try {
-            ResponseEntity<Map<String, Object>> responseEntity = callOpenAIApi(requestBody);
+            int score = 0;
+            List<Map<String, Object>> details = new ArrayList<>();
 
-            if (responseEntity.getBody() != null) {
-                Object choicesObj = responseEntity.getBody().get("choices");
-                if (choicesObj instanceof List<?> choicesList && !choicesList.isEmpty()) {
-                    Object choiceObj = choicesList.getFirst();
-                    if (choiceObj instanceof Map<?, ?> choiceMap) {
-                        Object messageObj = choiceMap.get("message");
-                        if (messageObj instanceof Map<?, ?> messageMap) {
-                            Object contentObj = messageMap.get("content");
-                            if (contentObj instanceof String gradeResult) {
-                                return parseGradeResult(gradeResult, questions, answers);
-                            }
-                        }
-                    }
+            // 直接遍历比较，按索引一一对应
+            for (int i = 0; i < questions.size(); i++) {
+                Map<String, Object> question = questions.get(i);
+                String correctAnswer = question.get("answer") != null ? question.get("answer").toString() : "";
+                String userAnswer = answers.get(i) != null ? answers.get(i).toString() : "";
+                String explanation = question.get("explanation") != null ? question.get("explanation").toString() : "";
+
+                // 忽略大小写比较
+                boolean isCorrect = correctAnswer.equalsIgnoreCase(userAnswer);
+                if (isCorrect) {
+                    score++;
                 }
+
+                Map<String, Object> detail = new HashMap<>();
+                detail.put("correct", isCorrect);
+                detail.put("userAnswer", userAnswer);
+                detail.put("correctAnswer", correctAnswer);
+                detail.put("feedback", explanation);
+                details.add(detail);
             }
+
+            // 构建详细总结
+            double percentage = score * 100.0 / questions.size();
+            String performance;
+            if (percentage == 100) {
+                performance = "满分！您对本次测验的知识点掌握得非常扎实，继续保持！";
+            } else if (percentage >= 80) {
+                performance = "表现优秀！您对大部分知识点掌握较好，建议复习错题对应的解析，进一步巩固。";
+            } else if (percentage >= 60) {
+                performance = "表现良好，但还有提升空间。建议认真查看错题解析，理解相关知识点。";
+            } else if (percentage >= 40) {
+                performance = "需要加油！建议重新学习相关章节内容，重点关注错题涉及的知识点。";
+            } else {
+                performance = "建议重新学习文档内容，理解基本概念后再进行测验。";
+            }
+
+            String summary = String.format("本次测验共 %d 题，答对 %d 题，正确率 %.0f%%。%s",
+                    questions.size(), score, percentage, performance);
+
+            result.put("ok", true);
+            result.put("score", score);
+            result.put("total", questions.size());
+            result.put("summary", summary);
+            result.put("details", details);
+
         } catch (Exception e) {
             logger.error("批改答案失败: {}", e.getMessage(), e);
+            result.put("ok", false);
             result.put("error", "批改失败: " + e.getMessage());
         }
 

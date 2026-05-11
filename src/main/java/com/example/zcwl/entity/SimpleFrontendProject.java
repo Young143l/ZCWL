@@ -52,6 +52,9 @@ public class SimpleFrontendProject {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "is_deployed", nullable = false)
+    private Boolean isDeployed = false;
+
     // 构造函数
     public SimpleFrontendProject() {
     }

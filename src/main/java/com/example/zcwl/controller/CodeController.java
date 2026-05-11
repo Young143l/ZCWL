@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 
 import java.util.*;
+import java.util.Optional;
 import java.util.ArrayList;
 
 /**
@@ -301,6 +302,7 @@ public class CodeController {
                 Map<String, Object> response = new HashMap<>();
                 response.put("sfId", project.getSfId());
                 response.put("name", project.getProjectName());
+                response.put("isDeployed", project.getIsDeployed());
                 response.put("code", Map.of(
                         "html", project.getHtml() != null ? project.getHtml() : "",
                         "css", project.getCss() != null ? project.getCss() : "",
@@ -920,6 +922,224 @@ public class CodeController {
             logger.error("SF流式代码补全失败", e);
             return Flux.just("data: {\"type\": \"error\", \"text\": \"" + e.getMessage() + "\"}\n\n");
         }
+    }
+
+    /**
+     * 切换部署状态
+     * 接口：POST /code/sf/{id}/deploy
+     * 请求头：Authorization: "Bearer token"
+     * 响应：成功(200 OK)：{"isDeployed": true/false, "viewUrl": "..."}
+     */
+    @PostMapping("/sf/{id}/deploy")
+    public ResponseEntity<Map<String, Object>> toggleDeploy(
+            @PathVariable String id,
+            Authentication authentication) {
+        logger.debug("切换部署状态: {}", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 获取当前用户ID
+            String userId = authentication.getName();
+            
+            // 调用服务层切换部署状态
+            Boolean isDeployed = simpleFrontendProjectService.toggleDeploy(id, userId);
+            
+            // 构建响应
+            Map<String, Object> response = new HashMap<>();
+            response.put("isDeployed", isDeployed);
+            response.put("sfId", id);
+            
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            logger.error("切换部署状态失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        } catch (SecurityException e) {
+            logger.error("切换部署状态失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("切换部署状态失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "切换部署状态失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 获取项目的部署状态
+     * 接口：GET /code/sf/{id}/deploy
+     * 请求头：Authorization: "Bearer token"
+     * 响应：成功(200 OK)：{"isDeployed": true/false, "sfId": "...", "projectName": "...", "viewUrl": "..."}
+     */
+    @GetMapping("/sf/{id}/deploy")
+    public ResponseEntity<Map<String, Object>> getDeployStatus(
+            @PathVariable String id,
+            Authentication authentication) {
+        logger.debug("获取部署状态: {}", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 获取项目信息
+            Optional<SimpleFrontendProject> projectOptional = simpleFrontendProjectService.getSfProjectById(id);
+            if (projectOptional.isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目不存在");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+            
+            SimpleFrontendProject project = projectOptional.get();
+            
+            // 构建响应
+            Map<String, Object> response = new HashMap<>();
+            response.put("sfId", project.getSfId());
+            response.put("projectName", project.getProjectName());
+            response.put("isDeployed", project.getIsDeployed());
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("获取部署状态失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "获取部署状态失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 公开访问部署的项目视图（无需认证）
+     * 接口：GET /code/sf/view/{id}
+     * 响应：如果已部署，返回动态拼接的 HTML 页面；如果未部署，返回 404
+     */
+    @GetMapping(value = "/sf/view/{id}", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<String> viewDeployedProject(@PathVariable String id) {
+        logger.debug("公开访问部署项目视图: {}", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("<html><body><h1>项目ID不能为空</h1></body></html>");
+            }
+            
+            // 获取项目信息
+            Optional<SimpleFrontendProject> projectOptional = simpleFrontendProjectService.getSfProjectById(id);
+            if (projectOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("<html><body><h1>项目不存在</h1></body></html>");
+            }
+            
+            SimpleFrontendProject project = projectOptional.get();
+            
+            // 检查是否已部署
+            if (!project.getIsDeployed()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("<html><body><h1>该项目未开启部署</h1></body></html>");
+            }
+            
+            // 动态拼接 HTML 页面
+            String html = buildDeployHtml(project);
+            
+            return ResponseEntity.ok(html);
+        } catch (Exception e) {
+            logger.error("获取部署视图失败", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("<html><body><h1>加载失败</h1></body></html>");
+        }
+    }
+
+    /**
+     * 构建部署的 HTML 页面
+     * @param project 项目实体
+     * @return 完整的 HTML 页面
+     */
+    private String buildDeployHtml(SimpleFrontendProject project) {
+        StringBuilder html = new StringBuilder();
+        
+        // 获取代码内容，处理 null 情况
+        String htmlContent = project.getHtml() != null ? project.getHtml() : "";
+        String cssContent = project.getCss() != null ? project.getCss() : "";
+        String jsContent = project.getJavascript() != null ? project.getJavascript() : "";
+        
+        // 如果 HTML 内容是完整的文档结构，直接返回
+        if (htmlContent.contains("<!DOCTYPE html>") || htmlContent.contains("<html")) {
+            // 插入 CSS
+            if (!cssContent.isEmpty()) {
+                html.append(htmlContent);
+                int headEndIndex = html.lastIndexOf("</head>");
+                if (headEndIndex != -1) {
+                    html.insert(headEndIndex, "<style>" + cssContent + "</style>");
+                }
+            } else {
+                html.append(htmlContent);
+            }
+            
+            // 插入 JavaScript
+            if (!jsContent.isEmpty()) {
+                int bodyEndIndex = html.lastIndexOf("</body>");
+                if (bodyEndIndex != -1) {
+                    html.insert(bodyEndIndex, "<script>" + jsContent + "</script>");
+                } else {
+                    int htmlEndIndex = html.lastIndexOf("</html>");
+                    if (htmlEndIndex != -1) {
+                        html.insert(htmlEndIndex, "<script>" + jsContent + "</script>");
+                    }
+                }
+            }
+        } else {
+            // HTML 内容不是完整文档，动态构建
+            html.append("<!DOCTYPE html>\n");
+            html.append("<html lang=\"zh-CN\">\n");
+            html.append("<head>\n");
+            html.append("    <meta charset=\"UTF-8\">\n");
+            html.append("    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
+            html.append("    <title>").append(escapeHtml(project.getProjectName())).append("</title>\n");
+            
+            // 添加 CSS
+            if (!cssContent.isEmpty()) {
+                html.append("    <style>\n").append(cssContent).append("\n    </style>\n");
+            }
+            
+            html.append("</head>\n");
+            html.append("<body>\n");
+            
+            // 添加 HTML 内容
+            html.append(htmlContent);
+            
+            html.append("\n");
+            
+            // 添加 JavaScript
+            if (!jsContent.isEmpty()) {
+                html.append("    <script>\n").append(jsContent).append("\n    </script>\n");
+            }
+            
+            html.append("</body>\n");
+            html.append("</html>");
+        }
+        
+        return html.toString();
+    }
+
+    /**
+     * HTML 特殊字符转义
+     * @param text 原始文本
+     * @return 转义后的文本
+     */
+    private String escapeHtml(String text) {
+        if (text == null) return "";
+        String result = text;
+        result = result.replace("&", "&");
+        result = result.replace("<", "<");
+        result = result.replace(">", ">");
+        result = result.replace("\"", "\"");
+        result = result.replace("'", "&#39;");
+        return result;
     }
 
 }
