@@ -287,6 +287,24 @@ const SF_Editor_components: FC<{
                             variant="text"
                         />
                     </Popconfirm>
+                    <Popover
+                        content={
+                            <>
+                                <p>部署状态: {sf.isDeployed ? "已部署" : "未部署"}</p>
+                                <a target="_blank" href={import.meta.env.VITE_BACK_END + `/code/sf/view/${sf.sfId}`}>点击访问</a>
+                            </>
+                        }
+                        placement="bottom"
+                    >
+                        <Button
+                            color={sf.isDeployed ? "green" : "primary"}
+                            icon={sf.isDeployed ? <CheckCircleOutlined /> : <CloudOutlined />}
+                            variant={sf.isDeployed ? "solid" : "text"}
+                            onClick={handleDeploy}
+                            loading={deploying}
+                            title={sf.isDeployed ? "已部署 (点击取消)" : "一键部署"}
+                        />
+                    </Popover>
                     <Button
                         color="primary"
                         icon={<ReloadOutlined />}
@@ -370,24 +388,6 @@ const SF_Editor_components: FC<{
                             getSelectedContent();
                         }}
                     />
-                    <Popover
-                        content={
-                            <>
-                                <p>部署状态: {sf.isDeployed ? "已部署" : "未部署"}</p>
-                                <a target="_blank" href={import.meta.env.VITE_BACK_END + `/code/sf/view/${sf.sfId}`}>点击访问</a>
-                            </>
-                        }
-                        placement="bottom"
-                    >
-                        <Button
-                            color={sf.isDeployed ? "green" : "primary"}
-                            icon={sf.isDeployed ? <CheckCircleOutlined /> : <CloudOutlined />}
-                            variant={sf.isDeployed ? "solid" : "text"}
-                            onClick={handleDeploy}
-                            loading={deploying}
-                            title={sf.isDeployed ? "已部署 (点击取消)" : "一键部署"}
-                        />
-                    </Popover>
                 </div>
                 <div
                     className="flex-1 border-2 rounded-xl overflow-hidden"
