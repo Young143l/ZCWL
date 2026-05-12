@@ -15,7 +15,7 @@
  * - setTimeout 确保 hide 先执行完毕再 trigger
  */
 
-import type { editor, languages, IDisposable } from 'monaco-editor';
+import type { editor, IDisposable } from 'monaco-editor';
 import type { Monaco } from '@monaco-editor/react';
 import { getCodeCompletion } from '../api/Code_api';
 import completionConfig from '../config/completion';
@@ -89,10 +89,9 @@ export function registerInlineCompletion(
       provideInlineCompletions: (
         model: editor.ITextModel,
         position: { lineNumber: number; column: number },
-        context: languages.InlineCompletionContext,
       ) => {
-        // 只响应手动触发（快捷键），不自动弹出
-        if (context.triggerKind !== 1) return { items: [] };
+        // 响应所有触发类型（包括自动和手动）
+        // 注意：如果需要限制只响应手动触发，需要检查 context 参数
 
         const language = getLanguage();
         if (model.getLanguageId() !== language) return { items: [] };

@@ -58,6 +58,12 @@ export default defineConfig({
         },
         // 代码分割配置
         rollupOptions: {
+            // 忽略 console-feed 包的 eval 警告（第三方依赖，无法修改）
+            onLog(level, log) {
+                const logStr = String(log);
+                if (logStr.includes("Use of direct `eval`")) return;
+                if (typeof console !== "undefined" && level === "warn") console.warn(logStr);
+            },
             output: {
                 // 手动代码分割策略 - 优化分组，减少重复依赖
                 manualChunks(id: string) {

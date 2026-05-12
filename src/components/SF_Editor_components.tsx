@@ -136,30 +136,20 @@ const SF_Editor_components: FC<{
         };
     }, [handleSave]);
 
-    // 语言切换时重新注册快捷键
+    // 语言切换时重新注册（如果 editor 已挂载且有 monaco 实例）
     useEffect(() => {
         const ed = editorRef.current;
         if (!ed) return;
 
-        // 先清理旧的
-        if (completionDisposableRef.current) {
-            completionDisposableRef.current.dispose();
-        }
-
-        // 从编辑器实例获取 Monaco 实例
+        // 获取之前注册时使用的 monaco 实例
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const monacoInstance = (window as any).monaco;
         if (!monacoInstance) return;
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        completionDisposableRef.current = registerInlineCompletion(monacoInstance, ed as any, token, () => cur, sf.sfId, true);
-
-        return () => {
-            if (completionDisposableRef.current) {
-                completionDisposableRef.current.dispose();
-            }
-        };
-    }, [cur, token, sf.sfId]);
+        // 只在语言变化时更新（不需要重新注册，只需要更新语言获取函数）
+        // 注意：这里我们不需要清理和重新注册整个 provider，只需要确保语言正确即可
+        // registerInlineCompletion 中的 getLanguage 函数会在每次调用时获取最新的 cur 值
+    }, [cur]);
     const getSelectedContent = () => {
         const editor = editorRef.current;
         if (!editor) return;

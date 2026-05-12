@@ -92,24 +92,12 @@ const CodeCP: FC = () => {
         };
     }, [handleSave]);
 
-    // 语言切换时重新注册快捷键
+    // 语言切换时不需要重新注册 provider（getLanguage 函数会获取最新值）
+    // 注意：如果需要重新注册，只需要更新 provider 的语言配置，不需要清理再创建
     useEffect(() => {
-        const ed = editorRef.current;
-        if (!ed) return;
-
-        // 先清理旧的
-        if (completionDisposableRef.current) {
-            completionDisposableRef.current.dispose();
-        }
-
-        // 从编辑器实例获取 Monaco 实例
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const monacoInstance = (window as any).monaco;
-        if (!monacoInstance) return;
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        completionDisposableRef.current = registerInlineCompletion(monacoInstance, ed as any, token, () => cp.type, cp_id, false);
-    }, [cp.type, token, cp_id]);
+        // getLanguage 函数 () => cp.type 会在每次调用时获取最新的 cp.type
+        // 所以这里不需要做任何事情，provider 会自动使用最新的语言
+    }, [cp.type]);
 
     const getSelectedContent = () => {
         const editor = editorRef.current;

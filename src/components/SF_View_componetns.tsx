@@ -11,7 +11,7 @@ interface View {
     reLoadKey: number;
 }
 
-const SF_View_componetns: FC<View> = ({ code, isSelect, reLoadKey}) => {
+const SF_View_componetns: FC<View> = ({ code, isSelect, reLoadKey }) => {
     const debounceTimer = useRef<number | null>(null);
     const [htmlsrc, setHtmlSrc] = useState<string>("");
     const [messageApi, contextHolder] = message.useMessage();
@@ -35,15 +35,15 @@ const SF_View_componetns: FC<View> = ({ code, isSelect, reLoadKey}) => {
 
         debounceTimer.current = setTimeout(() => {
             const transformCode = (userJs: string) => {
-                return userJs;
-                // .replace(
-                //     /(for|while)\s*\(([\s\S]*?)\)\s*\{/g,
-                //     "$1 ($2) { window.__LOOP_PROTECT__.check(); ",
-                // )
-                // .replace(
-                //     /do\s*\{/g,
-                //     "do { window.__LOOP_PROTECT__.check(); ",
-                // );
+                return userJs
+                    .replace(
+                        /(for|while)\s*\(([\s\S]*?)\)\s*\{/g,
+                        "$1 ($2) { window.__LOOP_PROTECT__.check(); ",
+                    )
+                    .replace(
+                        /do\s*\{/g,
+                        "do { window.__LOOP_PROTECT__.check(); ",
+                    );
             };
 
             const htmlContent = code.html;
