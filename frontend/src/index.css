@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+#nprogress .bar {
+    background: #13c2c2;
+}
+
+#nprogress .peg {
+    box-shadow: 0 0 10px #13c2c2, 0 0 5px #13c2c2;
+}
+
+#nprogress .spinner-icon {
+    border-top-color: #13c2c2;
+    border-left-color: #13c2c2;
+}
+
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: #333;
+}
+
+html.dark-mode ::-webkit-scrollbar-track {
+    background: #2d2d2d;
+}
+
+html.dark-mode ::-webkit-scrollbar-thumb {
+    background: #666;
+}
+
+html.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+
+html.dark-mode ::-webkit-scrollbar-thumb:active {
+    background: #aaa;
+}
+
+/* Carousel 自定义样式 - 反色使箭头和进度条在白色背景可见 */
+.help-carousel .slick-prev,
+.help-carousel .slick-next,
+.help-carousel .slick-prev:hover,
+.help-carousel .slick-next:hover,
+.help-carousel .slick-prev:focus,
+.help-carousel .slick-next:focus {
+    color: #333 !important;
+    font-size: 20px !important;
+}
+
+.help-carousel .slick-prev::before,
+.help-carousel .slick-next::before {
+    color: #333 !important;
+}
+
+.help-carousel-dots li button {
+    background: #999 !important;
+    opacity: 1 !important;
+}
+
+.help-carousel-dots li.slick-active button {
+    background: #333 !important;
+}
