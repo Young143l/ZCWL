@@ -1,0 +1,1145 @@
+package com.example.zcwl.controller;
+
+import com.example.zcwl.entity.SimpleFrontendProject;
+import com.example.zcwl.entity.ConsoleProject;
+import com.example.zcwl.service.SimpleFrontendProjectService;
+import com.example.zcwl.service.ConsoleProjectService;
+import com.example.zcwl.service.CompletionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
+
+import java.util.*;
+import java.util.Optional;
+import java.util.ArrayList;
+
+/**
+ * 代码生成控制器
+ * 实现REST接口
+ */
+@RestController
+@RequestMapping("/code")
+public class CodeController {
+
+    private static final Logger logger = LoggerFactory.getLogger(CodeController.class);
+    private final SimpleFrontendProjectService simpleFrontendProjectService;
+    private final ConsoleProjectService consoleProjectService;
+    private final CompletionService completionService;
+
+    @Autowired
+    public CodeController(SimpleFrontendProjectService simpleFrontendProjectService, ConsoleProjectService consoleProjectService, CompletionService completionService) {
+        this.simpleFrontendProjectService = simpleFrontendProjectService;
+        this.consoleProjectService = consoleProjectService;
+        this.completionService = completionService;
+    }
+
+    /**
+     * 获取全部的代码生成项目的列表，可指定用户
+     * 接口：GET /code/?uId="uid"
+     * @param uId 用户ID
+     * @return 项目列表
+     */
+    @GetMapping("")
+    public ResponseEntity<Map<String, Object>> getCodeProjects(
+            @RequestParam(value = "uId", required = false) String uId) {
+        logger.debug("获取代码生成项目列表，用户ID: {}", uId);
+        try {
+            // 获取简单前端项目列表
+            List<SimpleFrontendProject> sfProjects = simpleFrontendProjectService.getSfProjects(uId);
+            // 获取控制台项目列表
+            List<ConsoleProject> cpProjects = consoleProjectService.getCpProjects(uId);
+            // 转换为文档要求的格式
+            Map<String, Object> response = getStringObjectMap(uId, sfProjects, cpProjects);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("获取项目列表失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "获取项目列表失败");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    private static Map<String, Object> getStringObjectMap(String uId, List<SimpleFrontendProject> sfProjects, List<ConsoleProject> cpProjects) {
+        List<Map<String, String>> list = new ArrayList<>();
+        
+        // 添加简单前端项目
+        for (SimpleFrontendProject project : sfProjects) {
+            Map<String, String> item = new HashMap<>();
+            item.put("name", project.getProjectName());
+            item.put("id", project.getSfId());
+            item.put("type", "sf"); // 类型为sf
+            list.add(item);
+        }
+        
+        // 添加控制台项目
+        for (ConsoleProject project : cpProjects) {
+            Map<String, String> item = new HashMap<>();
+            item.put("name", project.getProjectName());
+            item.put("id", project.getCpId());
+            item.put("type", "cp"); // 类型为cp
+            list.add(item);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("uId", uId);
+        response.put("list", list);
+        return response;
+    }
+
+
+
+    /**
+     * 获取用户的简单前端代码生成项目列表
+     * 接口：GET /code/sf?uId={用户id}
+     * @param uId 用户ID
+     * @return 项目列表
+     */
+    @GetMapping("/sf")
+    public ResponseEntity<Map<String, Object>> getSfProjectsByUserId(
+            @RequestParam("uId") String uId) {
+        logger.debug("获取用户 {} 的简单前端代码生成项目列表", uId);
+        try {
+            List<SimpleFrontendProject> projects = simpleFrontendProjectService.getSfProjects(uId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("projects", projects);
+            response.put("uId", uId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("获取项目列表失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "获取项目列表失败");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 创建新的简单前端代码生成项目
+     * 接口：POST /code/sf
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 请求体：{"u_id":"", "projectName":"", "message":""}
+     * 响应：成功(200 OK)：{"sf_id":"", "code":{"html":"", "css":"", "javascript":""}}
+     */
+    @PostMapping("/sf")
+    public ResponseEntity<Map<String, Object>> createSfProject(
+            @RequestBody(required = false) Map<String, Object> request,
+            Authentication authentication) {
+        logger.debug("创建新的简单前端代码生成项目: {}", request);
+        try {
+            // 验证请求参数
+            if (request == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "请求体不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 验证必要参数
+            Object uIdObj = request.get("uId");
+            if (uIdObj == null || uIdObj.toString().trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "uId参数不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            Object projectNameObj = request.get("projectName");
+            if (projectNameObj == null || projectNameObj.toString().trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "projectName参数不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            Object messageObj = request.get("message");
+            if (messageObj == null || messageObj.toString().trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "message参数不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 获取当前用户ID
+            String userId = authentication.getName();
+            
+            // 确保用户ID一致
+            String requestUserId = uIdObj.toString();
+            if (!userId.equals(requestUserId)) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "用户ID不匹配");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            String projectName = projectNameObj.toString();
+            String message = messageObj.toString();
+            
+            // 调用服务层创建项目
+            SimpleFrontendProject createdProject = simpleFrontendProjectService.createSfProject(userId, projectName, message);
+            
+            // 构建响应
+            return getMapResponseEntity(createdProject);
+        } catch (IllegalArgumentException e) {
+            logger.error("创建项目失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("创建项目失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "创建项目失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    private ResponseEntity<Map<String, Object>> getMapResponseEntity(SimpleFrontendProject createdProject) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("sfId", createdProject.getSfId());
+        response.put("code", Map.of(
+                "html", createdProject.getHtml(),
+                "css", createdProject.getCss(),
+                "javascript", createdProject.getJavascript()
+        ));
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 在指定ID的项目中发起AI对话生成新的代码
+     * 接口：POST /code/sf/:id
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 请求体：{"code":{"html":"", "css":"", "js":""}, "message":"", "selectId":["",""]}
+     * 响应：成功(200 OK)：{"sf_id":"", "code":{"html":"", "css":"", "javascript":""}}
+     */
+    @PostMapping("/sf/{id}")
+    public ResponseEntity<Map<String, Object>> generateCodeInSfProject(
+            @PathVariable String id,
+            @RequestBody Map<String, Object> request) {
+        logger.debug("在项目 {} 中生成新代码: {}", id, request);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 验证请求体
+            if (request == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "请求体不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 验证必要参数
+            if (!request.containsKey("code") || request.get("code") == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "code参数不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            if (!request.containsKey("message") || request.get("message") == null || ((String) request.get("message")).trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "message参数不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            Map<String, String> code = (Map<String, String>) request.get("code");
+            // 处理前端可能传递的js字段
+            if (code != null) {
+                if (code.containsKey("js") && !code.containsKey("javascript")) {
+                    code.put("javascript", code.get("js"));
+                }
+            } else {
+                code = new HashMap<>();
+            }
+            
+            String message = (String) request.get("message");
+            List<String> selectId = (List<String>) request.get("selectId");
+            if (selectId == null) {
+                selectId = new ArrayList<>();
+            }
+            
+            // 调用服务层生成代码
+            SimpleFrontendProject updatedProject = simpleFrontendProjectService.generateCodeInSfProject(id, code, message, selectId);
+            
+            // 构建响应
+            return getMapResponseEntity(updatedProject);
+        } catch (IllegalArgumentException e) {
+            logger.error("生成代码失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("生成代码失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "生成代码失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 获取指定ID的简易前端项目相关信息
+     * 接口：GET /code/sf/:id
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 响应：成功(200 OK)：{"sfId":"", "name":"", "code":{"html":"", "css":"", "javascript":""}}
+     */
+    @GetMapping("/sf/{id}")
+    public ResponseEntity<Map<String, Object>> getSfProjectById(
+            @PathVariable String id) {
+        logger.debug("获取简易前端项目 {} 的信息", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            Optional<SimpleFrontendProject> projectOptional = simpleFrontendProjectService.getSfProjectById(id);
+            if (projectOptional.isPresent()) {
+                SimpleFrontendProject project = projectOptional.get();
+                Map<String, Object> response = new HashMap<>();
+                response.put("sfId", project.getSfId());
+                response.put("name", project.getProjectName());
+                response.put("isDeployed", project.getIsDeployed());
+                response.put("code", Map.of(
+                        "html", project.getHtml() != null ? project.getHtml() : "",
+                        "css", project.getCss() != null ? project.getCss() : "",
+                        "javascript", project.getJavascript() != null ? project.getJavascript() : ""
+                ));
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目不存在");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+        } catch (Exception e) {
+            logger.error("获取项目信息失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "获取项目信息失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 流式生成代码
+     * 接口：POST /code/stream
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 请求体：{"message":""}
+     * 响应：流式文本响应
+     */
+    @PostMapping("/stream")
+    public Flux<String> generateCodeStream(
+            @RequestBody Map<String, Object> request) {
+        logger.debug("流式生成代码: {}", request);
+        try {
+            // 验证请求参数
+            if (request == null || !request.containsKey("message") || request.get("message") == null || ((String) request.get("message")).trim().isEmpty()) {
+                return Flux.just("message参数不能为空");
+            }
+            
+            String message = (String) request.get("message");
+            return simpleFrontendProjectService.generateCodeStream(message);
+        } catch (Exception e) {
+            logger.error("流式生成代码失败", e);
+            return Flux.just("生成代码失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 在指定ID的项目中流式生成新的代码
+     * 接口：POST /code/sf/:id/stream
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 请求体：{"code":{"html":"", "css":"", "js":""}, "message":"", "selectId":["",""]}
+     * 响应：流式文本响应
+     */
+    @PostMapping("/sf/{id}/stream")
+    public Flux<String> generateCodeInSfProjectStream(
+            @PathVariable String id,
+            @RequestBody Map<String, Object> request) {
+        logger.debug("在项目 {} 中流式生成新代码: {}", id, request);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                return Flux.just("项目ID不能为空");
+            }
+            
+            // 验证请求体
+            if (request == null) {
+                return Flux.just("请求体不能为空");
+            }
+            
+            // 验证必要参数
+            if (!request.containsKey("code") || request.get("code") == null) {
+                return Flux.just("code参数不能为空");
+            }
+            
+            if (!request.containsKey("message") || request.get("message") == null || ((String) request.get("message")).trim().isEmpty()) {
+                return Flux.just("message参数不能为空");
+            }
+            
+            Map<String, String> code = (Map<String, String>) request.get("code");
+            // 处理前端可能传递的js字段
+            if (code != null) {
+                if (code.containsKey("js") && !code.containsKey("javascript")) {
+                    code.put("javascript", code.get("js"));
+                }
+            } else {
+                code = new HashMap<>();
+            }
+            
+            String message = (String) request.get("message");
+            List<String> selectId = (List<String>) request.get("selectId");
+            if (selectId == null) {
+                selectId = new ArrayList<>();
+            }
+            
+            return simpleFrontendProjectService.generateCodeInSfProjectStream(id, code, message, selectId);
+        } catch (Exception e) {
+            logger.error("流式生成代码失败", e);
+            return Flux.just("生成代码失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 删除指定ID的简单前端代码生成项目
+     * 接口：GET /code/sf/delete/:id
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 响应：成功(200 OK)：{"status":"success", "message":"项目删除成功", "id":"项目ID"}
+     */
+    @GetMapping("/sf/delete/{id}")
+    public ResponseEntity<Map<String, Object>> deleteSfProject(
+            @PathVariable String id,
+            Authentication authentication) {
+        logger.debug("删除简单前端代码生成项目: {}", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 获取当前用户ID
+            String userId = authentication.getName();
+            
+            // 执行删除操作
+            boolean deleted = simpleFrontendProjectService.deleteSfProject(id, userId);
+            if (deleted) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("id", id);
+                response.put("status", "success");
+                response.put("message", "项目删除成功");
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目不存在");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+        } catch (SecurityException e) {
+            logger.error("删除项目失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("删除项目失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "删除项目失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 获取用户的控制台项目列表
+     * 接口：GET /code/cp?uId={用户id}
+     * @param uId 用户ID
+     * @return 项目列表
+     */
+    @GetMapping("/cp")
+    public ResponseEntity<Map<String, Object>> getCpProjects(
+            @RequestParam("uId") String uId) {
+        logger.debug("获取控制台项目列表，用户ID: {}", uId);
+        try {
+            List<ConsoleProject> projects = consoleProjectService.getCpProjects(uId);
+            // 转换为文档要求的格式
+            List<Map<String, String>> list = new ArrayList<>();
+            for (ConsoleProject project : projects) {
+                Map<String, String> item = new HashMap<>();
+                item.put("name", project.getProjectName());
+                item.put("id", project.getCpId());
+                item.put("type", "console"); // 类型固定为console
+                list.add(item);
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("uId", uId);
+            response.put("list", list);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("获取控制台项目列表失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "获取项目列表失败");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 创建新的控制台项目
+     * 接口：POST /code/cp
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 请求体：{"uId":"", "type":"", "projectName":"", "message":""}
+     * 响应：成功(200 OK)：{"cpId":"", "code":"", "type":""}
+     */
+    @PostMapping("/cp")
+    public ResponseEntity<Map<String, Object>> createCpProject(
+            @RequestBody(required = false) Map<String, Object> request,
+            Authentication authentication) {
+        logger.debug("创建新的控制台项目: {}", request);
+        try {
+            // 验证请求参数
+            if (request == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "请求体不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 验证必要参数
+            Object uIdObj = request.get("uId");
+            if (uIdObj == null || uIdObj.toString().trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "uId参数不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            Object projectNameObj = request.get("projectName");
+            if (projectNameObj == null || projectNameObj.toString().trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "projectName参数不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            Object messageObj = request.get("message");
+            if (messageObj == null || messageObj.toString().trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "message参数不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 获取当前用户ID
+            String userId = authentication.getName();
+            
+            // 确保用户ID一致
+            String requestUserId = uIdObj.toString();
+            if (!userId.equals(requestUserId)) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "用户ID不匹配");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            String projectName = projectNameObj.toString();
+            String message = messageObj.toString();
+            String type = request.containsKey("type") && request.get("type") != null ? request.get("type").toString().toLowerCase() : "python"; // 默认类型为python
+            
+            // 调用服务层创建项目
+            ConsoleProject createdProject = consoleProjectService.createCpProject(userId, projectName, message, type);
+            
+            // 构建响应
+            Map<String, Object> response = new HashMap<>();
+            response.put("cpId", createdProject.getCpId());
+            response.put("code", createdProject.getCode() != null ? createdProject.getCode() : "");
+            response.put("type", createdProject.getType() != null ? createdProject.getType() : "");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            logger.error("创建控制台项目失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("创建控制台项目失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "创建项目失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 在指定ID的控制台项目中生成新的代码
+     * 接口：POST /code/cp/:id
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 请求体：{"code":"", "message":"", "selectId":["",""]}
+     * 响应：成功(200 OK)：{"cpId":"", "code":""}
+     */
+    @PostMapping("/cp/{id}")
+    public ResponseEntity<Map<String, Object>> generateCodeInCpProject(
+            @PathVariable String id,
+            @RequestBody Map<String, Object> request) {
+        logger.debug("在控制台项目 {} 中生成新代码: {}", id, request);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 验证请求体
+            if (request == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "请求体不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 验证必要参数
+            if (!request.containsKey("message") || request.get("message") == null || ((String) request.get("message")).trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "message参数不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            String code = request.containsKey("code") && request.get("code") != null ? request.get("code").toString() : "";
+            String message = (String) request.get("message");
+            List<String> selectId = (List<String>) request.get("selectId");
+            if (selectId == null) {
+                selectId = new ArrayList<>();
+            }
+            
+            // 调用服务层生成代码
+            ConsoleProject updatedProject = consoleProjectService.generateCodeInCpProject(id, code, message, selectId);
+            
+            // 构建响应
+            Map<String, Object> response = new HashMap<>();
+            response.put("cpId", updatedProject.getCpId());
+            response.put("code", updatedProject.getCode() != null ? updatedProject.getCode() : "");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            logger.error("生成代码失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("生成代码失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "生成代码失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 获取指定ID的控制台项目信息
+     * 接口：GET /code/cp/:id
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 响应：成功(200 OK)：{"cpId":"", "name":"", "type":"", "code":""}
+     */
+    @GetMapping("/cp/{id}")
+    public ResponseEntity<Map<String, Object>> getCpProjectById(
+            @PathVariable String id) {
+        logger.debug("获取控制台项目 {} 的信息", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            Optional<ConsoleProject> projectOptional = consoleProjectService.getCpProjectById(id);
+            if (projectOptional.isPresent()) {
+                ConsoleProject project = projectOptional.get();
+                Map<String, Object> response = new HashMap<>();
+                response.put("cpId", project.getCpId());
+                response.put("name", project.getProjectName());
+                response.put("type", project.getType() != null ? project.getType() : "");
+                response.put("code", project.getCode() != null ? project.getCode() : "");
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目不存在");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+        } catch (Exception e) {
+            logger.error("获取控制台项目信息失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "获取项目信息失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 删除指定ID的控制台项目
+     * 接口：GET /code/cp/delete/:id
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 响应：成功(200 OK)：{"status":"success", "message":"项目删除成功", "id":"项目ID"}
+     */
+    @GetMapping("/cp/delete/{id}")
+    public ResponseEntity<Map<String, Object>> deleteCpProject(
+            @PathVariable String id,
+            Authentication authentication) {
+        logger.debug("删除控制台项目: {}", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 获取当前用户ID
+            String userId = authentication.getName();
+            
+            // 执行删除操作
+            boolean deleted = consoleProjectService.deleteCpProject(id, userId);
+            if (deleted) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("id", id);
+                response.put("status", "success");
+                response.put("message", "项目删除成功");
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目不存在");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+        } catch (SecurityException e) {
+            logger.error("删除项目失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("删除项目失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "删除项目失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 手动保存SF项目代码（不调用AI，直接将当前编辑器的代码保存到数据库）
+     * 接口：POST /code/sf/{id}/save
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 请求体：{"code":{"html":"", "css":"", "javascript":""}}
+     * 响应：成功(200 OK)：{"sfId":"", "code":{"html":"", "css":"", "javascript":""}}
+     */
+    @PostMapping("/sf/{id}/save")
+    public ResponseEntity<Map<String, Object>> saveSfCode(
+            @PathVariable String id,
+            @RequestBody Map<String, Object> request) {
+        logger.debug("手动保存SF项目 {} 的代码", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 验证请求体
+            if (request == null || !request.containsKey("code") || request.get("code") == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "code参数不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            Map<String, String> code = (Map<String, String>) request.get("code");
+            // 处理前端可能传递的js字段
+            if (code != null) {
+                if (code.containsKey("js") && !code.containsKey("javascript")) {
+                    code.put("javascript", code.get("js"));
+                }
+            } else {
+                code = new HashMap<>();
+            }
+            
+            // 调用服务层保存代码（不调用AI）
+            SimpleFrontendProject updatedProject = simpleFrontendProjectService.saveSfCode(id, code);
+            
+            // 构建响应
+            return getMapResponseEntity(updatedProject);
+        } catch (IllegalArgumentException e) {
+            logger.error("保存代码失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("保存代码失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "保存代码失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 手动保存CP项目代码（不调用AI，直接将当前编辑器的代码保存到数据库）
+     * 接口：POST /code/cp/{id}/save
+     * 请求头：Content-Type: application/json, Authorization: "Bearer token"
+     * 请求体：{"code":""}
+     * 响应：成功(200 OK)：{"cpId":"", "code":""}
+     */
+    @PostMapping("/cp/{id}/save")
+    public ResponseEntity<Map<String, Object>> saveCpCode(
+            @PathVariable String id,
+            @RequestBody Map<String, Object> request) {
+        logger.debug("手动保存CP项目 {} 的代码", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 验证请求体
+            if (request == null || !request.containsKey("code") || request.get("code") == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "code参数不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            String code = request.get("code").toString();
+            
+            // 调用服务层保存代码（不调用AI）
+            ConsoleProject updatedProject = consoleProjectService.saveCpCode(id, code);
+            
+            // 构建响应
+            Map<String, Object> response = new HashMap<>();
+            response.put("cpId", updatedProject.getCpId());
+            response.put("code", updatedProject.getCode() != null ? updatedProject.getCode() : "");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            logger.error("保存代码失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("保存代码失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "保存代码失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    // ==================== AI 内联代码补全接口 ====================
+
+    /**
+     * CP 的代码补全接口（非流式）
+     * 接口：POST /code/cp/completion
+     * 请求体：{"language": "python", "prefixCode": "...", "suffixCode": "...", "currentLineContent": "...", "fullCode": "...", "cpId": "..."}
+     */
+    @PostMapping("/cp/completion")
+    public ResponseEntity<Map<String, Object>> getCpCompletion(
+            @RequestBody Map<String, Object> request) {
+        logger.debug("CP代码补全请求: {}", request);
+        try {
+            String language = (String) request.getOrDefault("language", "python");
+            String prefixCode = (String) request.getOrDefault("prefixCode", "");
+            String suffixCode = (String) request.getOrDefault("suffixCode", "");
+            String currentLineContent = (String) request.getOrDefault("currentLineContent", "");
+            String fullCode = (String) request.getOrDefault("fullCode", "");
+
+            Map<String, Object> result = completionService.getCompletion(
+                    language, prefixCode, suffixCode, currentLineContent, fullCode);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("CP代码补全失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("completion", "");
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * CP 的代码补全接口（流式 SSE）
+     * 接口：POST /code/cp/completion/stream
+     * 请求体：{"language": "python", "prefixCode": "...", "suffixCode": "...", "currentLineContent": "...", "fullCode": "...", "cpId": "..."}
+     */
+    @PostMapping(value = "/cp/completion/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> getCpCompletionStream(
+            @RequestBody Map<String, Object> request) {
+        logger.debug("CP流式代码补全请求");
+        try {
+            String language = (String) request.getOrDefault("language", "python");
+            String prefixCode = (String) request.getOrDefault("prefixCode", "");
+            String suffixCode = (String) request.getOrDefault("suffixCode", "");
+            String currentLineContent = (String) request.getOrDefault("currentLineContent", "");
+            String fullCode = (String) request.getOrDefault("fullCode", "");
+
+            return completionService.getCompletionStream(
+                    language, prefixCode, suffixCode, currentLineContent, fullCode);
+        } catch (Exception e) {
+            logger.error("CP流式代码补全失败", e);
+            return Flux.just("data: {\"type\": \"error\", \"text\": \"" + e.getMessage() + "\"}\n\n");
+        }
+    }
+
+    /**
+     * SF 的代码补全接口（非流式）
+     * 接口：POST /code/sf/completion
+     * 请求体：{"language": "html/css/javascript", "prefixCode": "...", "suffixCode": "...", "currentLineContent": "...", "fullCode": "...", "sfId": "..."}
+     */
+    @PostMapping("/sf/completion")
+    public ResponseEntity<Map<String, Object>> getSfCompletion(
+            @RequestBody Map<String, Object> request) {
+        logger.debug("SF代码补全请求: {}", request);
+        try {
+            String language = (String) request.getOrDefault("language", "html");
+            String prefixCode = (String) request.getOrDefault("prefixCode", "");
+            String suffixCode = (String) request.getOrDefault("suffixCode", "");
+            String currentLineContent = (String) request.getOrDefault("currentLineContent", "");
+            String fullCode = (String) request.getOrDefault("fullCode", "");
+
+            Map<String, Object> result = completionService.getCompletion(
+                    language, prefixCode, suffixCode, currentLineContent, fullCode);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("SF代码补全失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("completion", "");
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * SF 的代码补全接口（流式 SSE）
+     * 接口：POST /code/sf/completion/stream
+     * 请求体：{"language": "html/css/javascript", "prefixCode": "...", "suffixCode": "...", "currentLineContent": "...", "fullCode": "...", "sfId": "..."}
+     */
+    @PostMapping(value = "/sf/completion/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> getSfCompletionStream(
+            @RequestBody Map<String, Object> request) {
+        logger.debug("SF流式代码补全请求");
+        try {
+            String language = (String) request.getOrDefault("language", "html");
+            String prefixCode = (String) request.getOrDefault("prefixCode", "");
+            String suffixCode = (String) request.getOrDefault("suffixCode", "");
+            String currentLineContent = (String) request.getOrDefault("currentLineContent", "");
+            String fullCode = (String) request.getOrDefault("fullCode", "");
+
+            return completionService.getCompletionStream(
+                    language, prefixCode, suffixCode, currentLineContent, fullCode);
+        } catch (Exception e) {
+            logger.error("SF流式代码补全失败", e);
+            return Flux.just("data: {\"type\": \"error\", \"text\": \"" + e.getMessage() + "\"}\n\n");
+        }
+    }
+
+    /**
+     * 切换部署状态
+     * 接口：POST /code/sf/{id}/deploy
+     * 请求头：Authorization: "Bearer token"
+     * 响应：成功(200 OK)：{"isDeployed": true/false, "viewUrl": "..."}
+     */
+    @PostMapping("/sf/{id}/deploy")
+    public ResponseEntity<Map<String, Object>> toggleDeploy(
+            @PathVariable String id,
+            Authentication authentication) {
+        logger.debug("切换部署状态: {}", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 获取当前用户ID
+            String userId = authentication.getName();
+            
+            // 调用服务层切换部署状态
+            Boolean isDeployed = simpleFrontendProjectService.toggleDeploy(id, userId);
+            
+            // 构建响应
+            Map<String, Object> response = new HashMap<>();
+            response.put("isDeployed", isDeployed);
+            response.put("sfId", id);
+            
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            logger.error("切换部署状态失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        } catch (SecurityException e) {
+            logger.error("切换部署状态失败: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("切换部署状态失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "切换部署状态失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 获取项目的部署状态
+     * 接口：GET /code/sf/{id}/deploy
+     * 请求头：Authorization: "Bearer token"
+     * 响应：成功(200 OK)：{"isDeployed": true/false, "sfId": "...", "projectName": "...", "viewUrl": "..."}
+     */
+    @GetMapping("/sf/{id}/deploy")
+    public ResponseEntity<Map<String, Object>> getDeployStatus(
+            @PathVariable String id,
+            Authentication authentication) {
+        logger.debug("获取部署状态: {}", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目ID不能为空");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // 获取项目信息
+            Optional<SimpleFrontendProject> projectOptional = simpleFrontendProjectService.getSfProjectById(id);
+            if (projectOptional.isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "项目不存在");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+            
+            SimpleFrontendProject project = projectOptional.get();
+            
+            // 构建响应
+            Map<String, Object> response = new HashMap<>();
+            response.put("sfId", project.getSfId());
+            response.put("projectName", project.getProjectName());
+            response.put("isDeployed", project.getIsDeployed());
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("获取部署状态失败", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "获取部署状态失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 公开访问部署的项目视图（无需认证）
+     * 接口：GET /code/sf/view/{id}
+     * 响应：如果已部署，返回动态拼接的 HTML 页面；如果未部署，返回 404
+     */
+    @GetMapping(value = "/sf/view/{id}", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<String> viewDeployedProject(@PathVariable String id) {
+        logger.debug("公开访问部署项目视图: {}", id);
+        try {
+            // 验证路径参数
+            if (id == null || id.trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("<html><body><h1>项目ID不能为空</h1></body></html>");
+            }
+            
+            // 获取项目信息
+            Optional<SimpleFrontendProject> projectOptional = simpleFrontendProjectService.getSfProjectById(id);
+            if (projectOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("<html><body><h1>项目不存在</h1></body></html>");
+            }
+            
+            SimpleFrontendProject project = projectOptional.get();
+            
+            // 检查是否已部署
+            if (!project.getIsDeployed()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("<html><body><h1>该项目未开启部署</h1></body></html>");
+            }
+            
+            // 动态拼接 HTML 页面
+            String html = buildDeployHtml(project);
+            
+            return ResponseEntity.ok(html);
+        } catch (Exception e) {
+            logger.error("获取部署视图失败", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("<html><body><h1>加载失败</h1></body></html>");
+        }
+    }
+
+    /**
+     * 构建部署的 HTML 页面
+     * @param project 项目实体
+     * @return 完整的 HTML 页面
+     */
+    private String buildDeployHtml(SimpleFrontendProject project) {
+        StringBuilder html = new StringBuilder();
+        
+        // 获取代码内容，处理 null 情况
+        String htmlContent = project.getHtml() != null ? project.getHtml() : "";
+        String cssContent = project.getCss() != null ? project.getCss() : "";
+        String jsContent = project.getJavascript() != null ? project.getJavascript() : "";
+        
+        // 如果 HTML 内容是完整的文档结构，直接返回
+        if (htmlContent.contains("<!DOCTYPE html>") || htmlContent.contains("<html")) {
+            // 插入 CSS
+            if (!cssContent.isEmpty()) {
+                html.append(htmlContent);
+                int headEndIndex = html.lastIndexOf("</head>");
+                if (headEndIndex != -1) {
+                    html.insert(headEndIndex, "<style>" + cssContent + "</style>");
+                }
+            } else {
+                html.append(htmlContent);
+            }
+            
+            // 插入 JavaScript
+            if (!jsContent.isEmpty()) {
+                int bodyEndIndex = html.lastIndexOf("</body>");
+                if (bodyEndIndex != -1) {
+                    html.insert(bodyEndIndex, "<script>" + jsContent + "</script>");
+                } else {
+                    int htmlEndIndex = html.lastIndexOf("</html>");
+                    if (htmlEndIndex != -1) {
+                        html.insert(htmlEndIndex, "<script>" + jsContent + "</script>");
+                    }
+                }
+            }
+        } else {
+            // HTML 内容不是完整文档，动态构建
+            html.append("<!DOCTYPE html>\n");
+            html.append("<html lang=\"zh-CN\">\n");
+            html.append("<head>\n");
+            html.append("    <meta charset=\"UTF-8\">\n");
+            html.append("    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
+            html.append("    <title>").append(escapeHtml(project.getProjectName())).append("</title>\n");
+            
+            // 添加 CSS
+            if (!cssContent.isEmpty()) {
+                html.append("    <style>\n").append(cssContent).append("\n    </style>\n");
+            }
+            
+            html.append("</head>\n");
+            html.append("<body>\n");
+            
+            // 添加 HTML 内容
+            html.append(htmlContent);
+            
+            html.append("\n");
+            
+            // 添加 JavaScript
+            if (!jsContent.isEmpty()) {
+                html.append("    <script>\n").append(jsContent).append("\n    </script>\n");
+            }
+            
+            html.append("</body>\n");
+            html.append("</html>");
+        }
+        
+        return html.toString();
+    }
+
+    /**
+     * HTML 特殊字符转义
+     * @param text 原始文本
+     * @return 转义后的文本
+     */
+    private String escapeHtml(String text) {
+        if (text == null) return "";
+        String result = text;
+        result = result.replace("&", "&");
+        result = result.replace("<", "<");
+        result = result.replace(">", ">");
+        result = result.replace("\"", "\"");
+        result = result.replace("'", "&#39;");
+        return result;
+    }
+
+}

@@ -1,0 +1,87 @@
+package com.example.zcwl.service;
+
+import com.example.zcwl.entity.SimpleFrontendProject;
+import reactor.core.publisher.Flux;
+import java.util.List;
+import java.util.Optional;
+import java.util.Map;
+
+/**
+ * 简单前端代码生成项目服务接口
+ */
+public interface SimpleFrontendProjectService {
+
+    /**
+     * 获取简单前端代码生成项目列表，可指定用户
+     * @param userId 用户ID，可为null
+     * @return 项目列表
+     */
+    List<SimpleFrontendProject> getSfProjects(String userId);
+
+    /**
+     * 创建新的简单前端代码生成项目
+     * @param userId 用户ID
+     * @param projectName 项目名称
+     * @param message 生成代码的提示信息
+     * @return 创建的项目，包含生成的代码
+     */
+    SimpleFrontendProject createSfProject(String userId, String projectName, String message);
+
+    /**
+     * 在指定ID的项目中发起AI对话生成新的代码
+     * @param sfId 项目唯一标识符
+     * @param code 当前项目的代码内容
+     * @param message 新的代码生成提示信息
+     * @param selectId 选中的代码块ID列表
+     * @return 更新后的项目，包含新生成的代码
+     */
+    SimpleFrontendProject generateCodeInSfProject(String sfId, Map<String, String> code, String message, List<String> selectId);
+
+    /**
+     * 手动保存SF项目代码（不调用AI，直接将当前编辑器的代码保存到数据库）
+     * @param sfId 项目唯一标识符
+     * @param code 要保存的代码（包含 html, css, javascript）
+     * @return 更新后的项目
+     */
+    SimpleFrontendProject saveSfCode(String sfId, Map<String, String> code);
+
+    /**
+     * 获取指定ID的简易前端项目相关信息
+     * @param sfId 项目唯一标识符
+     * @return 项目信息
+     */
+    Optional<SimpleFrontendProject> getSfProjectById(String sfId);
+
+    /**
+     * 流式生成代码
+     * @param message 生成代码的提示信息
+     * @return 流式响应的Flux
+     */
+    Flux<String> generateCodeStream(String message);
+
+    /**
+     * 在指定ID的项目中流式生成新的代码
+     * @param sfId 项目唯一标识符
+     * @param code 当前项目的代码内容
+     * @param message 新的代码生成提示信息
+     * @param selectId 选中的代码块ID列表
+     * @return 流式响应的Flux
+     */
+    Flux<String> generateCodeInSfProjectStream(String sfId, Map<String, String> code, String message, List<String> selectId);
+
+    /**
+     * 删除指定ID的简单前端代码生成项目
+     * @param sfId 项目唯一标识符
+     * @param userId 用户ID
+     * @return 是否删除成功
+     */
+    boolean deleteSfProject(String sfId, String userId);
+
+    /**
+     * 切换部署状态
+     * @param sfId 项目唯一标识符
+     * @param userId 用户ID
+     * @return 切换后的部署状态
+     */
+    Boolean toggleDeploy(String sfId, String userId);
+}
