@@ -1,0 +1,38 @@
+# 通用
+.DS_Store
+*.log
+logs/
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.trae/
+
+# 环境变量
+.env
+*.local
+
+# Node / Bun（frontend, ai-rag, doc-manager）
+node_modules/
+dist/
+dist-ssr/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Java / Maven（backend）
+backend/target/
+backend/out/
+backend/zcwl.iml
+backend/.mvn/
+backend/httpRequests/
+backend/shelf/
+backend/workspace.xml
+backend/dataSources/
+backend/dataSources.local.xml
+
+# Python（mcp-server）
+venv/
+__pycache__/
+mcp-server/src/config.py
